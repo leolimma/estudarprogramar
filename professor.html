@@ -842,6 +842,32 @@ ALTER TABLE student_users DISABLE ROW LEVEL SECURITY;</pre>
         } catch(e) {
           return false;
         }
+      },
+
+      async saveUser(user) {
+        try {
+          const res = await fetch(this.apiEndpoint + '?action=save_user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(user)
+          });
+          return res.ok;
+        } catch(e) {
+          return false;
+        }
+      },
+
+      async getUsers() {
+        try {
+          const res = await fetch(this.apiEndpoint + '?action=get_users');
+          if (res.ok) {
+            const data = await res.json();
+            if (data.success && Array.isArray(data.users)) {
+              return data.users;
+            }
+          }
+        } catch(e) {}
+        return null;
       }
     };
 

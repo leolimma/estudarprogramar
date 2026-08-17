@@ -2,7 +2,7 @@
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS, DELETE');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
 $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
@@ -10,12 +10,51 @@ if ($requestMethod === 'OPTIONS') {
     exit(0);
 }
 
-try {
-    $dbPath = __DIR__ . '/database.sqlite';
-    $db = new PDO('sqlite:' . $dbPath);
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+/**
+ * Obtém a conexão PDO com o SQLite.
+ * Se o diretório atual for somente leitura (como no ambiente Serverless da Vercel),
+ * o banco é copiado e aberto em /tmp/database.sqlite.
+ */
+function getDatabaseConnection() {
+    $dbDir = __DIR__;
+    $dbPath = $dbDir . '/database.sqlite';
+    $tmpDbPath = sys_get_temp_dir() . '/database.sqlite';
 
-    // Criação das tabelas caso não existam
+    $isVercel = isset($_SERVER['VERCEL']) || isset($_ENV['VERCEL']);
+    $useTmp = $isVercel || !is_writable($dbDir) || (file_exists($dbPath) && !is_writable($dbPath));
+
+    if ($useTmp) {
+        if (!file_exists($tmpDbPath) && file_exists($dbPath)) {
+            @copy($dbPath, $tmpDbPath);
+        }
+        $dbPath = $tmpDbPath;
+    }
+
+    try {
+        $db = new PDO('sqlite:' . $dbPath);
+        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        // Garante tabelas existentes
+        createTablesIfNotExists($db);
+
+        return [$db, $dbPath, $useTmp];
+    } catch (Throwable $e) {
+        // Se ainda não estava usando /tmp e deu erro de permissão/abertura, tenta /tmp
+        if ($dbPath !== $tmpDbPath) {
+            if (!file_exists($tmpDbPath) && file_exists($dbPath)) {
+                @copy($dbPath, $tmpDbPath);
+            }
+            $dbPath = $tmpDbPath;
+            $db = new PDO('sqlite:' . $dbPath);
+            $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            createTablesIfNotExists($db);
+            return [$db, $dbPath, true];
+        }
+        throw $e;
+    }
+}
+
+function createTablesIfNotExists($db) {
     $db->exec("CREATE TABLE IF NOT EXISTS student_attempts (
         id TEXT PRIMARY KEY,
         student_name TEXT,
@@ -44,6 +83,10 @@ try {
         avatar TEXT,
         created_at TEXT
     )");
+}
+
+try {
+    list($db, $dbPath, $isTmp) = getDatabaseConnection();
 
     $action = $_GET['action'] ?? '';
     
@@ -58,9 +101,10 @@ try {
     if ($action === 'status') {
         echo json_encode([
             'success' => true,
-            'storage' => 'SQLite (Servidor XAMPP)',
-            'database' => 'database.sqlite',
+            'storage' => 'SQLite (' . ($isTmp ? 'Vercel /tmp' : 'Servidor Local') . ')',
+            'database' => basename($dbPath),
             'path' => $dbPath,
+            'is_tmp' => $isTmp,
             'timestamp' => date('c')
         ]);
         exit;
@@ -80,20 +124,20 @@ try {
 
         $stmt->execute([
             ':id' => (string)$record['id'],
-            ':student_name' => $record['studentName'] ?? '',
-            ':student_class' => $record['studentClass'] ?? '',
-            ':student_login' => $record['studentLogin'] ?? '',
-            ':character_name' => $record['characterName'] ?? '',
-            ':character_avatar' => $record['characterAvatar'] ?? '',
+            ':student_name' => $record['studentName'] ?? ($record['student_name'] ?? ''),
+            ':student_class' => $record['studentClass'] ?? ($record['student_class'] ?? ''),
+            ':student_login' => $record['studentLogin'] ?? ($record['student_login'] ?? ''),
+            ':character_name' => $record['characterName'] ?? ($record['character_name'] ?? ''),
+            ':character_avatar' => $record['characterAvatar'] ?? ($record['character_avatar'] ?? ''),
             ':score' => (int)($record['score'] ?? 0),
-            ':progress_percentage' => (int)($record['progressPercentage'] ?? 0),
-            ':stages_completed' => (int)($record['stagesCompleted'] ?? 0),
-            ':correct_answers' => (int)($record['correctAnswers'] ?? 0),
-            ':wrong_attempts' => (int)($record['wrongAttempts'] ?? 0),
-            ':lives_remaining' => (int)($record['livesRemaining'] ?? 0),
+            ':progress_percentage' => (int)($record['progressPercentage'] ?? ($record['progress_percentage'] ?? 0)),
+            ':stages_completed' => (int)($record['stagesCompleted'] ?? ($record['stages_completed'] ?? 0)),
+            ':correct_answers' => (int)($record['correctAnswers'] ?? ($record['correct_answers'] ?? 0)),
+            ':wrong_attempts' => (int)($record['wrongAttempts'] ?? ($record['wrong_attempts'] ?? 0)),
+            ':lives_remaining' => (int)($record['livesRemaining'] ?? ($record['lives_remaining'] ?? 0)),
             ':status' => $record['status'] ?? '',
             ':timestamp' => $record['timestamp'] ?? date('d/m/Y H:i:s'),
-            ':stage_results' => json_encode($record['stageResults'] ?? []),
+            ':stage_results' => json_encode($record['stageResults'] ?? ($record['stage_results'] ?? [])),
             ':raw_json' => json_encode($record, JSON_UNESCAPED_UNICODE)
         ]);
 
@@ -139,12 +183,16 @@ try {
     // Salvar Usuário (Cadastro de Aluno)
     if ($action === 'save_user') {
         $user = $input['user'] ?? $input;
+        if (!isset($user['id']) || !isset($user['login'])) {
+            echo json_encode(['success' => false, 'error' => 'Dados de usuário incompletos']);
+            exit;
+        }
         $stmt = $db->prepare("INSERT OR REPLACE INTO student_users 
             (id, login, password_hash, first_name, student_class, avatar, created_at)
             VALUES (:id, :login, :password_hash, :first_name, :student_class, :avatar, :created_at)");
         $stmt->execute([
             ':id' => (string)$user['id'],
-            ':login' => $user['login'],
+            ':login' => strtolower(trim($user['login'])),
             ':password_hash' => $user['password'] ?? ($user['password_hash'] ?? ''),
             ':first_name' => $user['firstName'] ?? ($user['first_name'] ?? ''),
             ':student_class' => $user['studentClass'] ?? ($user['student_class'] ?? ''),
@@ -165,7 +213,7 @@ try {
 
     echo json_encode(['success' => true, 'msg' => 'API SQLite do Cyber Runner operacional']);
 
-} catch (Exception $e) {
+} catch (Throwable $e) {
     http_response_code(500);
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }

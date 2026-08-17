@@ -2919,8 +2919,9 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
         localStorage.setItem('cyber_runner_users', JSON.stringify(users));
       } catch(e) {}
 
-      // Save to Supabase if configured
+      // Save to Supabase if configured & SQLite
       await SupabaseCloud.saveUser(userData);
+      await XamppSqlite.saveUser(userData);
 
       // Start Session
       initSessionData(firstName, sClass, login);
@@ -2956,6 +2957,14 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       // 2. If not found locally, query Supabase
       if (!user) {
         user = await SupabaseCloud.getUser(login, password);
+      }
+
+      // 3. If not found, query SQLite backend
+      if (!user) {
+        const sqliteUsers = await XamppSqlite.getUsers();
+        if (sqliteUsers) {
+          user = sqliteUsers.find(u => u.login.toLowerCase() === login && u.password === password);
+        }
       }
 
       if (user) {
@@ -3473,6 +3482,32 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
         } catch(e) {
           return false;
         }
+      },
+
+      async saveUser(user) {
+        try {
+          const res = await fetch(this.apiEndpoint + '?action=save_user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(user)
+          });
+          return res.ok;
+        } catch(e) {
+          return false;
+        }
+      },
+
+      async getUsers() {
+        try {
+          const res = await fetch(this.apiEndpoint + '?action=get_users');
+          if (res.ok) {
+            const data = await res.json();
+            if (data.success && Array.isArray(data.users)) {
+              return data.users;
+            }
+          }
+        } catch(e) {}
+        return null;
       }
     };
 
