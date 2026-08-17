@@ -1,0 +1,3980 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Cyber Runner: O Resgate do Algoritmo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #050505;
+      --bg-card: #0c0c0e;
+      --bg-card-hover: #111114;
+      --bg-surface: #111114;
+      --bg-surface-active: #1a1a20;
+      --border-subtle: #1e293b;
+      --border-glow: #22d3ee;
+      --neon-cyan: #22d3ee;
+      --neon-cyan-dim: #0891b2;
+      --neon-magenta: #f43f5e;
+      --neon-yellow: #fbbf24;
+      --neon-green: #10b981;
+      --neon-red: #f43f5e;
+      --neon-purple: #c084fc;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dark: #64748b;
+      --code-bg: #030304;
+      --font-display: 'Orbitron', -apple-system, sans-serif;
+      --font-body: 'Rajdhani', -apple-system, sans-serif;
+      --font-code: 'Fira Code', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.4;
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      position: relative;
+    }
+
+    /* Ambient Canvas Background */
+    #bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.45;
+    }
+
+    /* Cyber Scanline Overlay */
+    .scanlines {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(34, 211, 238, 0.02), rgba(0, 0, 0, 0.01), rgba(244, 63, 94, 0.02));
+      background-size: 100% 3px, 6px 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Main Container */
+    #app-root {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 760px;
+      min-height: 100vh;
+      padding: 16px 16px 40px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top HUD */
+    .hud-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(12, 12, 14, 0.92);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 10px 18px;
+      margin-bottom: 16px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .hud-title {
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--neon-cyan);
+      letter-spacing: 1.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-transform: uppercase;
+    }
+
+    .hud-stats {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .hud-stat-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 16px;
+      padding: 4px 12px;
+    }
+
+    .hud-stat-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--font-code);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .hud-stat-divider {
+      width: 1px;
+      height: 14px;
+      background: var(--border-subtle);
+    }
+
+    .hud-lives {
+      color: var(--neon-magenta);
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .heart-icon {
+      font-size: 14px;
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .heart-lost {
+      filter: grayscale(1) opacity(0.2);
+      transform: scale(0.8);
+    }
+
+    .hud-score {
+      color: var(--neon-yellow);
+    }
+
+    /* Screen Wrappers */
+    .screen {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+    .screen.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cards */
+    .cyber-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 24px;
+      padding: 24px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cyber-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0.03;
+      pointer-events: none;
+      background-image: radial-gradient(#fff 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+
+    /* Typography & Headers */
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-align: center;
+      background: linear-gradient(135deg, #ffffff 0%, #22d3ee 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+
+    .hero-subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 24px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Form Fields */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 11px;
+      color: var(--neon-cyan);
+      letter-spacing: 1.5px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .cyber-input {
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 12px 16px;
+      color: var(--text-main);
+      font-family: var(--font-body);
+      font-size: 16px;
+      font-weight: 600;
+      outline: none;
+      transition: all 0.2s;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    .cyber-input:focus {
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 12px rgba(34, 211, 238, 0.25);
+      background: var(--bg-surface-active);
+    }
+
+    .cyber-password-mask {
+      -webkit-text-security: disk;
+      -moz-text-security: disk;
+    }
+
+    /* Character Selection Grid */
+    .characters-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    @media (min-width: 520px) {
+      .characters-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .char-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 12px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .char-card:hover {
+      border-color: rgba(34, 211, 238, 0.4);
+      background: var(--bg-surface-active);
+      transform: translateY(-2px);
+    }
+
+    .char-card.selected {
+      border-color: var(--neon-cyan);
+      background: var(--bg-surface-active);
+      box-shadow: 0 0 14px rgba(34, 211, 238, 0.25);
+    }
+
+    .char-avatar {
+      font-size: 32px;
+      margin-bottom: 2px;
+    }
+
+    .char-name {
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .char-specialty {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.1;
+    }
+
+    /* Buttons */
+    .cyber-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #0891b2 0%, #22d3ee 100%);
+      color: #050505;
+      border: none;
+      border-radius: 16px;
+      padding: 14px 20px;
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 16px rgba(34, 211, 238, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .cyber-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 22px rgba(34, 211, 238, 0.5);
+      filter: brightness(1.08);
+    }
+
+    .cyber-btn:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    .cyber-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .cyber-btn-secondary {
+      background: var(--bg-surface);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      box-shadow: none;
+    }
+
+    .cyber-btn-secondary:hover:not(:disabled) {
+      background: var(--bg-surface-active);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Progress & Mission Header */
+    .mission-header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .stage-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: var(--neon-cyan);
+      padding: 3px 8px;
+      border-radius: 8px;
+      font-family: var(--font-code);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      width: fit-content;
+    }
+
+    .stage-title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-style: italic;
+    }
+
+    .stage-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: -2px;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 6px;
+      background: #0f172a;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #0891b2, #22d3ee);
+      box-shadow: 0 0 8px rgba(34, 211, 238, 0.5);
+      transition: width 0.4s ease;
+      width: 16.66%;
+    }
+
+    /* Mission Scenario & Story */
+    .scenario-box {
+      background: var(--bg-surface);
+      border-left: 3px solid var(--neon-cyan);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      font-size: 14.5px;
+      color: #cbd5e1;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.5;
+    }
+
+    .scenario-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    /* Code Terminal Display */
+    .terminal-container {
+      background: var(--code-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+    }
+
+    .terminal-header {
+      background: #0a0a0c;
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .terminal-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .dot-red { background: #f43f5e; opacity: 0.85; }
+    .dot-yellow { background: #fbbf24; opacity: 0.85; }
+    .dot-green { background: #10b981; opacity: 0.85; }
+
+    .terminal-file-name {
+      font-family: var(--font-code);
+      font-size: 11px;
+      color: var(--text-dark);
+    }
+
+    .code-content {
+      padding: 16px;
+      font-family: var(--font-code);
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: #cbd5e1;
+      white-space: pre-wrap;
+      word-break: break-word;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    .code-kw { color: var(--neon-purple); font-weight: 700; }
+    .code-var { color: #38bdf8; }
+    .code-str { color: #67e8f9; }
+    .code-fn { color: #c084fc; font-weight: 600; }
+    .code-num { color: #fbbf24; }
+    .code-op { color: #f43f5e; }
+    .code-comment { color: #64748b; font-style: italic; }
+
+    .code-gap {
+      display: inline-block;
+      padding: 2px 12px;
+      background: rgba(34, 211, 238, 0.1);
+      border: 1px dashed rgba(34, 211, 238, 0.5);
+      border-radius: 6px;
+      color: var(--neon-cyan);
+      font-weight: 700;
+      animation: pulseGap 1.5s infinite;
+    }
+
+    @keyframes pulseGap {
+      0%, 100% { border-color: rgba(34, 211, 238, 0.5); background: rgba(34, 211, 238, 0.1); }
+      50% { border-color: rgba(251, 191, 36, 0.7); background: rgba(251, 191, 36, 0.15); }
+    }
+
+    /* Interactive Options / Choices */
+    .options-title {
+      font-family: var(--font-display);
+      font-size: 12px;
+      color: var(--neon-cyan);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .options-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .option-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 14px 16px;
+      color: var(--text-main);
+      font-family: var(--font-code);
+      font-size: 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      border-color: rgba(34, 211, 238, 0.4);
+      background: var(--bg-surface-active);
+      transform: translateY(-1px);
+    }
+
+    .option-btn.selected {
+      border-color: var(--neon-cyan);
+      background: var(--bg-surface-active);
+      color: var(--neon-cyan);
+      box-shadow: 0 0 12px rgba(34, 211, 238, 0.25);
+    }
+
+    .option-btn.correct {
+      border-color: var(--neon-green) !important;
+      background: rgba(16, 185, 129, 0.18) !important;
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.3) !important;
+      color: #34d399 !important;
+    }
+
+    .option-btn.wrong {
+      border-color: var(--neon-red) !important;
+      background: rgba(244, 63, 94, 0.18) !important;
+      box-shadow: 0 0 14px rgba(244, 63, 94, 0.3) !important;
+      color: #fda4af !important;
+    }
+
+    .option-key {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-code);
+      font-size: 10px;
+      opacity: 0.5;
+      flex-shrink: 0;
+    }
+
+    /* Feedback Banner */
+    .feedback-banner {
+      display: none;
+      padding: 14px 16px;
+      border-radius: 16px;
+      margin-bottom: 12px;
+      font-size: 13.5px;
+      line-height: 1.5;
+      animation: slideIn 0.3s ease-out forwards;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .feedback-banner.success {
+      display: block;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid var(--neon-green);
+      color: #34d399;
+    }
+
+    .feedback-banner.error {
+      display: block;
+      background: rgba(244, 63, 94, 0.12);
+      border: 1px solid var(--neon-red);
+      color: #fda4af;
+    }
+
+    .feedback-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .feedback-explanation {
+      font-size: 13px;
+      color: #e2e8f0;
+    }
+
+    /* Victory & Results Screen */
+    .victory-badge {
+      font-size: 54px;
+      text-align: center;
+      margin-bottom: 8px;
+      animation: bounce 1s infinite alternate;
+    }
+
+    @keyframes bounce {
+      from { transform: scale(1); }
+      to { transform: scale(1.1); }
+    }
+
+    .stats-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .stat-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-val {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--neon-cyan);
+    }
+
+    .stat-lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stage-results-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 13px;
+    }
+
+    .stage-results-table th, .stage-results-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      text-align: left;
+    }
+
+    .stage-results-table th {
+      color: var(--neon-cyan);
+      font-family: var(--font-display);
+      font-size: 10.5px;
+      text-transform: uppercase;
+    }
+
+    .logic-pedagogic-message {
+      background: rgba(34, 211, 238, 0.06);
+      border: 1px solid rgba(34, 211, 238, 0.2);
+      border-radius: 16px;
+      padding: 14px;
+      margin: 16px 0;
+      font-size: 13.5px;
+      color: #e2e8f0;
+      line-height: 1.5;
+    }
+
+    .logic-pedagogic-message h4 {
+      font-family: var(--font-display);
+      color: var(--neon-yellow);
+      font-size: 13px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Sound Control Button */
+    .sound-toggle-btn {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--neon-cyan);
+      border-radius: 10px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .sound-toggle-btn:hover {
+      background: var(--bg-surface-active);
+      border-color: var(--neon-cyan);
+    }
+
+    /* Web Nav Tabs (for running fully inside Google Chrome) */
+    .web-nav-tabs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      background: rgba(12, 12, 14, 0.92);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 6px;
+    }
+
+    .web-nav-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-family: var(--font-display);
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .web-nav-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .web-nav-btn.active {
+      background: rgba(34, 211, 238, 0.15);
+      color: var(--neon-cyan);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+    }
+
+    /* Teacher Dashboard Styles inside Web */
+    .teacher-metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    @media (min-width: 500px) {
+      .teacher-metric-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .teacher-metric-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 12px 8px;
+      text-align: center;
+    }
+
+    .teacher-metric-val {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .teacher-metric-lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      text-transform: uppercase;
+    }
+
+    .teacher-actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .teacher-btn-sm {
+      flex: 1;
+      min-width: 130px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .teacher-chips-container {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin-bottom: 14px;
+    }
+
+    .teacher-chip {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-family: var(--font-body);
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .teacher-chip:hover {
+      border-color: var(--neon-cyan);
+      color: #fff;
+    }
+
+    .teacher-chip.active {
+      background: rgba(34, 211, 238, 0.15);
+      border-color: var(--neon-cyan);
+      color: var(--neon-cyan);
+    }
+
+    .student-item-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .student-item-card:hover {
+      border-color: rgba(34, 211, 238, 0.4);
+      transform: translateY(-1px);
+      background: var(--bg-surface-active);
+    }
+
+    .student-avatar-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .student-info-col {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .student-name-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .student-name-text {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .student-class-tag {
+      background: rgba(34, 211, 238, 0.15);
+      color: var(--neon-cyan);
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .student-meta-row {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .student-score-col {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .student-score-num {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--neon-yellow);
+    }
+
+    /* Modal Overlay */
+    .custom-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .custom-modal.active {
+      display: flex;
+    }
+
+    .custom-modal-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      max-width: 500px;
+      width: 100%;
+      padding: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9);
+      position: relative;
+    }
+
+    /* Cyber Select Dropdown */
+    .cyber-select {
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: var(--text-main);
+      font-family: var(--font-body);
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2322d3ee' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      background-size: 16px;
+      cursor: pointer;
+    }
+
+    .cyber-select:focus {
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.2);
+    }
+
+    .cyber-select option {
+      background: #0d1117;
+      color: #e2e8f0;
+      padding: 8px;
+    }
+
+    /* Auth Switcher Tabs */
+    .auth-tabs-row {
+      display: flex;
+      gap: 6px;
+      background: rgba(12, 12, 16, 0.85);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 16px;
+    }
+
+    .auth-tab-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-family: var(--font-display);
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .auth-tab-btn.active {
+      background: rgba(34, 211, 238, 0.15);
+      color: var(--neon-cyan);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+    }
+
+    /* Class Format Helper Guide */
+    .class-guide-box {
+      background: rgba(34, 211, 238, 0.05);
+      border: 1px dashed rgba(34, 211, 238, 0.25);
+      border-radius: 10px;
+      padding: 8px 10px;
+      margin-top: 6px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .class-guide-tag {
+      display: inline-block;
+      background: rgba(34, 211, 238, 0.15);
+      color: var(--neon-cyan);
+      font-family: var(--font-code);
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+
+    /* Screen Abandoned Anti-Cheat Warning Box */
+    .abandoned-warning-card {
+      background: linear-gradient(135deg, rgba(244, 63, 94, 0.12) 0%, rgba(251, 191, 36, 0.08) 100%);
+      border: 1.5px solid var(--neon-magenta);
+      border-radius: 20px;
+      padding: 24px 20px;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(244, 63, 94, 0.2);
+    }
+
+    .supabase-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(34, 211, 238, 0.1);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+      color: var(--neon-cyan);
+    }
+
+    .code-sql-block {
+      background: #080a0f;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 10px;
+      font-family: var(--font-code);
+      font-size: 11px;
+      color: #93c5fd;
+      text-align: left;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      max-height: 160px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Ambient Canvas Background -->
+  <canvas id="bg-canvas"></canvas>
+  <div class="scanlines"></div>
+
+  <div id="app-root">
+    <!-- Top HUD Bar -->
+    <header class="hud-bar">
+      <div class="hud-title">
+        <span>⚡</span> CYBER RUNNER
+      </div>
+      <div class="hud-stats">
+        <div class="hud-stat-pill">
+          <div class="hud-stat-item hud-lives" id="hud-lives-container" title="Baterias de Vida">
+            <span class="heart-icon" id="heart-1">❤️</span>
+            <span class="heart-icon" id="heart-2">❤️</span>
+            <span class="heart-icon" id="heart-3">❤️</span>
+          </div>
+          <div class="hud-stat-divider"></div>
+          <div class="hud-stat-item hud-score">
+            <span>⭐</span>
+            <span id="hud-score-val">0</span>
+          </div>
+        </div>
+        <button class="sound-toggle-btn" id="btn-sound-toggle" title="Ligar/Desligar Som">
+          <span id="sound-icon">🔊</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Student Focused Interface (Desmembrado do Painel do Professor) -->
+
+    <!-- SCREEN 1: LOGIN & CHARACTER SELECT -->
+    <section class="screen active" id="screen-login">
+      <div class="cyber-card">
+        <h1 class="hero-title">Cyber Runner</h1>
+        <p class="hero-subtitle">O Resgate do Algoritmo // Treinamento de Lógica de Programação</p>
+
+        <!-- Auth Mode Switcher -->
+        <div class="auth-tabs-row">
+          <button type="button" class="auth-tab-btn active" id="tab-auth-register" onclick="switchAuthMode('register')">
+            <span>🌟</span> NOVO ALUNO / CADASTRAR
+          </button>
+          <button type="button" class="auth-tab-btn" id="tab-auth-login" onclick="switchAuthMode('login')">
+            <span>🔑</span> JÁ TENHO LOGIN
+          </button>
+        </div>
+
+        <!-- FORM 1: NOVO ALUNO / CADASTRAR -->
+        <form id="register-form" onsubmit="event.preventDefault(); handleStudentRegister();">
+          <div class="form-group">
+            <label class="form-label" for="student-first-name">Primeiro Nome do Aluno</label>
+            <input type="text" id="student-first-name" class="cyber-input" placeholder="Ex: Gabriel" required autocomplete="given-name" oninput="autoGenerateLoginSuggestion(this.value)" />
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Digite apenas o seu primeiro nome.</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="student-class-select">Selecione sua Turma</label>
+            <select id="student-class-select" class="cyber-select" onchange="onClassSelectChanged(this.value)">
+              <optgroup label="1º Ano">
+                <option value="1TECA" selected>1TECA (1º Técnico A)</option>
+                <option value="1TECB">1TECB (1º Técnico B)</option>
+                <option value="1ADMA">1ADMA (1º Administração A)</option>
+                <option value="1ADMB">1ADMB (1º Administração B)</option>
+                <option value="1INFOA">1INFOA (1º Informática A)</option>
+                <option value="1INFOB">1INFOB (1º Informática B)</option>
+                <option value="1DSA">1DSA (1º Desenv. Sistemas A)</option>
+                <option value="1DSB">1DSB (1º Desenv. Sistemas B)</option>
+              </optgroup>
+              <optgroup label="2º Ano">
+                <option value="2TECA">2TECA (2º Técnico A)</option>
+                <option value="2TECB">2TECB (2º Técnico B)</option>
+                <option value="2ADMA">2ADMA (2º Administração A)</option>
+                <option value="2ADMB">2ADMB (2º Administração B)</option>
+                <option value="2INFOA">2INFOA (2º Informática A)</option>
+                <option value="2INFOB">2INFOB (2º Informática B)</option>
+                <option value="2DSA">2DSA (2º Desenv. Sistemas A)</option>
+                <option value="2DSB">2DSB (2º Desenv. Sistemas B)</option>
+              </optgroup>
+              <optgroup label="3º Ano">
+                <option value="3TECA">3TECA (3º Técnico A)</option>
+                <option value="3TECB">3TECB (3º Técnico B)</option>
+                <option value="3ADMA">3ADMA (3º Administração A)</option>
+                <option value="3ADMB">3ADMB (3º Administração B)</option>
+                <option value="3INFOA">3INFOA (3º Informática A)</option>
+                <option value="3INFOB">3INFOB (3º Informática B)</option>
+                <option value="3DSA">3DSA (3º Desenv. Sistemas A)</option>
+                <option value="3DSB">3DSB (3º Desenv. Sistemas B)</option>
+              </optgroup>
+              <option value="CUSTOM">✏️ Digitar Outra Turma no Padrão...</option>
+            </select>
+
+            <!-- Custom Class Input (appears if CUSTOM is selected) -->
+            <input type="text" id="student-class-custom" class="cyber-input" style="display: none; margin-top: 8px; text-transform: uppercase;" placeholder="Ex: 1TECA, 2ADMB, 1MTEC" maxlength="10" oninput="onCustomClassInput(this)" />
+
+            <div class="class-guide-box">
+              <span>💡 <strong>Padrão de Turma:</strong></span>
+              <span class="class-guide-tag">1</span> (Ano) + 
+              <span class="class-guide-tag">TEC</span> (Curso) + 
+              <span class="class-guide-tag">A</span> (Turma) = 
+              <span class="class-guide-tag" id="class-preview-tag">1TECA</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="form-group">
+              <label class="form-label" for="student-login-input">Login / Usuário</label>
+              <input type="text" id="student-login-input" class="cyber-input" placeholder="Ex: gabriel.1teca" required autocomplete="username" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="student-password-input">Senha de Acesso</label>
+              <input type="text" id="student-password-input" class="cyber-input cyber-password-mask" placeholder="Crie sua senha" required autocomplete="off" spellcheck="false" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Escolha seu Avatar Cyberpunk</label>
+            <div class="characters-grid" id="characters-container">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <div style="margin-top: 18px;">
+            <button type="submit" class="cyber-btn" id="btn-start-class">
+              <span>🚀</span> INICIAR MISSÃO & SALVAR PROGRESSO
+            </button>
+          </div>
+        </form>
+
+        <!-- FORM 2: JÁ TENHO LOGIN / ENTRAR -->
+        <form id="login-existing-form" style="display: none;" onsubmit="event.preventDefault(); handleStudentLogin();">
+          <div class="form-group">
+            <label class="form-label" for="existing-login-input">Seu Login de Aluno</label>
+            <input type="text" id="existing-login-input" class="cyber-input" placeholder="Ex: gabriel.1teca" required autocomplete="username" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="existing-password-input">Sua Senha</label>
+            <input type="text" id="existing-password-input" class="cyber-input cyber-password-mask" placeholder="Digite sua senha cadastrada" required autocomplete="off" spellcheck="false" />
+          </div>
+
+          <div id="login-status-msg" style="display: none; font-size: 13px; margin-bottom: 12px; padding: 10px; border-radius: 10px;"></div>
+
+          <div style="margin-top: 18px;">
+            <button type="submit" class="cyber-btn">
+              <span>🔑</span> ENTRAR & RETOMAR MISSÃO
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- SCREEN 2: GAMEPLAY (STAGES 1 to 6) -->
+    <section class="screen" id="screen-gameplay">
+      <div class="cyber-card">
+        <!-- Stage Header & Progress -->
+        <div class="mission-header">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="stage-badge" id="game-stage-badge">FASE 1 / 6</span>
+            <span style="font-size: 13px; color: var(--neon-yellow); font-family: var(--font-display);" id="game-character-badge">Kai ⚡</span>
+          </div>
+          <h2 class="stage-title" id="game-stage-title">Condicionais Simples (SE / SENÃO)</h2>
+          <div class="progress-track">
+            <div class="progress-fill" id="game-progress-bar"></div>
+          </div>
+        </div>
+
+        <!-- Scenario Context -->
+        <div class="scenario-box">
+          <span class="scenario-icon">🎯</span>
+          <div id="game-scenario-text">
+            O Portão Neural da Megacity está bloqueado por uma chave criptográfica. Complete a estrutura lógica para abrir o portão se a chave for válida, ou soar o alarme no caso contrário.
+          </div>
+        </div>
+
+        <!-- Code Terminal -->
+        <div class="terminal-container">
+          <div class="terminal-header">
+            <div class="terminal-dots">
+              <span class="dot dot-red"></span>
+              <span class="dot dot-yellow"></span>
+              <span class="dot dot-green"></span>
+            </div>
+            <span class="terminal-file-name" id="terminal-filename">modulo_seguranca.algo</span>
+            <span style="font-size: 11px; color: var(--neon-green); font-family: var(--font-code);">UTF-8</span>
+          </div>
+          <div class="code-content" id="terminal-code">
+            <!-- Code populated by JS -->
+          </div>
+        </div>
+
+        <!-- Interactive Options -->
+        <div class="options-title">Selecione o comando correto para preencher a lacuna:</div>
+        <div class="options-list" id="options-container">
+          <!-- Options populated by JS -->
+        </div>
+
+        <!-- Immediate Feedback Banner -->
+        <div class="feedback-banner" id="feedback-banner">
+          <div class="feedback-title" id="feedback-title"></div>
+          <div class="feedback-explanation" id="feedback-explanation"></div>
+        </div>
+
+        <!-- Next / Action Button -->
+        <button class="cyber-btn" id="btn-next-action" style="display: none;" onclick="onNextStageClicked()">
+          PRÓXIMA FASE ➔
+        </button>
+      </div>
+    </section>
+
+    <!-- SCREEN 3: GAME OVER (LIVES EXHAUSTED) -->
+    <section class="screen" id="screen-gameover">
+      <div class="cyber-card" style="text-align: center;">
+        <div style="font-size: 48px; margin-bottom: 6px;">💀</div>
+        <h2 class="hero-title" style="background: linear-gradient(135deg, #ff007f 0%, #ff3366 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+          SISTEMA CORROMPIDO
+        </h2>
+        <p class="hero-subtitle">Suas baterias de energia foram esgotadas antes de concluir o algoritmo.</p>
+
+        <div class="stats-summary-grid">
+          <div class="stat-box">
+            <div class="stat-val" id="go-score">0</div>
+            <div class="stat-lbl">Pontuação Final</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="go-stages">0 / 6</div>
+            <div class="stat-lbl">Fases Alcançadas</div>
+          </div>
+        </div>
+
+        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">
+          Seus dados de desempenho foram salvos no registro da aula para o professor. Não desista, programar é aprender com as iterações!
+        </p>
+
+        <button class="cyber-btn" onclick="restartGame()">
+          🔄 TENTAR NOVAMENTE
+        </button>
+      </div>
+    </section>
+
+    <!-- SCREEN 4: VICTORY & SUMMARY -->
+    <section class="screen" id="screen-victory">
+      <div class="cyber-card">
+        <div class="victory-badge">🏆</div>
+        <h2 class="hero-title">ALGORITMO RESGATADO!</h2>
+        <p class="hero-subtitle" id="victory-student-greeting">Parabéns, Aluno! Você dominou a lógica do sistema.</p>
+
+        <!-- Stats Overview -->
+        <div class="stats-summary-grid">
+          <div class="stat-box">
+            <div class="stat-val" id="victory-score">0</div>
+            <div class="stat-lbl">Pontos Conquistados</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="victory-accuracy">100%</div>
+            <div class="stat-lbl">Precisão de Acertos</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="victory-lives">3 / 3</div>
+            <div class="stat-lbl">Vidas Restantes</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="victory-time">00:45</div>
+            <div class="stat-lbl">Tempo de Missão</div>
+          </div>
+        </div>
+
+        <!-- Stage Performance Breakdown -->
+        <h3 style="font-family: var(--font-display); font-size: 14px; color: var(--neon-cyan); margin-top: 10px; text-transform: uppercase;">
+          Relatório de Desempenho por Conceito:
+        </h3>
+        <table class="stage-results-table">
+          <thead>
+            <tr>
+              <th>Fase / Conceito</th>
+              <th>Status</th>
+              <th>Pontos</th>
+            </tr>
+          </thead>
+          <tbody id="victory-breakdown-body">
+            <!-- Populated via JS -->
+          </tbody>
+        </table>
+
+        <!-- Pedagogical Message on the Importance of Logic -->
+        <div class="logic-pedagogic-message">
+          <h4>💡 A Importância da Lógica de Programação</h4>
+          <p>
+            A lógica de programação é muito mais do que escrever código de computador: é a habilidade de decompor problemas complexos, estruturar o pensamento analítico e tomar decisões precisas com base em condições reais. Seja desenvolvendo jogos incríveis, construindo inteligências artificiais ou solucionando desafios da ciência, a base de todo avanço tecnológico nasce do raciocínio lógico que você praticou hoje!
+          </p>
+        </div>
+
+        <div style="display: flex; gap: 10px; flex-direction: column;">
+          <button class="cyber-btn" onclick="downloadCurrentSessionProof()">
+            <span>📥</span> BAIXAR COMPROVANTE DO ALUNO (.JSON / .CSV)
+          </button>
+          <button class="cyber-btn-secondary" style="border-radius: 16px; padding: 12px; font-weight: 700;" onclick="restartGame()">
+            🎮 JOGAR NOVAMENTE
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 5: ANTI-CHEAT / SCREEN ABANDONED (LOCKED ON SCREEN SWITCH) -->
+    <section class="screen" id="screen-abandoned">
+      <div class="cyber-card" style="text-align: center;">
+        <div class="abandoned-warning-card">
+          <div style="font-size: 48px; margin-bottom: 8px;">🚨</div>
+          <h2 class="hero-title" style="color: var(--neon-magenta); -webkit-text-fill-color: var(--neon-magenta); font-size: 22px;">
+            VIOLAÇÃO DE FOCO DETECTADA!
+          </h2>
+          <p style="color: #fca5a5; font-size: 13.5px; line-height: 1.5; margin: 8px 0 16px 0;">
+            Atenção: A troca de tela, minimização de aba ou perda de foco foi detectada durante a missão em andamento. Conforme o regulamento escolar, a sessão foi travada e a pontuação enviada foi zerada.
+          </p>
+
+          <div style="background: rgba(0,0,0,0.5); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 14px; text-align: left; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px; margin-bottom: 8px;">
+              <span style="color: var(--text-muted); font-size: 12px;">ALUNO / TURMA</span>
+              <strong style="color: var(--neon-cyan); font-size: 13px;" id="ab-student-meta">Aluno (1TECA)</strong>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px;">
+              <div>
+                <span style="color: var(--text-muted); font-size: 11px;">PROGRESSO ALCANÇADO:</span><br>
+                <strong style="color: var(--neon-yellow); font-size: 16px;" id="ab-progress-pct">0% (Fase 1/6)</strong>
+              </div>
+              <div>
+                <span style="color: var(--text-muted); font-size: 11px;">PONTUAÇÃO GRAVADA:</span><br>
+                <strong style="color: var(--neon-magenta); font-size: 16px;">0 pts (Zerado)</strong>
+              </div>
+              <div>
+                <span style="color: var(--text-muted); font-size: 11px;">ACERTOS:</span><br>
+                <strong style="color: var(--neon-green);" id="ab-correct-val">0 vezes</strong>
+              </div>
+              <div>
+                <span style="color: var(--text-muted); font-size: 11px;">ERROS:</span><br>
+                <strong style="color: var(--neon-magenta);" id="ab-wrong-val">0 vezes</strong>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button class="cyber-btn" onclick="downloadCurrentSessionProof()">
+              <span>📥</span> BAIXAR COMPROVANTE DESTE REGISTRO
+            </button>
+            <button class="cyber-btn-secondary" style="border-radius: 16px; padding: 12px; font-weight: 700;" onclick="restartGame()">
+              🔄 REINICIAR NOVA TENTATIVA
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 6: TEACHER DASHBOARD (NATIVELY IN GOOGLE CHROME) -->
+    <section class="screen" id="screen-teacher">
+      <div class="cyber-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
+          <div>
+            <h2 class="hero-title" style="text-align: left; font-size: 20px; margin-bottom: 2px;">PAINEL DO PROFESSOR</h2>
+            <p style="color: var(--text-muted); font-size: 13px;">Gestão de turmas (1TECA, 1ADMA, etc.), Supabase e Netlify.</p>
+          </div>
+          <div id="supabase-indicator-badge" class="supabase-badge">
+            <span id="supabase-dot" style="color: #22c55e;">🟢</span>
+            <span id="supabase-status-text">Supabase / Local</span>
+          </div>
+        </div>
+
+        <!-- 4 Metric Cards -->
+        <div class="teacher-metric-grid">
+          <div class="teacher-metric-card">
+            <div class="teacher-metric-val" id="t-metric-total" style="color: var(--neon-cyan);">0</div>
+            <div class="teacher-metric-lbl">Total Alunos</div>
+          </div>
+          <div class="teacher-metric-card">
+            <div class="teacher-metric-val" id="t-metric-avg" style="color: var(--neon-yellow);">0</div>
+            <div class="teacher-metric-lbl">Média Pontos</div>
+          </div>
+          <div class="teacher-metric-card">
+            <div class="teacher-metric-val" id="t-metric-rate" style="color: var(--neon-green);">0%</div>
+            <div class="teacher-metric-lbl">Conclusão</div>
+          </div>
+          <div class="teacher-metric-card">
+            <div class="teacher-metric-val" id="t-metric-abandoned" style="color: var(--neon-magenta);">0</div>
+            <div class="teacher-metric-lbl">Zerados/Saíram</div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="teacher-actions-row">
+          <button class="teacher-btn-sm" style="background: linear-gradient(135deg, #0891b2 0%, #22d3ee 100%); color: #050505;" onclick="downloadTeacherReportCsv()">
+            <span>📥</span> Baixar CSV
+          </button>
+          <button class="teacher-btn-sm" style="background: var(--bg-surface); color: var(--neon-cyan);" onclick="downloadTeacherBackupJson()">
+            <span>💾</span> Backup JSON
+          </button>
+          <button class="teacher-btn-sm" style="background: var(--bg-surface); color: var(--neon-green); border-color: rgba(34, 197, 94, 0.4);" onclick="openSupabaseConfigModal()">
+            <span>⚡</span> Supabase / Netlify
+          </button>
+          <button class="teacher-btn-sm" style="background: var(--bg-surface); color: var(--neon-magenta); border-color: rgba(244, 63, 94, 0.4);" onclick="confirmClearTeacherHistory()">
+            <span>🗑️</span> Limpar
+          </button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="form-group" style="margin-bottom: 10px;">
+          <input type="text" id="teacher-search-input" class="cyber-input" placeholder="🔍 Buscar por nome do aluno, turma (ex: 1TECA) ou status..." oninput="handleTeacherSearch(this.value)" />
+        </div>
+
+        <!-- Class Filter Chips -->
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px;">
+          Filtrar por Turma:
+        </div>
+        <div class="teacher-chips-container" id="teacher-chips-list">
+          <button class="teacher-chip active" onclick="filterTeacherByClass('TODAS', this)">TODAS</button>
+        </div>
+
+        <!-- Records List -->
+        <div style="font-size: 12px; font-weight: 700; color: var(--neon-cyan); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;" id="teacher-records-count-lbl">
+          Registros Salvos (0)
+        </div>
+        <div id="teacher-records-container">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- DETAIL MODAL -->
+  <div class="custom-modal" id="student-detail-modal" onclick="if(event.target === this) closeStudentDetailModal()">
+    <div class="custom-modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span id="modal-avatar" style="font-size: 28px;">⚡</span>
+          <div>
+            <h3 id="modal-name" style="font-family: var(--font-display); font-size: 17px; color: var(--text-main);">Aluno</h3>
+            <p id="modal-class" style="color: var(--neon-cyan); font-size: 12px;">Turma</p>
+          </div>
+        </div>
+        <button style="background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer;" onclick="closeStudentDetailModal()">✕</button>
+      </div>
+      <div id="modal-body" style="font-size: 13.5px; color: #cbd5e1; line-height: 1.6;">
+        <!-- Content -->
+      </div>
+      <div style="margin-top: 18px; display: flex; gap: 8px;">
+        <button class="cyber-btn" style="margin-top: 0; flex: 1;" onclick="closeStudentDetailModal()">Fechar</button>
+        <button class="cyber-btn-secondary" style="border-radius: 16px; padding: 10px 16px; color: var(--neon-magenta); border-color: rgba(244, 63, 94, 0.4);" onclick="deleteCurrentModalRecord()">Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUPABASE & NETLIFY CONFIG MODAL -->
+  <div class="custom-modal" id="supabase-config-modal" onclick="if(event.target === this) closeSupabaseConfigModal()">
+    <div class="custom-modal-content" style="max-width: 540px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 24px;">⚡</span>
+          <div>
+            <h3 style="font-family: var(--font-display); font-size: 17px; color: var(--neon-cyan);">Integração Supabase & Netlify</h3>
+            <p style="color: var(--text-muted); font-size: 12px;">Gravação em Nuvem e Hospedagem Web</p>
+          </div>
+        </div>
+        <button style="background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer;" onclick="closeSupabaseConfigModal()">✕</button>
+      </div>
+
+      <div style="font-size: 13px; color: #cbd5e1; line-height: 1.5; margin-bottom: 14px;">
+        Insira as credenciais do seu projeto Supabase para sincronizar automaticamente as tentativas e logins dos alunos direto na nuvem:
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="supabase-url-input">Supabase Project URL</label>
+        <input type="url" id="supabase-url-input" class="cyber-input" placeholder="https://xyzabcdefg.supabase.co" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="supabase-key-input">Supabase Anon Public API Key</label>
+        <input type="text" id="supabase-key-input" class="cyber-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." />
+      </div>
+
+      <div id="supabase-test-feedback" style="display: none; font-size: 12.5px; padding: 8px 12px; border-radius: 8px; margin-bottom: 12px;"></div>
+
+      <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+        <button class="teacher-btn-sm" style="background: rgba(34, 197, 94, 0.2); color: var(--neon-green); border-color: rgba(34, 197, 94, 0.4);" onclick="testSupabaseConnection()">
+          🔄 Testar Conexão
+        </button>
+        <button class="teacher-btn-sm" style="background: linear-gradient(135deg, #0891b2 0%, #22d3ee 100%); color: #050505;" onclick="saveSupabaseSettings()">
+          💾 Salvar Configuração
+        </button>
+      </div>
+
+      <div style="margin-top: 14px; border-top: 1px solid var(--border-subtle); padding-top: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <span style="font-size: 12px; font-weight: 700; color: var(--neon-yellow);">Script SQL para Criar Tabelas no Supabase:</span>
+          <button style="background: transparent; border: none; color: var(--neon-cyan); font-size: 11px; cursor: pointer; font-weight: 700;" onclick="copySupabaseSqlScript()">📋 Copiar SQL</button>
+        </div>
+        <div class="code-sql-block" id="supabase-sql-code">CREATE TABLE IF NOT EXISTS student_attempts (
+    id TEXT PRIMARY KEY,
+    student_name TEXT NOT NULL,
+    student_class TEXT NOT NULL,
+    student_login TEXT,
+    character_name TEXT,
+    character_avatar TEXT,
+    score INTEGER DEFAULT 0,
+    progress_percentage INTEGER DEFAULT 0,
+    stages_completed INTEGER DEFAULT 0,
+    correct_answers INTEGER DEFAULT 0,
+    wrong_attempts INTEGER DEFAULT 0,
+    lives_remaining INTEGER DEFAULT 0,
+    status TEXT NOT NULL,
+    stage_results JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS student_users (
+    id TEXT PRIMARY KEY,
+    login TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    first_name TEXT NOT NULL,
+    student_class TEXT NOT NULL,
+    avatar TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE student_attempts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public attempts" ON student_attempts FOR ALL USING (true) WITH CHECK (true);
+
+ALTER TABLE student_users ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (true);</div>
+      </div>
+
+      <div style="margin-top: 16px; display: flex; gap: 8px;">
+        <button class="cyber-btn" style="margin-top: 0; flex: 1;" onclick="closeSupabaseConfigModal()">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================================
+       AUDIO SYNTHESIZER (WEB AUDIO API - ZERO EXTERNAL ASSETS REQUIRED)
+       ========================================================================= */
+    class CyberAudio {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+      playBlip() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(587.33, this.ctx.currentTime); // D5
+          osc.frequency.exponentialRampToValueAtTime(880, this.ctx.currentTime + 0.08); // A5
+          gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.08);
+        } catch(e) {}
+      }
+      playCorrect() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + i * 0.07);
+            gain.gain.setValueAtTime(0.15, now + i * 0.07);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.15);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now + i * 0.07);
+            osc.stop(now + i * 0.07 + 0.16);
+          });
+        } catch(e) {}
+      }
+      playError() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(180, this.ctx.currentTime);
+          osc.frequency.linearRampToValueAtTime(110, this.ctx.currentTime + 0.25);
+          gain.gain.setValueAtTime(0.18, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.25);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.25);
+        } catch(e) {}
+      }
+      playVictory() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const notes = [440, 554.37, 659.25, 880, 1108.73];
+          notes.forEach((f, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(f, now + idx * 0.1);
+            gain.gain.setValueAtTime(0.18, now + idx * 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.35);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now + idx * 0.1);
+            osc.stop(now + idx * 0.1 + 0.36);
+          });
+        } catch(e) {}
+      }
+    }
+
+    const sound = new CyberAudio();
+
+    /* =========================================================================
+       CHARACTERS DATABASE
+       ========================================================================= */
+    const CHARACTERS = [
+      {
+        id: 'kai',
+        name: 'Kai',
+        avatar: '⚡',
+        specialty: 'Sintaxe Rápida',
+        color: '#00f5ff',
+        quote: 'Reflexos rápidos decifram qualquer código!'
+      },
+      {
+        id: 'ayla',
+        name: 'Ayla',
+        avatar: '🔮',
+        specialty: 'Lógica Pura',
+        color: '#d2a8ff',
+        quote: 'A elegância está na precisão dos condicionais.'
+      },
+      {
+        id: 'zeta',
+        name: 'Zeta-09',
+        avatar: '🤖',
+        specialty: 'Laços & Repetição',
+        color: '#00ff88',
+        quote: 'Iterações otimizadas constroem o futuro.'
+      },
+      {
+        id: 'lynx',
+        name: 'Lynx',
+        avatar: '🦊',
+        specialty: 'Operadores Booleanos',
+        color: '#ffe600',
+        quote: 'Verdadeiro ou falso: tudo se resume a decisões.'
+      }
+    ];
+
+    /* =========================================================================
+       40 PROGRESSIVE EDUCATIONAL STAGES DATA (COMPLETE CURRICULUM)
+       ========================================================================= */
+    const STAGES = [
+      // 1-6: FUNDAMENTOS CONDICIONAIS E LAÇOS BÁSICOS
+      {
+        id: 1,
+        title: "Fase 1: Condicionais Simples (SE / SENÃO)",
+        concept: "Decisão Binária Básica (if / else)",
+        filename: "modulo_portao.algo",
+        scenario: "O Portão Neural de Neo-Curitiba está trancado. Se a chave criptográfica for 'CYBER_KEY', liberar o acesso; caso contrário (senão), soar o alarme de invasão.",
+        codeTemplate: `se (chaveDeAcesso == "CYBER_KEY") {\n    abrirPortao();\n} <span class="code-gap">_____</span> {\n    dispararAlarme();\n}`,
+        options: [
+          { text: "senao", correct: true, feedback: "Correto! O bloco 'SENÃO' (else) executa exatamente quando a condição 'SE' (if) é falsa." },
+          { text: "enquanto", correct: false, feedback: "Incorreto! 'ENQUANTO' (while) é um laço de repetição, não uma bifurcação condicional contrária." },
+          { text: "repetir", correct: false, feedback: "Incorreto! 'REPETIR' cria loops, enquanto queremos executar a alternativa ao 'SE'." },
+          { text: "retornar", correct: false, feedback: "Incorreto! 'RETORNAR' devolve um valor ou encerra a função, não tratando o fluxo contrário." }
+        ],
+        explanation: "Em lógica de programação, a estrutura SE / SENÃO permite que o computador escolha entre dois caminhos exclusivos com base em um teste lógico."
+      },
+      {
+        id: 2,
+        title: "Fase 2: Condicionais Encadeadas (SENÃO SE)",
+        concept: "Múltiplas Condições Sequenciais (else if)",
+        filename: "roteador_trafego.algo",
+        scenario: "O Roteador da Megacity precisa classificar pacotes de dados. Se for 'URGENTE', vai para o Canal Alfa; senão se for 'NORMAL', vai para o Canal Beta; senão, vai para o Canal Padrão.",
+        codeTemplate: `se (pacote.tipo == "URGENTE") {\n    enviarCanal("Alfa");\n} <span class="code-gap">____________</span> (pacote.tipo == "NORMAL") {\n    enviarCanal("Beta");\n} senao {\n    enviarCanal("Padrao");\n}`,
+        options: [
+          { text: "senao se", correct: true, feedback: "Exato! 'SENÃO SE' (else if) testa uma nova condição caso a primeira tenha sido falsa." },
+          { text: "e tambem", correct: false, feedback: "Incorreto! 'E' é um operador lógico de conjunção, não uma estrutura condicional encadeada." },
+          { text: "para cada", correct: false, feedback: "Incorreto! 'PARA CADA' é usado para iterar sobre listas ou coleções de itens." },
+          { text: "pare", correct: false, feedback: "Incorreto! 'PARE' (break) interrompe a execução de laços ou switches." }
+        ],
+        explanation: "O 'SENÃO SE' permite encadear múltiplos testes em ordem hierárquica. Assim que uma condição verdadeira é encontrada, as seguintes são ignoradas."
+      },
+      {
+        id: 3,
+        title: "Fase 3: Operadores Lógicos (E / AND / &&)",
+        concept: "Conjunção Lógica: Ambos devem ser Verdadeiros",
+        filename: "escudo_quantico.algo",
+        scenario: "O Escudo de Proteção só pode ser ativado com segurança se o nível de energia for maior ou igual a 80 E o gerador estiver devidamente calibrado.",
+        codeTemplate: `se (energia >= 80 <span class="code-gap">___</span> geradorCalibrado == verdadeiro) {\n    ativarEscudoQuantico();\n}`,
+        options: [
+          { text: "&& (E lógico)", correct: true, feedback: "Perfeito! O operador '&&' (E) exige que AMBAS as condições sejam verdadeiras simultaneamente." },
+          { text: "|| (OU lógico)", correct: false, feedback: "Incorreto! O '||' (OU) ativaria o escudo mesmo se o gerador estivesse descalibrado, causando curto-circuito!" },
+          { text: "! (NÃO lógico)", correct: false, feedback: "Incorreto! O '!' inverte o valor booleano, e não conecta duas expressões lógicas." },
+          { text: "==", correct: false, feedback: "Incorreto! '==' é um operador de comparação de igualdade entre dois valores." }
+        ],
+        explanation: "Na tabela-verdade do operador 'E' (AND), o resultado final só é VERDADEIRO quando todas as premissas forem verdadeiras ao mesmo tempo."
+      },
+      {
+        id: 4,
+        title: "Fase 4: Operadores Lógicos (OU / || e NÃO / !)",
+        concept: "Disjunção e Negação Lógica (OR & NOT)",
+        filename: "sensor_intrusao.algo",
+        scenario: "O alarme deve disparar se o sensor óptico OU o sensor sonoro detectar anomalia, contanto que o sistema NÃO esteja em modo de manutenção.",
+        codeTemplate: `se ((sensorOptico == true <span class="code-gap">__</span> sensorSonoro == true) && !modoManutencao) {\n    ativarProtocoloDefesa();\n}`,
+        options: [
+          { text: "|| (OU lógico)", correct: true, feedback: "Excelente! O operador '||' (OU) retorna verdadeiro se PELO MENOS UM dos sensores disparar." },
+          { text: "&& (E lógico)", correct: false, feedback: "Incorreto! Se usássemos '&&', o alarme só tocaria se AMBOS os sensores disparassem juntos, permitindo invasões sorrateiras." },
+          { text: "!=", correct: false, feedback: "Incorreto! '!=' significa 'diferente de' e compara valores." },
+          { text: "++", correct: false, feedback: "Incorreto! '++' é o operador de incremento numérico (+1)." }
+        ],
+        explanation: "O operador 'OU' (OR) é flexível: basta que uma condição seja satisfeita. O operador '!' (NOT) inverte o estado lógico de verdadeiro para falso."
+      },
+      {
+        id: 5,
+        title: "Fase 5: Estrutura de Repetição com Contagem (FOR)",
+        concept: "Laço com Contador Determinado (for)",
+        filename: "restaurar_blocos.algo",
+        scenario: "Existem 5 blocos de memória corrompidos (índices 0 a 4). Crie um laço que execute 5 vezes, incrementando o contador de 1 em 1 a cada passo.",
+        codeTemplate: `para (contador = 0; contador < 5; contador<span class="code-gap">____</span>) {\n    restaurarBlocoMemoria(contador);\n}`,
+        options: [
+          { text: "++ (incremento)", correct: true, feedback: "Muito bem! 'contador++' soma 1 à variável a cada volta do laço, percorrendo 0, 1, 2, 3 e 4 com perfeição." },
+          { text: "-- (decremento)", correct: false, feedback: "Incorreto! Decrementar causaria um loop infinito negativo (-1, -2, -3...), travando a memória!" },
+          { text: "== 0", correct: false, feedback: "Incorreto! '== 0' é uma comparação booleana, não uma instrução de passo/incremento." },
+          { text: "= 5", correct: false, feedback: "Incorreto! Atribuir 5 encerraria o laço na primeira tentativa sem restaurar os outros blocos." }
+        ],
+        explanation: "O laço FOR é ideal quando sabemos antecipadamente quantas vezes a instrução deve se repetir. Ele possui inicialização, condição de parada e passo de incremento."
+      },
+      {
+        id: 6,
+        title: "Fase 6: Laço Condicional de Repetição (WHILE)",
+        concept: "Repetição Baseada em Condição Dinâmica (while)",
+        filename: "desarmar_firewall.algo",
+        scenario: "Para derrubar a barreira inimiga, devemos atacar ENQUANTO a integridade do firewall for maior que 0, reduzindo a integridade em 25 a cada golpe.",
+        codeTemplate: `<span class="code-gap">________</span> (firewallIntegridade > 0) {\n    desferirGolpeCyber();\n    firewallIntegridade = firewallIntegridade - 25;\n}`,
+        options: [
+          { text: "enquanto", correct: true, feedback: "Sensacional! 'ENQUANTO' (while) repete o bloco de código até que a condição se torne falsa (integridade <= 0)." },
+          { text: "se", correct: false, feedback: "Incorreto! O 'SE' executaria o golpe apenas UMA única vez, sem derrubar toda a barra de vida." },
+          { text: "retornar", correct: false, feedback: "Incorreto! 'RETORNAR' sairia da função imediatamente." },
+          { text: "funcao", correct: false, feedback: "Incorreto! 'FUNÇÃO' declara uma sub-rotina, não uma estrutura de repetição." }
+        ],
+        explanation: "O laço WHILE continua executando indefinidamente enquanto sua condição for verdadeira. A alteração da variável dentro do laço é crucial para evitar loops infinitos!"
+      },
+
+      // 7-12: TIPOS DE DADOS, OPERADORES ARITMÉTICOS E VETORES
+      {
+        id: 7,
+        title: "Fase 7: Tipos Primitivos de Dados",
+        concept: "Identificação de Tipos (Inteiro, Real, Texto, Booleano)",
+        filename: "nucleo_dados.algo",
+        scenario: "O núcleo está registrando os dados do agente. Qual tipo de dado deve armazenar o status 'true' ou 'false' que indica se o agente está camuflado?",
+        codeTemplate: `variavel nomeAgente = "Kai";      // Texto (String)\nvariavel nivelAcesso = 4;         // Inteiro (Integer)\nvariavel taxaEnergia = 87.5;      // Real (Float)\nvariavel camuflado = <span class="code-gap">__________</span>;     // Booleano (Boolean)`,
+        options: [
+          { text: "verdadeiro (true)", correct: true, feedback: "Exato! Variáveis booleanas armazenam apenas dois estados lógicos: verdadeiro (true) ou falso (false)." },
+          { text: "\"verdadeiro\"", correct: false, feedback: "Incorreto! Aspas duplas transformam o valor em Texto (String), perdendo o comportamento booleano nativo." },
+          { text: "100.0", correct: false, feedback: "Incorreto! 100.0 é um número de ponto flutuante (Real), não um booleano." },
+          { text: "nulo", correct: false, feedback: "Incorreto! 'nulo' (null) representa a ausência de valor, não o estado lógico ativado." }
+        ],
+        explanation: "Os tipos primitivos fundamentais são Inteiro (números inteiros), Real (decimais), Texto/String (caracteres) e Booleano (verdadeiro/falso)."
+      },
+      {
+        id: 8,
+        title: "Fase 8: Operador de Módulo / Resto (%)",
+        concept: "Verificação de Números Pares e Múltiplos",
+        filename: "filtro_frequencia.algo",
+        scenario: "Para sintonizar o receptor nos canais PARES, verificamos se o resto da divisão do número do canal por 2 é exatamente igual a 0.",
+        codeTemplate: `se (numeroCanal <span class="code-gap">_</span> 2 == 0) {\n    sintonizarCanalPar();\n} senao {\n    sintonizarCanalImpar();\n}`,
+        options: [
+          { text: "% (módulo/resto)", correct: true, feedback: "Perfeito! O operador '%' calcula o resto da divisão inteira. Se X % 2 == 0, o número é PAR!" },
+          { text: "/", correct: false, feedback: "Incorreto! '/' faz a divisão real/quociente, e não retorna o resto da divisão." },
+          { text: "*", correct: false, feedback: "Incorreto! '*' é multiplicação." },
+          { text: "^", correct: false, feedback: "Incorreto! '^' é potenciação ou bitwise XOR em muitas linguagens." }
+        ],
+        explanation: "O operador de módulo (%) é fundamental para testar paridade, divisibilidade, paginação e ciclos em estruturas de repetição."
+      },
+      {
+        id: 9,
+        title: "Fase 9: Vetores / Arrays Unidimensionais",
+        concept: "Indexação Base Zero (Primeiro Elemento [0])",
+        filename: "inventario_chips.algo",
+        scenario: "Uma lista armazena os chips coletados: ['Chip_Alfa', 'Chip_Beta', 'Chip_Gama']. Como acessamos o PRIMEIRO item da lista?",
+        codeTemplate: `lista chips = ["Chip_Alfa", "Chip_Beta", "Chip_Gama"];\nvariavel primeiroChip = chips<span class="code-gap">___</span>;`,
+        options: [
+          { text: "[0]", correct: true, feedback: "Excelente! Em quase todas as linguagens modernas, o índice do primeiro elemento de uma lista é 0." },
+          { text: "[1]", correct: false, feedback: "Cuidado! O índice [1] acessa o SEGUNDO elemento ('Chip_Beta') devido à indexação baseada em zero." },
+          { text: ".primeiro()", correct: false, feedback: "Incorreto! O acesso direto por colchetes é a notação canônica de indexação." },
+          { text: "[3]", correct: false, feedback: "Incorreto! O índice [3] provocaria um erro de 'Índice fora dos limites' (IndexOutOfBounds)." }
+        ],
+        explanation: "Na ciência da computação, a contagem de posições em vetores se inicia no offset zero [0]."
+      },
+      {
+        id: 10,
+        title: "Fase 10: Comprimento e Limite de Vetores",
+        concept: "Tamanho da Lista e Último Elemento (tamanho - 1)",
+        filename: "buffer_seguranca.algo",
+        scenario: "Dada uma lista de 4 nós: nos = [10, 20, 30, 40]. Qual é o índice do ÚLTIMO elemento disponível?",
+        codeTemplate: `lista nos = [10, 20, 30, 40];\nvariavel totalElementos = nos.tamanho; // 4\nvariavel ultimoIndice = totalElementos <span class="code-gap">___</span>;`,
+        options: [
+          { text: "- 1", correct: true, feedback: "Correto! Como os índices vão de 0 até (tamanho - 1), o último índice de 4 elementos é 3 (4 - 1)." },
+          { text: "+ 1", correct: false, feedback: "Incorreto! Somar 1 ultrapassaria a memória do vetor gerando estouro de buffer." },
+          { text: "* 2", correct: false, feedback: "Incorreto! Dobrar o tamanho resultaria em uma posição inexistente." },
+          { text: "/ 2", correct: false, feedback: "Incorreto! Dividir por 2 apontaria para o elemento do meio, não para o último." }
+        ],
+        explanation: "Para qualquer lista de N elementos, o primeiro índice é sempre 0 e o último índice é sempre N - 1."
+      },
+      {
+        id: 11,
+        title: "Fase 11: Percorrendo Vetores com Laço FOR",
+        concept: "Iteração Sequencial sobre Coleções",
+        filename: "varredura_setores.algo",
+        scenario: "Precisamos inspecionar todos os setores da cidade armazenados no vetor 'setores'. Complete a condição de parada do laço:",
+        codeTemplate: `para (i = 0; i < <span class="code-gap">_______________</span>; i++) {\n    inspecionarSetor(setores[i]);\n}`,
+        options: [
+          { text: "setores.tamanho", correct: true, feedback: "Muito bem! Usando 'i < setores.tamanho', o índice 'i' vai de 0 até o último elemento sem estourar a lista." },
+          { text: "1000", correct: false, feedback: "Incorreto! Usar um número fixo desconhecido causará erros se a lista tiver menos de 1000 itens." },
+          { text: "0", correct: false, feedback: "Incorreto! Se 'i < 0', o laço nunca executará sequer a primeira vez (0 < 0 é falso)." },
+          { text: "setores.tamanho + 1", correct: false, feedback: "Incorreto! 'i < tamanho + 1' tentaria acessar um índice além do limite do vetor." }
+        ],
+        explanation: "A propriedade .tamanho (ou .length) garante que o laço se adapte dinamicamente à quantidade real de itens da lista."
+      },
+      {
+        id: 12,
+        title: "Fase 12: Variáveis Acumuladoras (Soma Total)",
+        concept: "Acúmulo de Valores em Laço (soma = soma + valor)",
+        filename: "coleta_energia.algo",
+        scenario: "A cada bateria encontrada, devemos acumular sua carga na variável 'totalEnergia'. Complete a instrução de acúmulo:",
+        codeTemplate: `variavel totalEnergia = 0;\npara (i = 0; i < baterias.tamanho; i++) {\n    totalEnergia = totalEnergia <span class="code-gap">_</span> baterias[i];\n}`,
+        options: [
+          { text: "+", correct: true, feedback: "Exato! Somar o valor atual de totalEnergia com o novo valor acumula progressivamente a soma total." },
+          { text: "=", correct: false, feedback: "Incorreto! Apenas substituir '=' sobrescreveria o total anterior, guardando só o valor da última bateria." },
+          { text: "* 0 +", correct: false, feedback: "Incorreto! Multiplicar por 0 zeraria todo o histórico anterior." },
+          { text: "-", correct: false, feedback: "Incorreto! Subtrair diminuiria a energia em vez de somar." }
+        ],
+        explanation: "O padrão acumulador (total += valor) é a técnica padrão para calcular somatórios, médias e saldos acumulados."
+      },
+
+      // 13-18: FUNÇÕES, ESCOPO E CONTROLE AVANÇADO DE LAÇOS
+      {
+        id: 13,
+        title: "Fase 13: Variáveis Contadoras (Incremento)",
+        concept: "Contagem de Ocorrências com Condicional",
+        filename: "rastreador_bugs.algo",
+        scenario: "Queremos contar quantos vírus foram detectados na rede. Se o pacote for um vírus, incremente o contador em 1:",
+        codeTemplate: `variavel contadorVirus = 0;\nse (pacote.ehVirus == verdadeiro) {\n    contadorVirus = <span class="code-gap">_________________</span>;\n}`,
+        options: [
+          { text: "contadorVirus + 1", correct: true, feedback: "Correto! Somar 1 ao valor atual da própria variável é a definição de um contador (contador++)." },
+          { text: "0", correct: false, feedback: "Incorreto! Atribuir 0 resetaria a contagem." },
+          { text: "pacote.ehVirus", correct: false, feedback: "Incorreto! 'ehVirus' é um booleano (true/false), não um número." },
+          { text: "contadorVirus * 2", correct: false, feedback: "Incorreto! Multiplicar por 2 não contaria ocorrências individuais de forma linear." }
+        ],
+        explanation: "Contadores guardam quantas vezes determinado evento ocorreu, sendo incrementados geralmente com 'contador = contador + 1' ou 'contador++'."
+      },
+      {
+        id: 14,
+        title: "Fase 14: Declaração e Chamada de Funções",
+        concept: "Modularização e Parâmetros de Entrada",
+        filename: "propulsor_cyber.algo",
+        scenario: "Complete a declaração da função 'ativarPropulsor' que recebe como parâmetro a 'potenciaDesejada':",
+        codeTemplate: `<span class="code-gap">______</span> ativarPropulsor(potenciaDesejada) {\n    motor.ajustarPotencia(potenciaDesejada);\n    motor.ligar();\n}`,
+        options: [
+          { text: "funcao", correct: true, feedback: "Perfeito! A palavra-chave 'funcao' (ou 'function' / 'def') define um bloco de código reutilizável." },
+          { text: "enquanto", correct: false, feedback: "Incorreto! 'enquanto' cria um laço de repetição." },
+          { text: "se", correct: false, feedback: "Incorreto! 'se' é uma condicional." },
+          { text: "lista", correct: false, feedback: "Incorreto! 'lista' declara um vetor de dados." }
+        ],
+        explanation: "Funções agrupam instruções com um propósito específico, evitando duplicação de código e permitindo reutilização com diferentes argumentos."
+      },
+      {
+        id: 15,
+        title: "Fase 15: Retorno de Valores em Funções",
+        concept: "Devolução de Resultados (return)",
+        filename: "calculo_hash.algo",
+        scenario: "A função de criptografia calcula o hash de segurança e deve DEVOLVER o resultado calculado para quem a chamou:",
+        codeTemplate: `funcao calcularHash(codigoBase) {\n    variavel hash = (codigoBase * 1337) % 9999;\n    <span class="code-gap">_______</span> hash;\n}`,
+        options: [
+          { text: "retorne", correct: true, feedback: "Excelente! O comando 'retorne' (return) finaliza a função e envia o valor de volta para o chamador." },
+          { text: "imprima", correct: false, feedback: "Incorreto! 'imprima' apenas exibe na tela, não devolve o dado para ser usado em outras contas." },
+          { text: "pare", correct: false, feedback: "Incorreto! 'pare' interrompe loops sem devolver valor resultante." },
+          { text: "continue", correct: false, feedback: "Incorreto! 'continue' salta para a próxima iteração de um laço." }
+        ],
+        explanation: "O comando 'return' é a ponte que permite que uma função produza um resultado utilizável por outras partes do programa."
+      },
+      {
+        id: 16,
+        title: "Fase 16: Escopo de Variáveis (Global vs Local)",
+        concept: "Visibilidade e Ciclo de Vida de Variáveis",
+        filename: "modulo_escopo.algo",
+        scenario: "Uma variável criada DENTRO de uma função é LOCAL. O que acontece se tentarmos acessá-la FORA da função?",
+        codeTemplate: `funcao processarSinal() {\n    variavel senhaSecreta = "1234";\n}\n// Tentativa de acesso fora da função:\nimprimir(senhaSecreta); // <span class="code-gap">___________________</span>`,
+        options: [
+          { text: "Gera erro (Variável não definida)", correct: true, feedback: "Exato! Variáveis locais só existem durante a execução do bloco onde foram criadas." },
+          { text: "Imprime '1234' normalmente", correct: false, feedback: "Incorreto! Fora da função, a variável 'senhaSecreta' não é visível pelo escopo global." },
+          { text: "Cria uma nova variável vazia", correct: false, feedback: "Incorreto! O compilador acusará erro de referência inexistente." },
+          { text: "Apaga a memória do computador", correct: false, feedback: "Incorreto! Apenas interrompe a execução do script com exceção de escopo." }
+        ],
+        explanation: "O escopo delimita onde uma variável pode ser lida ou alterada. Variáveis locais protegem os dados internos de funções contra interferências externas."
+      },
+      {
+        id: 17,
+        title: "Fase 17: Laço Pós-Testado (FAÇA... ENQUANTO)",
+        concept: "Garantia de Execução de Pelo Menos 1 Vez (do... while)",
+        filename: "calibrar_laser.algo",
+        scenario: "O canhão de plasma precisa disparar PELO MENOS uma vez antes de testar se a calibração foi concluída com sucesso:",
+        codeTemplate: `<span class="code-gap">____</span> {\n    dispararFeixeTeste();\n} enquanto (calibracaoValida == falso);`,
+        options: [
+          { text: "faca", correct: true, feedback: "Muito bem! O bloco 'FAÇA... ENQUANTO' (do... while) executa o código primeiro e só testa a condição no final." },
+          { text: "se", correct: false, feedback: "Incorreto! 'se' não possui a terminação 'enquanto' de repetição pós-testada." },
+          { text: "para", correct: false, feedback: "Incorreto! 'para' é um laço com inicialização pré-testada." },
+          { text: "retorne", correct: false, feedback: "Incorreto! 'retorne' encerraria a sub-rotina." }
+        ],
+        explanation: "Ao contrário do 'while' tradicional (pré-testado), o 'do-while' (pós-testado) garante que o bloco execute no mínimo uma vez."
+      },
+      {
+        id: 18,
+        title: "Fase 18: Interrupção Forçada de Loop (PARE / break)",
+        concept: "Saída Imediata de Laço ao Atingir Condição",
+        filename: "localizar_antidoto.algo",
+        scenario: "Ao vasculhar o banco de dados, assim que o antídoto for localizado, devemos interromper imediatamente o laço sem gastar mais ciclos:",
+        codeTemplate: `para (i = 0; i < itens.tamanho; i++) {\n    se (itens[i] == "ANTIDOTO") {\n        extrairAntidoto();\n        <span class="code-gap">____</span>; // Interrompe o loop agora!\n    }\n}`,
+        options: [
+          { text: "pare (break)", correct: true, feedback: "Correto! O comando 'pare' (break) encerra o laço na hora, economizando processamento." },
+          { text: "continue", correct: false, feedback: "Incorreto! 'continue' apenas pularia para o próximo item sem sair do laço." },
+          { text: "senao", correct: false, feedback: "Incorreto! 'senao' é uma cláusula condicional, não um comando de controle de laço." },
+          { text: "esperar", correct: false, feedback: "Incorreto! 'esperar' pausaria o tempo, mas manteria o laço em execução." }
+        ],
+        explanation: "O comando 'break' interrompe a execução do laço mais próximo imediatamente, transferindo o fluxo para a linha seguinte ao laço."
+      },
+
+      // 19-24: CONTROLE DE FLUXO, BUSCA E ALGORITMOS EM VETORES
+      {
+        id: 19,
+        title: "Fase 19: Pulo de Iteração (CONTINUE)",
+        concept: "Saltar para a Próxima Repetição (continue)",
+        filename: "ignorar_corrompidos.algo",
+        scenario: "Ao analisar pacotes, se o pacote estiver corrompido, queremos IGNORAR o processamento pesado e pular direto para o próximo pacote:",
+        codeTemplate: `para (i = 0; i < pacotes.tamanho; i++) {\n    se (pacotes[i].estaCorrompido == true) {\n        <span class="code-gap">________</span>; // Pula para a próxima volta\n    }\n    processarPacotePesado(pacotes[i]);\n}`,
+        options: [
+          { text: "continue", correct: true, feedback: "Excelente! 'continue' pula o restante do código da iteração atual e avança imediatamente para o próximo 'i'." },
+          { text: "pare", correct: false, feedback: "Incorreto! 'pare' (break) cancelaria todo o loop, deixando todos os outros pacotes bons sem processar!" },
+          { text: "retorne falso", correct: false, feedback: "Incorreto! Sairia da função por completo." },
+          { text: "deletar", correct: false, feedback: "Incorreto! 'deletar' não é um controle de iteração." }
+        ],
+        explanation: "O comando 'continue' pula apenas a iteração atual, sem cancelar as repetições futuras do laço."
+      },
+      {
+        id: 20,
+        title: "Fase 20: Operador de Desigualdade / Diferente (!=)",
+        concept: "Comparação de Não-Igualdade",
+        filename: "filtro_seguro.algo",
+        scenario: "A porta só deve abrir se a identidade do usuário NÃO FOR igual à 'INVASOR_PROIBIDO':",
+        codeTemplate: `se (usuario.id <span class="code-gap">__</span> "INVASOR_PROIBIDO") {\n    autorizarEntrada();\n}`,
+        options: [
+          { text: "!=", correct: true, feedback: "Exato! O operador '!=' significa 'diferente de' e retorna verdadeiro quando os dois lados não são iguais." },
+          { text: "==", correct: false, feedback: "Incorreto! '==' abriria a porta justamente para o invasor proibido!" },
+          { text: "!", correct: false, feedback: "Incorreto! '!' sozinho é negação unária." },
+          { text: "<=", correct: false, feedback: "Incorreto! '<=' compara grandezas numéricas (menor ou igual)." }
+        ],
+        explanation: "Os operadores de comparação incluem igualdade (==), diferença (!=), maior (>), menor (<), maior ou igual (>=) e menor ou igual (<=)."
+      },
+      {
+        id: 21,
+        title: "Fase 21: Precedência de Operadores Lógicos",
+        concept: "Uso de Parênteses para Prioridade de Avaliação",
+        filename: "blindagem_regras.algo",
+        scenario: "Qual é o resultado da expressão lógica: (FALSO || VERDADEIRO) && VERDADEIRO ?",
+        codeTemplate: `variavel resultado = (FALSO || VERDADEIRO) && VERDADEIRO;\n// resultado será: <span class="code-gap">___________</span>`,
+        options: [
+          { text: "VERDADEIRO (true)", correct: true, feedback: "Correto! (FALSO || VERDADEIRO) resulta em VERDADEIRO. Depois, VERDADEIRO && VERDADEIRO é VERDADEIRO!" },
+          { text: "FALSO (false)", correct: false, feedback: "Incorreto! Como a parte dentro dos parênteses avalia para verdadeiro, a conjunção com verdadeiro continua verdadeira." },
+          { text: "Nulo", correct: false, feedback: "Incorreto! Expressões booleanas sempre resultam em booleano (true ou false)." },
+          { text: "Indeterminado", correct: false, feedback: "Incorreto! A lógica proposicional é exata e determinística." }
+        ],
+        explanation: "Parênteses possuem a maior precedência na ordem de avaliação de expressões, resolvendo primeiro o que está dentro deles."
+      },
+      {
+        id: 22,
+        title: "Fase 22: Algoritmo de Busca Linear",
+        concept: "Pesquisa Sequencial em Coleções",
+        filename: "busca_sequencial.algo",
+        scenario: "Complete a busca linear que procura o número do servidor '888' e retorna sua posição (índice) no vetor:",
+        codeTemplate: `funcao buscarServidor(listaServidores, alvo) {\n    para (i = 0; i < listaServidores.tamanho; i++) {\n        se (listaServidores[i] == alvo) {\n            <span class="code-gap">_______</span> i; // Devolve o índice onde foi encontrado\n        }\n    }\n    retorne -1; // Não encontrado\n}`,
+        options: [
+          { text: "retorne", correct: true, feedback: "Perfeito! Assim que encontra o elemento, 'retorne i' devolve a posição imediatamente." },
+          { text: "apagar", correct: false, feedback: "Incorreto! 'apagar' removeria o item em vez de responder sua posição." },
+          { text: "continue", correct: false, feedback: "Incorreto! 'continue' seguiria procurando sem retornar a resposta ao chamador." },
+          { text: "senao", correct: false, feedback: "Incorreto! 'senao' é uma bifurcação condicional." }
+        ],
+        explanation: "A busca linear percorre elemento por elemento do início ao fim até encontrar o alvo ou esgotar a lista (retornando convencionalmente -1)."
+      },
+      {
+        id: 23,
+        title: "Fase 23: Encontrando o Maior Valor em Vetor",
+        concept: "Algoritmo de Seleção de Máximo",
+        filename: "pico_tensao.algo",
+        scenario: "Para identificar o maior pico de energia entre as medições, atualizamos a variável 'maior' se encontrarmos um valor superior:",
+        codeTemplate: `variavel maior = tensoes[0];\npara (i = 1; i < tensoes.tamanho; i++) {\n    se (tensoes[i] <span class="code-gap">_</span> maior) {\n        maior = tensoes[i];\n    }\n}`,
+        options: [
+          { text: ">", correct: true, feedback: "Muito bem! Se a tensão atual for MAIOR (>) que o nosso recorde 'maior', ela se torna o novo recorde!" },
+          { text: "<", correct: false, feedback: "Incorreto! '<' procuraria o menor valor, não o maior pico de tensão." },
+          { text: "==", correct: false, feedback: "Incorreto! '==' só testaria se são exatamente iguais." },
+          { text: "!=", correct: false, feedback: "Incorreto! '!=' atualizaria para qualquer número diferente, mesmo se fosse menor." }
+        ],
+        explanation: "Para encontrar o valor máximo, inicializamos com o primeiro elemento e substituímos sempre que encontramos um item estritamente maior."
+      },
+      {
+        id: 24,
+        title: "Fase 24: Encontrando o Menor Valor em Vetor",
+        concept: "Algoritmo de Seleção de Mínimo (Menor Latência)",
+        filename: "menor_ping.algo",
+        scenario: "Queremos selecionar a rota com a MENOR latência (ping). Como inicializamos a busca?",
+        codeTemplate: `variavel menorLatencia = <span class="code-gap">_________</span>;\npara (i = 1; i < rotas.tamanho; i++) {\n    se (rotas[i] < menorLatencia) {\n        menorLatencia = rotas[i];\n    }\n}`,
+        options: [
+          { text: "rotas[0]", correct: true, feedback: "Correto! Inicializar com o primeiro elemento garante que a comparação comece com um valor real existente na lista." },
+          { text: "0", correct: false, feedback: "Cuidado! Se todos os pings forem positivos (ex: 20ms, 50ms), 0 seria menor que todos e nunca seria superado, gerando resultado falso!" },
+          { text: "-9999", correct: false, feedback: "Incorreto! Um valor negativo irreal travaria a busca de mínimo." },
+          { text: "rotas.tamanho", correct: false, feedback: "Incorreto! O tamanho da lista é a quantidade de itens, não a latência do primeiro elemento." }
+        ],
+        explanation: "A melhor prática para encontrar mínimos ou máximos em listas é inicializar com o primeiro elemento da própria coleção (vetor[0])."
+      },
+
+      // 25-30: MANIPULAÇÃO DE STRINGS, MATRIZES E SWITCH
+      {
+        id: 25,
+        title: "Fase 25: Concatenação de Strings (Textos)",
+        concept: "União de Textos com Operador +",
+        filename: "montar_identidade.algo",
+        scenario: "Monte o crachá do agente unindo o prefixo 'AGENTE_' com seu código numérico '77':",
+        codeTemplate: `variavel prefixo = "AGENTE_";\nvariavel codigo = "77";\nvariavel crachaFinal = prefixo <span class="code-gap">_</span> codigo; // Resultado: "AGENTE_77"`,
+        options: [
+          { text: "+ (concatenação)", correct: true, feedback: "Exato! Quando aplicado a textos (strings), o operador '+' junta (concatena) os caracteres em uma única cadeia." },
+          { text: "-", correct: false, feedback: "Incorreto! Não existe subtração aritmética entre cadeias de texto." },
+          { text: "*", correct: false, feedback: "Incorreto! Multiplicação não realiza concatenação." },
+          { text: "&&", correct: false, feedback: "Incorreto! '&&' é um operador lógico booleano." }
+        ],
+        explanation: "Concatenação é a operação de unir duas ou mais sequências de caracteres de ponta a ponta para formar uma nova string."
+      },
+      {
+        id: 26,
+        title: "Fase 26: Extração de Substrings (Fatiamento)",
+        concept: "Obtenção de Pedaços de Texto",
+        filename: "extrair_protocolo.algo",
+        scenario: "Dada a chave 'CYBER_2026', queremos extrair apenas os 5 primeiros caracteres ('CYBER'). Como fazemos o fatiamento de índice 0 a 5?",
+        codeTemplate: `variavel chave = "CYBER_2026";\nvariavel prefixo = chave.<span class="code-gap">_________</span>(0, 5); // "CYBER"`,
+        options: [
+          { text: "subtexto / substring", correct: true, feedback: "Muito bem! O método substring(inicio, fim) extrai os caracteres a partir da posição inicial até a posição final." },
+          { text: "somar", correct: false, feedback: "Incorreto! 'somar' faria operação aritmética." },
+          { text: "deletar", correct: false, feedback: "Incorreto! 'deletar' removeria sem retornar a fatia desejada." },
+          { text: "tamanho", correct: false, feedback: "Incorreto! 'tamanho' retorna a quantidade total de caracteres (número inteiro)." }
+        ],
+        explanation: "Métodos de substring permitem inspecionar cabeçalhos de mensagens, prefixos de arquivos e fragmentos de dados."
+      },
+      {
+        id: 27,
+        title: "Fase 27: Conversão de Tipos (Type Casting)",
+        concept: "Conversão de Texto para Número Inteiro",
+        filename: "converter_input.algo",
+        scenario: "O usuário digitou o texto '150' no terminal. Para podermos somar matematicamente com outro número, devemos converter a String em Inteiro:",
+        codeTemplate: `variavel entradaTexto = "150";\nvariavel numero = <span class="code-gap">_____________</span>(entradaTexto);\nvariavel total = numero + 50; // Deve dar 200 (não "15050")`,
+        options: [
+          { text: "converterParaInteiro / parseInt", correct: true, feedback: "Correto! 'parseInt' / 'converterParaInteiro' transforma a representação em texto dos dígitos no tipo numérico real." },
+          { text: "converterParaTexto", correct: false, feedback: "Incorreto! Ele já é um texto; converter para texto causaria a concatenação '15050'." },
+          { text: "tamanhoDe", correct: false, feedback: "Incorreto! 'tamanhoDe' daria 3 (quantidade de dígitos '1','5','0'), não o valor 150." },
+          { text: "aleatorio", correct: false, feedback: "Incorreto! Geraria um número randômico qualquer." }
+        ],
+        explanation: "A conversão de tipos (type casting / parsing) é indispensável para evitar que '10' + 5 resulte em '105' em vez do cálculo 15."
+      },
+      {
+        id: 28,
+        title: "Fase 28: Estrutura Condicional Múltipla (ESCOLHA / switch)",
+        concept: "Seleção Múltipla com CASO / switch case",
+        filename: "seletor_modulo.algo",
+        scenario: "Para selecionar a arma ativa de acordo com o código numérico, usamos uma estrutura ESCOLHA / CASO:",
+        codeTemplate: `<span class="code-gap">_______</span> (codigoArma) {\n    caso 1:\n        equiparLaser();\n        pare;\n    caso 2:\n        equiparCanhaoEMP();\n        pare;\n    padrao:\n        equiparEspadaPlasma();\n}`,
+        options: [
+          { text: "escolha (switch)", correct: true, feedback: "Excelente! 'escolha' (switch) compara uma única variável contra múltiplos valores constantes de forma limpa." },
+          { text: "enquanto", correct: false, feedback: "Incorreto! 'enquanto' cria repetição, não ramificação de opções únicas." },
+          { text: "funcao", correct: false, feedback: "Incorreto! 'funcao' declara procedimentos." },
+          { text: "para", correct: false, feedback: "Incorreto! 'para' é um laço com contador." }
+        ],
+        explanation: "A estrutura switch / escolha substitui sequências longas de 'if / else if', tornando menus e máquinas de estado mais legíveis."
+      },
+      {
+        id: 29,
+        title: "Fase 29: Troca de Valores entre Duas Variáveis (Swap)",
+        concept: "Algoritmo de Permutação com Variável Auxiliar",
+        filename: "inverter_chaves.algo",
+        scenario: "Para trocar o conteúdo de 'A' e 'B' sem perder nenhum dado, precisamos de uma variável temporária 'auxiliar':",
+        codeTemplate: `variavel aux = A;\nA = B;\nB = <span class="code-gap">___</span>;`,
+        options: [
+          { text: "aux", correct: true, feedback: "Muito bem! Como guardamos o valor original de 'A' na variável 'aux', podemos passá-lo para 'B' sem perda." },
+          { text: "A", correct: false, feedback: "Incorreto! 'A' já recebeu o valor de 'B' na linha anterior; colocar 'B = A' deixaria ambos com o mesmo valor de B!" },
+          { text: "0", correct: false, feedback: "Incorreto! Atribuir 0 apagaria o valor de B." },
+          { text: "B", correct: false, feedback: "Incorreto! 'B = B' não altera nada." }
+        ],
+        explanation: "O algoritmo clássico de troca (swap) utiliza uma variável temporária para evitar a sobreposição destrutiva de memória."
+      },
+      {
+        id: 30,
+        title: "Fase 30: Matrizes / Vetores Bidimensionais",
+        concept: "Acesso a Elementos por Linha e Coluna [L][C]",
+        filename: "mapa_grade.algo",
+        scenario: "Em uma grade cibernética 3x3, como acessamos o elemento na Linha 1 e Coluna 2?",
+        codeTemplate: `matriz grade = [\n    ["A", "B", "C"], // Linha 0\n    ["D", "E", "F"], // Linha 1\n    ["G", "H", "I"]  // Linha 2\n];\nvariavel celula = grade<span class="code-gap">______</span>; // Acessa o elemento "F"`,
+        options: [
+          { text: "[1][2]", correct: true, feedback: "Correto! Linha 1 acessa o segundo vetor ['D', 'E', 'F'] e Coluna 2 acessa o elemento 'F' (índices 0, 1, 2)." },
+          { text: "[2][1]", correct: false, feedback: "Incorreto! [2][1] acessaria a Linha 2, Coluna 1 ('H')." },
+          { text: "[1, 2]", correct: false, feedback: "Incorreto! A sintaxe padrão de matrizes em C/Java/JS usa pares de colchetes separados [linha][coluna]." },
+          { text: "[3][3]", correct: false, feedback: "Incorreto! [3][3] estouraria os limites de uma matriz 3x3 (índices máximos são 2)." }
+        ],
+        explanation: "Matrizes são vetores de vetores, onde o primeiro índice indica a linha e o segundo indica a coluna: matriz[linha][coluna]."
+      },
+
+      // 31-36: ESTRUTURAS DE DADOS (PILHA, FILA, OBJETOS) E TRATAMENTO DE ERROS
+      {
+        id: 31,
+        title: "Fase 31: Laços Aninhados (FOR dentro de FOR)",
+        concept: "Varredura Completa de Matriz 2D",
+        filename: "renderizar_tela.algo",
+        scenario: "Para percorrer todas as linhas e todas as colunas de uma matriz, usamos um laço FOR externo para as linhas e um interno para as colunas:",
+        codeTemplate: `para (l = 0; l < totalLinhas; l++) {\n    para (c = 0; c < totalColunas; c<span class="code-gap">____</span>) {\n        desenharPixel(matriz[l][c]);\n    }\n}`,
+        options: [
+          { text: "++", correct: true, feedback: "Exato! O laço interno incrementa a coluna 'c++' para percorrer todos os pixels de cada linha 'l'." },
+          { text: "--", correct: false, feedback: "Incorreto! Decrementar geraria um loop infinito para trás." },
+          { text: "== totalColunas", correct: false, feedback: "Incorreto! '==' é comparação, não passo de incremento." },
+          { text: "= 0", correct: false, feedback: "Incorreto! Resetar para 0 travaria a coluna no início." }
+        ],
+        explanation: "Laços aninhados executam a repetição interna por completo a cada única volta do laço externo, gerando NxM iterações."
+      },
+      {
+        id: 32,
+        title: "Fase 32: Estrutura de Dados Pilha (LIFO)",
+        concept: "Último a Entrar, Primeiro a Sair (Stack)",
+        filename: "historico_desfazer.algo",
+        scenario: "Em uma Pilha (Stack), qual elemento é removido quando chamamos a operação 'desempilhar' (pop)?",
+        codeTemplate: `pilha acoes = [];\nacoes.empilhar("Mover");\nacoes.empilhar("Pular");\nacoes.empilhar("Atirar");\nvariavel removido = acoes.<span class="code-gap">___________</span>(); // Remove "Atirar"`,
+        options: [
+          { text: "desempilhar (pop)", correct: true, feedback: "Perfeito! A pilha segue a regra LIFO (Last-In, First-Out): o último item inserido é o primeiro a ser retirado." },
+          { text: "desenfileirar (dequeue)", correct: false, feedback: "Incorreto! 'desenfileirar' pertence à estrutura de Fila (FIFO), que tiraria o primeiro." },
+          { text: "limparTudo", correct: false, feedback: "Incorreto! Limpar apagaria toda a pilha de uma vez." },
+          { text: "inverter", correct: false, feedback: "Incorreto! 'inverter' apenas mudaria as posições dos itens." }
+        ],
+        explanation: "A Pilha (LIFO) é a estrutura usada no botão 'Desfazer' (Ctrl+Z), no histórico de navegação e na pilha de chamadas de funções (Call Stack)."
+      },
+      {
+        id: 33,
+        title: "Fase 33: Estrutura de Dados Fila (FIFO)",
+        concept: "Primeiro a Entrar, Primeiro a Sair (Queue)",
+        filename: "buffer_impressao.algo",
+        scenario: "Em uma Fila de mensagens (Queue), qual mensagem é processada primeiro?",
+        codeTemplate: `fila buffer = [];\nbuffer.enfileirar("Msg_1");\nbuffer.enfileirar("Msg_2");\nbuffer.enfileirar("Msg_3");\n// A mensagem retirada agora é: <span class="code-gap">_______</span>`,
+        options: [
+          { text: "\"Msg_1\" (A primeira que entrou)", correct: true, feedback: "Correto! Filas seguem a regra FIFO (First-In, First-Out): quem chega primeiro é atendido primeiro." },
+          { text: "\"Msg_3\" (A última que entrou)", correct: false, feedback: "Incorreto! Isso seria uma Pilha (LIFO), não uma Fila." },
+          { text: "\"Msg_2\" (A do meio)", correct: false, feedback: "Incorreto! Filas respeitam a ordem estrita de chegada." },
+          { text: "Nenhuma", correct: false, feedback: "Incorreto! A fila contém 3 itens aguardando atendimento." }
+        ],
+        explanation: "Filas (FIFO) organizam processos no sistema operacional, pedidos em e-commerce e pacotes em buffers de rede."
+      },
+      {
+        id: 34,
+        title: "Fase 34: Objetos / Dicionários (Chave e Valor)",
+        concept: "Estruturação de Dados com Atributos Nomeados",
+        filename: "ficha_agente.algo",
+        scenario: "Como acessamos o atributo 'escudo' do objeto que descreve o drone de defesa?",
+        codeTemplate: `objeto drone = {\n    modelo: "Cyber-Viper",\n    escudo: 100,\n    ativo: true\n};\nvariavel nivelEscudo = drone.<span class="code-gap">______</span>;`,
+        options: [
+          { text: "escudo", correct: true, feedback: "Excelente! Em estruturas de objetos e registros, usamos a notação de ponto (objeto.propriedade) para ler o campo desejado." },
+          { text: "modelo", correct: false, feedback: "Incorreto! 'modelo' retornaria o texto 'Cyber-Viper', não a quantidade de escudo." },
+          { text: "tamanho", correct: false, feedback: "Incorreto! 'tamanho' não é uma propriedade declarada no objeto drone." },
+          { text: "[escudo]", correct: false, feedback: "Incorreto! Sem aspas, a sintaxe de colchetes esperaria uma variável com o nome da chave." }
+        ],
+        explanation: "Objetos e dicionários agrupam propriedades relacionadas em pares de chave: valor, sendo a base do formato JSON e da POO."
+      },
+      {
+        id: 35,
+        title: "Fase 35: Modificação de Propriedades de Objeto",
+        concept: "Atualização de Estado em Estruturas de Dados",
+        filename: "atualizar_status.algo",
+        scenario: "Após sofrer dano, reduza a energia do drone em 30 pontos:",
+        codeTemplate: `drone.energia = drone.energia <span class="code-gap">____</span>;`,
+        options: [
+          { text: "- 30", correct: true, feedback: "Exato! 'drone.energia = drone.energia - 30' calcula o novo valor subtraído e salva de volta na propriedade." },
+          { text: "+ 30", correct: false, feedback: "Incorreto! Somar aumentaria a vida do drone em vez de aplicar o dano." },
+          { text: "= 0", correct: false, feedback: "Incorreto! Atribuir 0 destruiria o drone instantaneamente em vez de tirar 30 pontos." },
+          { text: "* 30", correct: false, feedback: "Incorreto! Multiplicaria a energia por 30." }
+        ],
+        explanation: "Propriedades de objetos podem ser lidas, atualizadas e incrementadas da mesma forma que variáveis individuais."
+      },
+      {
+        id: 36,
+        title: "Fase 36: Tratamento de Erros e Exceções",
+        concept: "Prevenção de Quedas com TENTE / CAPTURE (try / catch)",
+        filename: "blindagem_excecoes.algo",
+        scenario: "Para evitar que o programa trave caso o servidor esteja offline ao tentar conectar, envolvemos a chamada em um bloco de proteção:",
+        codeTemplate: `<span class="code-gap">_____</span> {\n    conectarServidorCentral();\n} capture (erro) {\n    registrarLog("Falha na conexão: " + erro);\n    usarServidorBackup();\n}`,
+        options: [
+          { text: "tente (try)", correct: true, feedback: "Muito bem! O bloco 'tente... capture' (try... catch) captura erros em tempo de execução sem deixar o app cair." },
+          { text: "enquanto", correct: false, feedback: "Incorreto! 'enquanto' é um laço de repetição." },
+          { text: "se", correct: false, feedback: "Incorreto! 'se' testa booleanos, mas não captura exceções não tratadas do sistema operacional." },
+          { text: "para", correct: false, feedback: "Incorreto! 'para' é um laço de iteração." }
+        ],
+        explanation: "O tratamento de exceções (try / catch) permite criar software robusto e resiliente a falhas de rede, arquivos corrompidos e erros inesperados."
+      },
+
+      // 37-40: FLAGS, RASTREAMENTO, RECURSÃO E DEPURAÇÃO FINAL
+      {
+        id: 37,
+        title: "Fase 37: Variável Sentinela / Flag Booleana",
+        concept: "Sinalizadores de Estado no Fluxo de Execução",
+        filename: "flag_alerta.algo",
+        scenario: "Uma variável 'flag' inicia como falsa. Se qualquer sensor detectar anomalia durante o laço, ela se torna verdadeira e permanece assim:",
+        codeTemplate: `variavel perigoDetectado = falso;\npara (i = 0; i < sensores.tamanho; i++) {\n    se (sensores[i].anomalia == verdadeiro) {\n        perigoDetectado = <span class="code-gap">__________</span>;\n    }\n}`,
+        options: [
+          { text: "verdadeiro (true)", correct: true, feedback: "Correto! A variável sentinela (flag) 'liga' o estado de perigo assim que a primeira anomalia é confirmada." },
+          { text: "falso (false)", correct: false, feedback: "Incorreto! Manter como falso ignoraria o perigo." },
+          { text: "i", correct: false, feedback: "Incorreto! 'i' é o índice numérico, e não o estado booleano de perigo." },
+          { text: "nulo", correct: false, feedback: "Incorreto! Nulo removeria o tipo booleano da flag." }
+        ],
+        explanation: "Flags booleanas são sentinelas que guardam se determinado evento crítico aconteceu em qualquer momento de um processamento."
+      },
+      {
+        id: 38,
+        title: "Fase 38: Teste de Mesa e Rastreamento de Código",
+        concept: "Simulação Mental de Execução de Algoritmo",
+        filename: "teste_mesa.algo",
+        scenario: "Qual será o valor final de 'X' após o término do seguinte laço de repetição?",
+        codeTemplate: `variavel X = 0;\npara (i = 1; i <= 3; i++) {\n    X = X + (i * 2);\n}\n// Valor final de X: <span class="code-gap">__</span>`,
+        options: [
+          { text: "12", correct: true, feedback: "Sensacional! Na volta 1: X = 0 + (1*2) = 2. Na volta 2: X = 2 + (2*2) = 6. Na volta 3: X = 6 + (3*2) = 12!" },
+          { text: "6", correct: false, feedback: "Incorreto! 6 seria apenas o resultado até a segunda volta (i = 2)." },
+          { text: "8", correct: false, feedback: "Incorreto! Revise a conta: 2 + 4 + 6 = 12." },
+          { text: "18", correct: false, feedback: "Incorreto! O laço executa apenas 3 vezes (i = 1, 2, 3)." }
+        ],
+        explanation: "O teste de mesa (trace table) é a habilidade de simular passo a passo a alteração das variáveis na memória durante cada iteração."
+      },
+      {
+        id: 39,
+        title: "Fase 39: Recursão Básica e Caso Base",
+        concept: "Função que Chama a Si Mesma com Condição de Parada",
+        filename: "recursao_fatorial.algo",
+        scenario: "Em uma função recursiva, o que impede que ela entre em loop infinito (estouro de pilha / Stack Overflow)?",
+        codeTemplate: `funcao contagemRegressiva(numero) {\n    se (numero <= 0) {\n        retorne; // <span class="code-gap">___________________</span>\n    }\n    imprimir(numero);\n    contagemRegressiva(numero - 1); // Chamada recursiva\n}`,
+        options: [
+          { text: "O Caso Base (Condição de Parada)", correct: true, feedback: "Perfeito! O 'Caso Base' é a condição que encerra a cadeia de chamadas recursivas, retornando sem chamar a função novamente." },
+          { text: "O comando imprimir", correct: false, feedback: "Incorreto! Imprimir apenas mostra texto no console." },
+          { text: "O nome da função", correct: false, feedback: "Incorreto! O nome é apenas o identificador da sub-rotina." },
+          { text: "O operador de soma", correct: false, feedback: "Incorreto! A recursão diminui o parâmetro em direção ao caso base." }
+        ],
+        explanation: "Toda função recursiva precisa de um Caso Base seguro para encerrar a recursão quando o problema atinge seu tamanho mínimo."
+      },
+      {
+        id: 40,
+        title: "Fase 40: Depuração de Código (Bug Hunting Final)",
+        concept: "Identificação e Correção de Loop Infinito",
+        filename: "ai_core_restoration.algo",
+        scenario: "O AI Core está travando em loop infinito! Qual linha está FALTANDO dentro do laço para permitir que ele termine?",
+        codeTemplate: `variavel blocosRestantes = 10;\nenquanto (blocosRestantes > 0) {\n    repararBloco();\n    <span class="code-gap">____________________</span>; // Essencial para o laço terminar!\n}\nimprimir("AI CORE TOTALMENTE RESTAURADO!");`,
+        options: [
+          { text: "blocosRestantes = blocosRestantes - 1 (ou blocosRestantes--)", correct: true, feedback: "VITÓRIA ABSOLUTA! Sem decrementar a variável de controle, a condição (10 > 0) continuaria eternamente verdadeira, travando a CPU!" },
+          { text: "blocosRestantes = blocosRestantes + 1", correct: false, feedback: "Incorreto! Incrementar aumentaria ainda mais os blocos (11, 12, 13...), mantendo o loop infinito para sempre!" },
+          { text: "imprimir(\"loop\")", correct: false, feedback: "Incorreto! Imprimir não altera o valor da variável de controle." },
+          { text: "blocosRestantes == 0", correct: false, feedback: "Incorreto! '==' é comparação e não altera o valor da variável na memória." }
+        ],
+        explanation: "Em laços 'while', a variável testada na condição DEVE sofrer alteração em direção ao fim da repetição para evitar loops infinitos."
+      },
+
+      // 41-60: NÍVEL DESAFIO AVANÇADO (ALGORITMOS CLÁSSICOS, ESTRUTURAS AVANÇADAS E OTIMIZAÇÃO)
+      {
+        id: 41,
+        title: "Fase 41 (Desafio): Busca Binária (Binary Search)",
+        concept: "Divisão e Conquista em Vetor Ordenado (O(log N))",
+        filename: "busca_binaria_cyber.algo",
+        scenario: "Em uma lista ORDENADA de 1.000.000 de IPs, a Busca Binária divide o espaço de busca pela metade a cada passo. Como calculamos o índice do MEIO?",
+        codeTemplate: `funcao buscaBinaria(vetorOrdenado, alvo) {\n    variavel inicio = 0;\n    variavel fim = vetorOrdenado.tamanho - 1;\n    enquanto (inicio <= fim) {\n        variavel meio = <span class="code-gap">__________________________</span>;\n        se (vetorOrdenado[meio] == alvo) retorne meio;\n        se (vetorOrdenado[meio] < alvo) inicio = meio + 1;\n        senao fim = meio - 1;\n    }\n    retorne -1;\n}`,
+        options: [
+          { text: "arredondarParaBaixo((inicio + fim) / 2)", correct: true, feedback: "Sensacional! O ponto médio é exatamente a média aritmética dos limites (inicio + fim) / 2." },
+          { text: "fim - inicio", correct: false, feedback: "Incorreto! (fim - inicio) calcula a distância/amplitude, não a posição central do índice." },
+          { text: "inicio * 2", correct: false, feedback: "Incorreto! Multiplicar o início por 2 não encontra o elemento mediano." },
+          { text: "vetorOrdenado.tamanho / 2", correct: false, feedback: "Incorreto! O tamanho fixo ignora os novos limites 'inicio' e 'fim' que mudam a cada iteração." }
+        ],
+        explanation: "A Busca Binária tem complexidade O(log N). Em 1 milhão de itens ordenados, ela encontra qualquer elemento em no máximo 20 comparações!"
+      },
+      {
+        id: 42,
+        title: "Fase 42 (Desafio): Ordenação por Bolha (Bubble Sort)",
+        concept: "Comparação e Troca de Elementos Adjacentes",
+        filename: "ordenacao_bolha.algo",
+        scenario: "Para ordenar o vetor em ordem crescente com Bubble Sort, quando devemos trocar dois elementos vizinhos de posição?",
+        codeTemplate: `para (i = 0; i < n - 1; i++) {\n    para (j = 0; j < n - i - 1; j++) {\n        se (vetor[j] <span class="code-gap">_</span> vetor[j + 1]) {\n            trocar(vetor, j, j + 1);\n        }\n    }\n}`,
+        options: [
+          { text: "> (maior que)", correct: true, feedback: "Exato! Se o elemento da esquerda vetor[j] for MAIOR que o vizinho da direita vetor[j+1], eles estão fora de ordem e devem ser trocados!" },
+          { text: "<", correct: false, feedback: "Incorreto! '<' ordenaria o vetor em ordem decrescente (do maior para o menor)." },
+          { text: "==", correct: false, feedback: "Incorreto! Trocar elementos iguais é inútil e quebra a estabilidade da ordenação." },
+          { text: "!=", correct: false, feedback: "Incorreto! '!=' trocaria inclusive elementos que já estão na ordem correta." }
+        ],
+        explanation: "O Bubble Sort faz os maiores valores 'flutuarem' progressivamente para o final da lista a cada passada completa."
+      },
+      {
+        id: 43,
+        title: "Fase 43 (Desafio): Recursão Múltipla (Sequência de Fibonacci)",
+        concept: "Definição de Termos Recursivos (Fn = Fn-1 + Fn-2)",
+        filename: "fibonacci_recursivo.algo",
+        scenario: "O algoritmo gerador de chaves segue a Sequência de Fibonacci (0, 1, 1, 2, 3, 5, 8...). Complete o retorno recursivo para N >= 2:",
+        codeTemplate: `funcao fibonacci(n) {\n    se (n == 0) retorne 0;\n    se (n == 1) retorne 1;\n    retorne <span class="code-gap">_________________________________</span>;\n}`,
+        options: [
+          { text: "fibonacci(n - 1) + fibonacci(n - 2)", correct: true, feedback: "Perfeito! Cada termo de Fibonacci é a soma exata dos dois termos imediatamente anteriores." },
+          { text: "fibonacci(n - 1) * fibonacci(n - 2)", correct: false, feedback: "Incorreto! Fibonacci é a SOMA dos dois termos anteriores, não a multiplicação." },
+          { text: "fibonacci(n * 2)", correct: false, feedback: "Incorreto! Dobrar o parâmetro provocaria recursão infinita e estouro de pilha." },
+          { text: "n + fibonacci(n)", correct: false, feedback: "Incorreto! Chamar com o mesmo 'n' travaria em recursão infinita sem convergência." }
+        ],
+        explanation: "A relação de recorrência de Fibonacci é F(n) = F(n-1) + F(n-2), com os casos base canônicos F(0)=0 e F(1)=1."
+      },
+      {
+        id: 44,
+        title: "Fase 44 (Desafio): Dois Ponteiros - Verificador de Palíndromo",
+        concept: "Convergência de Extremidades (Início e Fim)",
+        filename: "verificador_palindromo.algo",
+        scenario: "Para checar se uma sequência de bytes é um Palíndromo (lê-se igual de frente para trás), comparamos as pontas e avançamos:",
+        codeTemplate: `variavel ini = 0;\nvariavel fim = texto.tamanho - 1;\nenquanto (ini < fim) {\n    se (texto[ini] != texto[fim]) retorne falso;\n    ini<span class="code-gap">____</span>;\n    fim<span class="code-gap">____</span>;\n}\nretorne verdadeiro;`,
+        options: [
+          { text: "++ e --", correct: true, feedback: "Excelente! 'ini++' avança para a direita e 'fim--' recua para a esquerda até se encontrarem no centro." },
+          { text: "-- e ++", correct: false, feedback: "Incorreto! Afastaria os ponteiros para fora dos limites do texto." },
+          { text: "++ e ++", correct: false, feedback: "Incorreto! Ambos se moveriam na mesma direção, impedindo o teste simétrico das pontas." },
+          { text: "= 0 e = 0", correct: false, feedback: "Incorreto! Resetaria as variáveis para zero a cada iteração." }
+        ],
+        explanation: "A técnica de dois ponteiros (Two Pointers) resolve checagens simétricas e buscas de pares em tempo linear O(N) com memória O(1)."
+      },
+      {
+        id: 45,
+        title: "Fase 45 (Desafio): Operadores Bitwise (Máscara de Bits &)",
+        concept: "Manipulação de Bits em Nível de Hardware",
+        filename: "filtro_bits.algo",
+        scenario: "Para verificar se o 3º bit (peso 4 = 2^2) de uma flag de segurança está ATIVO (1), aplicamos uma máscara com o operador E Bitwise (&):",
+        codeTemplate: `variavel mascara = 4; // Em binário: 00000100\nse ((registroStatus <span class="code-gap">_</span> mascara) != 0) {\n    ativarProtocoloDefesa();\n}`,
+        options: [
+          { text: "& (E Bitwise)", correct: true, feedback: "Correto! O operador '&' preserva apenas os bits que são '1' em ambos os operandos (bitmasking)." },
+          { text: "&& (E Lógico)", correct: false, feedback: "Incorreto! '&&' avalia valores booleanos como um todo, não bit a bit individualmente." },
+          { text: "| (OU Bitwise)", correct: false, feedback: "Incorreto! '|' força os bits a ficarem em 1, em vez de apenas inspecionar o bit existente." },
+          { text: "%", correct: false, feedback: "Incorreto! '%' calcula o resto da divisão aritmética." }
+        ],
+        explanation: "Operações bit a bit (&, |, ^, ~, <<, >>) são ultrarrápidas e fundamentais em emuladores, drivers e sistemas embarcados."
+      },
+      {
+        id: 46,
+        title: "Fase 46 (Desafio): Análise de Complexidade de Tempo (Big-O)",
+        concept: "Comportamento Assintótico de Algoritmos",
+        filename: "analise_algoritmo.algo",
+        scenario: "Qual é a complexidade de tempo no pior caso de um algoritmo com 2 laços FOR aninhados, onde ambos percorrem 'N' elementos?",
+        codeTemplate: `para (i = 0; i < N; i++) {\n    para (j = 0; j < N; j++) {\n        processarPixel(matriz[i][j]); // Executa N * N vezes\n    }\n}`,
+        options: [
+          { text: "O(N²)", correct: true, feedback: "Muito bem! Como cada volta de 'i' executa 'N' voltas de 'j', o total de passos é N * N = O(N²) (complexidade quadrática)." },
+          { text: "O(N)", correct: false, feedback: "Incorreto! O(N) linear seria apenas 1 único laço simples." },
+          { text: "O(1)", correct: false, feedback: "Incorreto! O(1) representa tempo constante, independente de N." },
+          { text: "O(log N)", correct: false, feedback: "Incorreto! O(log N) divide o problema sucessivamente (como na busca binária)." }
+        ],
+        explanation: "A notação Big-O descreve como o tempo de execução ou memória de um algoritmo escala conforme o tamanho da entrada (N) cresce."
+      },
+      {
+        id: 47,
+        title: "Fase 47 (Desafio): Remoção de Duplicatas com Conjuntos (Set)",
+        concept: "Unicidade de Elementos e Tabelas de Dispersão",
+        filename: "limpar_duplicatas.algo",
+        scenario: "Qual estrutura de dados armazena nativamente apenas elementos ÚNICOS, descartando automaticamente qualquer inserção repetida?",
+        codeTemplate: `variavel idsComuns = [10, 20, 10, 30, 20, 40];\nvariavel idsUnicos = novo <span class="code-gap">__________</span>(idsComuns); // Resultado: {10, 20, 30, 40}`,
+        options: [
+          { text: "Conjunto / Set", correct: true, feedback: "Exato! Estruturas do tipo Set garantem a unicidade de suas chaves com verificação média em O(1)." },
+          { text: "Pilha / Stack", correct: false, feedback: "Incorreto! Pilhas aceitam itens repetidos e apenas controlam a ordem LIFO." },
+          { text: "Fila / Queue", correct: false, feedback: "Incorreto! Filas aceitam repetições e controlam apenas a ordem FIFO." },
+          { text: "Matriz 2D", correct: false, feedback: "Incorreto! Matrizes são apenas grades de posições numéricas." }
+        ],
+        explanation: "Um Conjunto (Set) utiliza internamente tabelas hash para garantir que nenhum elemento duplicado seja adicionado à coleção."
+      },
+      {
+        id: 48,
+        title: "Fase 48 (Desafio): Inversão de Vetor In-Place",
+        concept: "Economia de Memória O(1) Auxiliar",
+        filename: "inverter_vetor.algo",
+        scenario: "Para inverter um vetor sem criar uma segunda lista na memória, executamos a troca das posições até que o índice inicial alcance o:",
+        codeTemplate: `variavel ini = 0, fim = v.tamanho - 1;\nenquanto (<span class="code-gap">_________</span>) {\n    trocar(v, ini, fim);\n    ini++; fim--;\n}`,
+        options: [
+          { text: "ini < fim", correct: true, feedback: "Correto! Quando 'ini >= fim', todos os elementos opostos já foram trocados e o meio foi atingido." },
+          { text: "ini == 0", correct: false, feedback: "Incorreto! 'ini == 0' só seria verdadeiro na primeiríssima volta." },
+          { text: "ini < v.tamanho", correct: false, feedback: "Incorreto! Se for até o final, trocaria de novo os mesmos elementos, desfazendo a inversão!" },
+          { text: "fim > 1000", correct: false, feedback: "Incorreto! 1000 é um número arbitrário não relacionado ao tamanho real do vetor." }
+        ],
+        explanation: "Inverter um array 'in-place' usando dois ponteiros requer apenas N/2 trocas e nenhuma alocação extra de memória."
+      },
+      {
+        id: 49,
+        title: "Fase 49 (Desafio): Passagem por Valor vs Referência",
+        concept: "Mutabilidade de Coleções e Objetos na Memória",
+        filename: "ponteiro_referencia.algo",
+        scenario: "Quando passamos um Vetor como argumento para uma função e alteramos um item dentro dela, o que ocorre com o vetor original fora da função?",
+        codeTemplate: `funcao alterarPrimeiro(lista) {\n    lista[0] = 999;\n}\nvariavel dados = [1, 2, 3];\nalterarPrimeiro(dados);\n// O valor de dados[0] agora é: <span class="code-gap">___</span>`,
+        options: [
+          { text: "999 (O vetor original foi modificado porque é passado por referência)", correct: true, feedback: "Perfeito! Vetores e objetos são passados por referência (endereço de memória); portanto, alterações internas afetam a estrutura original." },
+          { text: "1 (Permanece 1 porque listas são imutáveis)", correct: false, feedback: "Incorreto! Na maioria das linguagens imperativas, vetores são mutáveis e passados por referência." },
+          { text: "0", correct: false, feedback: "Incorreto! A função atribuiu 999, não 0." },
+          { text: "Gera erro de execução", correct: false, feedback: "Incorreto! É um comportamento padrão da arquitetura de memória." }
+        ],
+        explanation: "Tipos primitivos (int, float, bool) são copiados por valor, enquanto estruturas compostas (vetores, objetos) compartilham a referência de memória."
+      },
+      {
+        id: 50,
+        title: "Fase 50 (Desafio): Balanceamento de Parênteses com Pilha",
+        concept: "Validação Sintática de Compiladores",
+        filename: "validador_sintaxe.algo",
+        scenario: "Para validar expressões matemáticas como '((A+B)*C)', empilhamos '(' ao abrir. O que devemos fazer ao encontrar o caractere de fechamento ')'?",
+        codeTemplate: `se (caractere == '(') {\n    pilha.empilhar('(');\n} senao se (caractere == ')') {\n    se (pilha.estaVazia()) retorne falso; // Erro: fechou sem abrir!\n    pilha.<span class="code-gap">___________</span>(); // Remove o '(' correspondente\n}`,
+        options: [
+          { text: "desempilhar() / pop()", correct: true, feedback: "Sensacional! Desempilhar o parêntese aberto consome o par correspondente da pilha com precisão." },
+          { text: "empilhar(')')", correct: false, feedback: "Incorreto! Empilhar o caractere de fechamento acumularia símbolos em vez de fechar os pares abertos." },
+          { text: "limparTudo()", correct: false, feedback: "Incorreto! Limpar apagaria outros parênteses aninhados válidos." },
+          { text: "inverter()", correct: false, feedback: "Incorreto! Inverter mudaria a ordem dos parênteses pendentes." }
+        ],
+        explanation: "Compiladores e analisadores sintáticos usam pilhas para verificar o balanceamento exato de delimitadores: (), [], {} e tags HTML."
+      },
+      {
+        id: 51,
+        title: "Fase 51 (Desafio): Algoritmo Guloso (Problema do Troco)",
+        concept: "Escolha da Melhor Opção Local Imediata",
+        filename: "algoritmo_troco.algo",
+        scenario: "Dadas moedas de valores [100, 50, 20, 10, 5, 1], como um algoritmo guloso escolhe as moedas para totalizar um valor com a menor quantidade?",
+        codeTemplate: `para (i = 0; i < moedas.tamanho; i++) {\n    variavel qtdMoedasDesteValor = parteInteira(valorRestante <span class="code-gap">_</span> moedas[i]);\n    valorRestante = valorRestante <span class="code-gap">_</span> moedas[i];\n}`,
+        options: [
+          { text: "/ (divisão) e % (resto)", correct: true, feedback: "Excelente! A divisão inteira extrai quantas moedas cabem, e o resto (%) atualiza o valor que ainda sobra." },
+          { text: "* e +", correct: false, feedback: "Incorreto! Multiplicar aumentaria a quantia a pagar." },
+          { text: "== e !=", correct: false, feedback: "Incorreto! São operadores de comparação lógica, não operações aritméticas de contagem." },
+          { text: "+ e -", correct: false, feedback: "Incorreto! Apenas somar e subtrair de 1 em 1 seria ineficiente frente à divisão direta." }
+        ],
+        explanation: "Algoritmos gulosos (Greedy) selecionam a maior moeda disponível primeiro, resolvendo problemas canônicos de otimização de troco."
+      },
+      {
+        id: 52,
+        title: "Fase 52 (Desafio): Árvore Binária de Busca (BST)",
+        concept: "Propriedade Fundamental de Ordenação em Árvores",
+        filename: "arvore_busca.algo",
+        scenario: "Em uma Árvore Binária de Busca (BST), se o novo valor a ser inserido for MENOR que o nó atual, para qual ramo devemos navegar?",
+        codeTemplate: `funcao inserir(noAtual, novoValor) {\n    se (novoValor < noAtual.valor) {\n        noAtual.filho<span class="code-gap">________</span> = inserir(noAtual.filho<span class="code-gap">________</span>, novoValor);\n    } senao {\n        noAtual.filhoDireito = inserir(noAtual.filhoDireito, novoValor);\n    }\n    retorne noAtual;\n}`,
+        options: [
+          { text: "Esquerdo (Left)", correct: true, feedback: "Correto! Por definição formal de BST, todos os valores menores ficam na subárvore Esquerda e os maiores na Direita." },
+          { text: "Direito (Right)", correct: false, feedback: "Incorreto! Valores maiores que o nó atual vão para a subárvore Direita." },
+          { text: "Raiz", correct: false, feedback: "Incorreto! A raiz é o nó ancestral de topo." },
+          { text: "Nenhum", correct: false, feedback: "Incorreto! A árvore deve crescer para o ramo esquerdo." }
+        ],
+        explanation: "A propriedade da BST (Esquerda < Raiz < Direita) permite realizar buscas, inserções e deleções com tempo médio O(log N)."
+      },
+      {
+        id: 53,
+        title: "Fase 53 (Desafio): Detecção de Ciclos (Algoritmo de Floyd)",
+        concept: "Ponteiro Lento e Rápido (Tartaruga e Lebre)",
+        filename: "detector_ciclo.algo",
+        scenario: "Para detectar se uma lista encadeada possui um loop infinito (ciclo), o ponteiro 'lento' avança 1 nó por vez, enquanto o ponteiro 'rápido' avança:",
+        codeTemplate: `variavel lento = cabeca;\nvariavel rapido = cabeca;\nenquanto (rapido != nulo && rapido.proximo != nulo) {\n    lento = lento.proximo;\n    rapido = rapido.<span class="code-gap">___________________</span>;\n    se (lento == rapido) retorne verdadeiro; // Ciclo detectado!\n}`,
+        options: [
+          { text: "proximo.proximo (2 nós por passo)", correct: true, feedback: "Muito bem! Como o rápido anda com o dobro da velocidade, se houver um ciclo, ele inevitavelmente alcançará o lento por trás!" },
+          { text: "proximo (1 nó por passo)", correct: false, feedback: "Incorreto! Se ambos andassem na mesma velocidade, manteriam sempre a mesma distância sem nunca se encontrar." },
+          { text: "anterior", correct: false, feedback: "Incorreto! Em listas simplesmente encadeadas não existe ponteiro de volta." },
+          { text: "cabeca", correct: false, feedback: "Incorreto! Resetar para o início não permitiria o avanço da lebre." }
+        ],
+        explanation: "O algoritmo de Floyd (Tartaruga e Lebre) detecta loops em grafos e listas usando apenas duas referências e sem gastar memória adicional O(1)."
+      },
+      {
+        id: 54,
+        title: "Fase 54 (Desafio): Funções de Alta Ordem - Mapeamento (MAP)",
+        concept: "Transformação Funcional Imutável de Vetores",
+        filename: "transformacao_map.algo",
+        scenario: "Queremos duplicar o valor de todos os números de uma lista sem alterar a lista original. Qual método funcional de alta ordem usamos?",
+        codeTemplate: `variavel numeros = [10, 20, 30];\nvariavel duplicados = numeros.<span class="code-gap">___</span>(item => item * 2); // [20, 40, 60]`,
+        options: [
+          { text: "mapear / map", correct: true, feedback: "Exato! O método 'map' aplica uma função de transformação a cada item e retorna um novo vetor do mesmo tamanho." },
+          { text: "filtrar / filter", correct: false, feedback: "Incorreto! 'filter' seleciona apenas itens que atendem a um teste booleano, sem transformar os valores." },
+          { text: "reduzir / reduce", correct: false, feedback: "Incorreto! 'reduce' condensa o vetor inteiro em um único valor final." },
+          { text: "deletar", correct: false, feedback: "Incorreto! 'deletar' destruiria dados." }
+        ],
+        explanation: "O paradigma funcional utiliza 'map' para transformações de dados puras e sem efeitos colaterais (side-effects)."
+      },
+      {
+        id: 55,
+        title: "Fase 55 (Desafio): Funções de Alta Ordem - Filtragem (FILTER)",
+        concept: "Seleção por Predicado Booleano",
+        filename: "filtragem_segura.algo",
+        scenario: "Dada uma lista de usuários, selecione apenas aqueles cujo status seja 'ATIVO':",
+        codeTemplate: `variavel ativos = usuarios.<span class="code-gap">______</span>(u => u.status == "ATIVO");`,
+        options: [
+          { text: "filtrar / filter", correct: true, feedback: "Correto! 'filter' executa uma função predicada para cada elemento, mantendo no resultado apenas onde retornou 'true'." },
+          { text: "mapear / map", correct: false, feedback: "Incorreto! 'map' transformaria os itens em uma lista de booleanos [true, false, true...], não na lista dos usuários." },
+          { text: "ordenar / sort", correct: false, feedback: "Incorreto! 'sort' apenas reorganiza a ordem dos elementos existentes." },
+          { text: "empilhar", correct: false, feedback: "Incorreto! 'empilhar' é uma operação de pilha." }
+        ],
+        explanation: "'Filter' é a operação padrão para extrair subconjuntos de registros sem loops manuais imperativos."
+      },
+      {
+        id: 56,
+        title: "Fase 56 (Desafio): Funções de Alta Ordem - Redução (REDUCE)",
+        concept: "Agregação Acumulativa de Vetores",
+        filename: "acumulador_reduce.algo",
+        scenario: "Para somar todos os valores de uma lista em um único valor total começando de 0, usamos o método funcional:",
+        codeTemplate: `variavel precos = [100, 250, 50];\nvariavel total = precos.<span class="code-gap">______</span>((acumulador, item) => acumulador + item, 0); // 400`,
+        options: [
+          { text: "reduzir / reduce", correct: true, feedback: "Sensacional! 'reduce' itera por toda a coleção passando o valor acumulado anterior adiante até obter um único resultado." },
+          { text: "fatiar / slice", correct: false, feedback: "Incorreto! 'slice' extrai um pedaço do vetor." },
+          { text: "juntar / join", correct: false, feedback: "Incorreto! 'join' junta strings separadas por vírgula." },
+          { text: "inverter", correct: false, feedback: "Incorreto! Inverter apenas muda as posições." }
+        ],
+        explanation: "O 'reduce' é extremamente poderoso para calcular totais, médias, agrupar objetos ou construir árvores a partir de listas."
+      },
+      {
+        id: 57,
+        title: "Fase 57 (Desafio): Resolução de Colisões em Tabela Hash",
+        concept: "Tratamento de Chaves Distintas com Mesmo Hash",
+        filename: "tabela_hash_colisao.algo",
+        scenario: "Quando duas chaves diferentes ('chave_A' e 'chave_B') produzem exatamente o mesmo índice na Tabela Hash, como o encadeamento (*Chaining*) resolve o conflito?",
+        codeTemplate: `// Hash("chave_A") % 10 == 3\n// Hash("chave_B") % 10 == 3 (Colisão!)\ntabelaHash[3] = <span class="code-gap">___________________________________</span>;`,
+        options: [
+          { text: "Uma Lista Encadeada contendo ambos os pares chave-valor", correct: true, feedback: "Perfeito! No encadeamento separado, cada posição da tabela armazena uma lista com todos os elementos que colidiram naquele balde (bucket)." },
+          { text: "Sobrescreve e apaga a chave antiga", correct: false, feedback: "Incorreto! Sobrescrever causaria perda irreparável de dados da chave anterior." },
+          { text: "Trava o sistema operacional", correct: false, feedback: "Incorreto! Colisões são eventos previstos e normais no design de tabelas hash." },
+          { text: "Limpa toda a memória da tabela", correct: false, feedback: "Incorreto! Destruiria todo o banco de dados." }
+        ],
+        explanation: "Encadeamento separado (Separate Chaining) e Endereçamento Aberto são as duas técnicas clássicas de tratamento de colisões em Hash Tables."
+      },
+      {
+        id: 58,
+        title: "Fase 58 (Desafio): Propriedade Matemática do XOR Bitwise (^)",
+        concept: "Localização de Elemento Único em O(N) Tempo e O(1) Espaço",
+        filename: "encontrar_impar_xor.algo",
+        scenario: "Em uma lista onde todos os números aparecem em PARES idênticos, exceto um número único isolado, por que aplicar XOR (^) acumulado em todos os itens revela o número solitário?",
+        codeTemplate: `// lista = [5, 9, 3, 9, 5]\nvariavel unico = 0;\npara (i = 0; i < lista.tamanho; i++) {\n    unico = unico ^ lista[i];\n}\n// Resultado: unico == 3! Pois X ^ X = <span class="code-gap">_</span> e X ^ 0 = <span class="code-gap">_</span>`,
+        options: [
+          { text: "0 e X", correct: true, feedback: "Brilhante! Qualquer número XOR ele mesmo é 0 (X ^ X = 0), e qualquer número XOR 0 é ele próprio (X ^ 0 = X), anulando todos os pares!" },
+          { text: "1 e 0", correct: false, feedback: "Incorreto! X ^ X zera os bits correspondentes." },
+          { text: "X e 0", correct: false, feedback: "Incorreto! A ordem correta das propriedades de paridade é inversa." },
+          { text: "Infinito e 1", correct: false, feedback: "Incorreto! São operações lógicas discretas em álgebra booleana." }
+        ],
+        explanation: "As propriedades de comutatividade e auto-anulação do XOR (A ^ A = 0) tornam-no um truque algorítmico lendário para otimização de espaço."
+      },
+      {
+        id: 59,
+        title: "Fase 59 (Desafio): Programação Dinâmica & Memoização",
+        concept: "Armazenamento de Resoluções de Subproblemas Sobrepostos",
+        filename: "memoizacao_cache.algo",
+        scenario: "Para transformar a complexidade exponencial O(2^N) de Fibonacci em tempo linear O(N), consultamos uma tabela de cache antes de calcular:",
+        codeTemplate: `funcao fiboMemo(n, cache) {\n    se (n <= 1) retorne n;\n    se (<span class="code-gap">___________________</span>) {\n        retorne cache[n]; // Reutiliza resultado já calculado instantaneamente!\n    }\n    cache[n] = fiboMemo(n - 1, cache) + fiboMemo(n - 2, cache);\n    retorne cache[n];\n}`,
+        options: [
+          { text: "cache[n] != indefinido (ou cache contém n)", correct: true, feedback: "Excelente! A memoização armazena as respostas intermediárias na memória cache, evitando recalcular os mesmos ramos recursivos repetidas vezes." },
+          { text: "n == 100", correct: false, feedback: "Incorreto! 100 é um caso isolado e não serviria para nenhum outro valor de 'n'." },
+          { text: "cache.tamanho == 0", correct: false, feedback: "Incorreto! Se o cache estiver vazio, não há valor para retornar." },
+          { text: "n < 0", correct: false, feedback: "Incorreto! A condição de parada base já trata n <= 1." }
+        ],
+        explanation: "Programação Dinâmica com Memoização (Top-Down) elimina cálculos redundantes, reduzindo o tempo de execução de dias para milissegundos."
+      },
+      {
+        id: 60,
+        title: "Fase 60 (Desafio Épico Final): Decodificação Criptográfica",
+        concept: "Cálculo Modular Cíclico para Rotação de Caracteres (Cifra de César)",
+        filename: "ai_core_master_key.algo",
+        scenario: "Para restaurar a chave mestra definitiva do AI Core com rotação de alfabeto (A-Z = 26 letras), aplicamos o operador módulo para garantir o retorno ao início:",
+        codeTemplate: `// novoIndice = (indiceAtual + deslocamento) % 26\nfuncao cifrarCaractere(indiceLetra, chave) {\n    retorne (indiceLetra + chave) <span class="code-gap">____</span> 26;\n}`,
+        options: [
+          { text: "% (módulo)", correct: true, feedback: "MESTRE DO ALGORITMO! O operador '%' faz com que qualquer número maior ou igual a 26 dê a volta cíclica correta (ex: 27 % 26 = 1 = 'B')!" },
+          { text: "/", correct: false, feedback: "Incorreto! '/' daria o quociente fracionário em vez do índice inteiro da letra." },
+          { text: "*", correct: false, feedback: "Incorreto! Multiplicar geraria valores astronômicos fora da tabela de caracteres." },
+          { text: "-", correct: false, feedback: "Incorreto! Subtrair não faria a rotação circular dos limites da base 26." }
+        ],
+        explanation: "A aritmética modular (mod 26) é a base matemática da criptografia clássica, relógios de ponteiro e sistemas circulares em ciência da computação!"
+      }
+    ];
+
+    /* =========================================================================
+       GAME STATE MANAGEMENT & SESSION TRACKING
+       ========================================================================= */
+    const state = {
+      sessionId: 0,
+      studentName: '',
+      studentClass: '',
+      studentLogin: '',
+      selectedCharacter: CHARACTERS[0],
+      currentStageIndex: 0,
+      score: 0,
+      lives: 3,
+      correctCount: 0,
+      wrongCount: 0,
+      startTime: 0,
+      endTime: 0,
+      isAnswerLocked: false,
+      stageResults: [],
+      hasStartedClass: false,
+      isFinished: false,
+      isLockedByScreenSwitch: false
+    };
+
+    /* =========================================================================
+       INITIALIZATION
+       ========================================================================= */
+    window.addEventListener('DOMContentLoaded', () => {
+      initCanvasBackground();
+      renderCharacterOptions();
+      setupSoundControls();
+      setupExitAndAbandonmentDetection();
+      loadSupabaseSettingsToInputs();
+      updateSupabaseStatusIndicator();
+    });
+
+    function setupSoundControls() {
+      const btn = document.getElementById('btn-sound-toggle');
+      const icon = document.getElementById('sound-icon');
+      if (!btn) return;
+      btn.addEventListener('click', () => {
+        sound.init();
+        sound.enabled = !sound.enabled;
+        icon.textContent = sound.enabled ? '🔊' : '🔇';
+        btn.style.opacity = sound.enabled ? '1' : '0.6';
+        if (sound.enabled) sound.playBlip();
+      });
+    }
+
+    function renderCharacterOptions() {
+      const container = document.getElementById('characters-container');
+      if (!container) return;
+      container.innerHTML = '';
+      CHARACTERS.forEach((char, idx) => {
+        const div = document.createElement('div');
+        div.className = `char-card ${idx === 0 ? 'selected' : ''}`;
+        div.onclick = () => selectCharacter(char.id);
+        div.innerHTML = `
+          <div class="char-avatar">${char.avatar}</div>
+          <div class="char-name">${char.name}</div>
+          <div class="char-specialty">${char.specialty}</div>
+        `;
+        div.id = `char-opt-${char.id}`;
+        container.appendChild(div);
+      });
+    }
+
+    function selectCharacter(charId) {
+      sound.init();
+      sound.playBlip();
+      const found = CHARACTERS.find(c => c.id === charId);
+      if (!found) return;
+      state.selectedCharacter = found;
+      document.querySelectorAll('.char-card').forEach(el => el.classList.remove('selected'));
+      const activeEl = document.getElementById(`char-opt-${charId}`);
+      if (activeEl) activeEl.classList.add('selected');
+    }
+
+    /* =========================================================================
+       CLASS FORMAT & AUTH VALIDATION (e.g. 1TECA, 1ADMA, 2TECB)
+       ========================================================================= */
+    function switchAuthMode(mode) {
+      sound.init();
+      sound.playBlip();
+      const tabReg = document.getElementById('tab-auth-register');
+      const tabLog = document.getElementById('tab-auth-login');
+      const formReg = document.getElementById('register-form');
+      const formLog = document.getElementById('login-existing-form');
+
+      if (mode === 'register') {
+        tabReg.classList.add('active');
+        tabLog.classList.remove('active');
+        formReg.style.display = 'block';
+        formLog.style.display = 'none';
+      } else {
+        tabLog.classList.add('active');
+        tabReg.classList.remove('active');
+        formLog.style.display = 'block';
+        formReg.style.display = 'none';
+      }
+    }
+
+    function onClassSelectChanged(val) {
+      const customInput = document.getElementById('student-class-custom');
+      const previewTag = document.getElementById('class-preview-tag');
+      if (val === 'CUSTOM') {
+        customInput.style.display = 'block';
+        customInput.focus();
+        previewTag.textContent = customInput.value.toUpperCase() || 'CUSTOM';
+      } else {
+        customInput.style.display = 'none';
+        previewTag.textContent = val;
+      }
+      autoGenerateLoginSuggestion(document.getElementById('student-first-name').value);
+    }
+
+    function onCustomClassInput(input) {
+      input.value = input.value.toUpperCase().replace(/\s+/g, '');
+      document.getElementById('class-preview-tag').textContent = input.value || '1TECA';
+      autoGenerateLoginSuggestion(document.getElementById('student-first-name').value);
+    }
+
+    function getSelectedClass() {
+      const select = document.getElementById('student-class-select');
+      if (select.value === 'CUSTOM') {
+        return document.getElementById('student-class-custom').value.trim().toUpperCase();
+      }
+      return select.value;
+    }
+
+    function validateClassFormat(className) {
+      // Must follow [Ano][Curso][Variação], e.g. 1TECA, 1ADMA, 2TECB, 1INFOA, 1DSA
+      const regex = /^[1-9][A-Z0-9]{2,6}[A-Z]$/;
+      return regex.test(className);
+    }
+
+    function autoGenerateLoginSuggestion(firstName) {
+      const cleanFirst = firstName.trim().split(' ')[0].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const sClass = getSelectedClass().toLowerCase();
+      const loginInput = document.getElementById('student-login-input');
+      if (cleanFirst && loginInput && !loginInput.dataset.manual) {
+        loginInput.value = `${cleanFirst}.${sClass || '1teca'}`;
+      }
+    }
+
+    /* =========================================================================
+       STUDENT REGISTRATION & LOGIN HANDLING
+       ========================================================================= */
+    async function handleStudentRegister() {
+      sound.init();
+      const firstNameInput = document.getElementById('student-first-name');
+      const loginInput = document.getElementById('student-login-input');
+      const passwordInput = document.getElementById('student-password-input');
+
+      let firstName = firstNameInput.value.trim();
+      // Enforce first name only
+      if (firstName.includes(' ')) {
+        firstName = firstName.split(' ')[0];
+        firstNameInput.value = firstName;
+      }
+
+      const sClass = getSelectedClass();
+      const login = loginInput.value.trim().toLowerCase();
+      const password = passwordInput.value;
+
+      if (!firstName) {
+        alert('Por favor, informe seu primeiro nome.');
+        return;
+      }
+
+      if (!sClass || !validateClassFormat(sClass)) {
+        alert(`Formato de turma inválido ("${sClass}").\nUse o padrão [Ano][Curso][Turma], por exemplo: 1TECA, 1ADMA, 2TECB, 1INFOA.`);
+        return;
+      }
+
+      if (!login || !password) {
+        alert('Por favor, preencha o login e a senha para salvar seu cadastro.');
+        return;
+      }
+
+      const userData = {
+        id: `usr_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+        firstName: firstName,
+        studentClass: sClass,
+        login: login,
+        password: password, // local verification hash/store
+        avatar: state.selectedCharacter.avatar,
+        characterName: state.selectedCharacter.name,
+        createdAt: new Date().toISOString()
+      };
+
+      // Save locally
+      try {
+        const users = JSON.parse(localStorage.getItem('cyber_runner_users') || '[]');
+        const existingIdx = users.findIndex(u => u.login === login);
+        if (existingIdx >= 0) {
+          users[existingIdx] = userData;
+        } else {
+          users.push(userData);
+        }
+        localStorage.setItem('cyber_runner_users', JSON.stringify(users));
+      } catch(e) {}
+
+      // Save to Supabase if configured
+      await SupabaseCloud.saveUser(userData);
+
+      // Start Session
+      initSessionData(firstName, sClass, login);
+    }
+
+    async function handleStudentLogin() {
+      sound.init();
+      const loginInput = document.getElementById('existing-login-input');
+      const passwordInput = document.getElementById('existing-password-input');
+      const statusMsg = document.getElementById('login-status-msg');
+
+      const login = loginInput.value.trim().toLowerCase();
+      const password = passwordInput.value;
+
+      if (!login || !password) {
+        alert('Preencha seu login e senha.');
+        return;
+      }
+
+      statusMsg.style.display = 'block';
+      statusMsg.style.background = 'rgba(34, 211, 238, 0.1)';
+      statusMsg.style.color = 'var(--neon-cyan)';
+      statusMsg.textContent = 'Verificando credenciais...';
+
+      // 1. Check local users
+      let users = [];
+      try {
+        users = JSON.parse(localStorage.getItem('cyber_runner_users') || '[]');
+      } catch(e) {}
+
+      let user = users.find(u => u.login === login && u.password === password);
+
+      // 2. If not found locally, query Supabase
+      if (!user) {
+        user = await SupabaseCloud.getUser(login, password);
+      }
+
+      if (user) {
+        statusMsg.style.background = 'rgba(34, 197, 94, 0.15)';
+        statusMsg.style.color = 'var(--neon-green)';
+        statusMsg.textContent = `✅ Bem-vindo de volta, ${user.firstName || user.first_name} (${user.studentClass || user.student_class})!`;
+
+        // Restore character if matching
+        if (user.avatar) {
+          const char = CHARACTERS.find(c => c.avatar === user.avatar) || CHARACTERS[0];
+          state.selectedCharacter = char;
+        }
+
+        setTimeout(() => {
+          initSessionData(user.firstName || user.first_name, user.studentClass || user.student_class, login);
+        }, 600);
+      } else {
+        statusMsg.style.background = 'rgba(244, 63, 94, 0.15)';
+        statusMsg.style.color = 'var(--neon-magenta)';
+        statusMsg.textContent = '❌ Login ou senha incorretos. Se for seu primeiro acesso, cadastre-se na aba NOVO ALUNO.';
+      }
+    }
+
+    function initSessionData(studentName, studentClass, studentLogin) {
+      state.studentName = studentName;
+      state.studentClass = studentClass;
+      state.studentLogin = studentLogin || '';
+      state.score = 0;
+      state.lives = 3;
+      state.correctCount = 0;
+      state.wrongCount = 0;
+      state.currentStageIndex = 0;
+      state.stageResults = [];
+      state.startTime = Date.now();
+      state.hasStartedClass = true;
+      state.isFinished = false;
+      state.isLockedByScreenSwitch = false;
+
+      updateHud();
+
+      // Register session with Android Bridge or Local/Supabase
+      if (window.AndroidBridge && typeof window.AndroidBridge.onSessionStarted === 'function') {
+        try {
+          state.sessionId = window.AndroidBridge.onSessionStarted(
+            state.studentName,
+            state.studentClass,
+            state.selectedCharacter.name,
+            state.selectedCharacter.avatar
+          );
+        } catch(e) {
+          state.sessionId = Date.now();
+        }
+      } else {
+        state.sessionId = Date.now();
+        saveLocalAttempt('EM ANDAMENTO');
+      }
+
+      sound.playCorrect();
+      showScreen('screen-gameplay');
+      loadStage(0);
+    }
+
+    /* =========================================================================
+       LOAD STAGE & PROGRESSION
+       ========================================================================= */
+    function loadStage(index) {
+      if (index >= STAGES.length) {
+        finishGameVictory();
+        return;
+      }
+
+      state.currentStageIndex = index;
+      state.isAnswerLocked = false;
+      const stage = STAGES[index];
+
+      // Update badges & progress
+      document.getElementById('game-stage-badge').textContent = `FASE ${index + 1} / ${STAGES.length}`;
+      document.getElementById('game-stage-title').textContent = stage.title;
+      document.getElementById('game-character-badge').textContent = `${state.selectedCharacter.name} ${state.selectedCharacter.avatar}`;
+      document.getElementById('game-progress-bar').style.width = `${((index + 1) / STAGES.length) * 100}%`;
+
+      document.getElementById('game-scenario-text').textContent = stage.scenario;
+      document.getElementById('terminal-filename').textContent = stage.filename;
+      document.getElementById('terminal-code').innerHTML = stage.codeTemplate;
+
+      // Hide feedback & next button
+      const feedback = document.getElementById('feedback-banner');
+      feedback.className = 'feedback-banner';
+      feedback.style.display = 'none';
+      document.getElementById('btn-next-action').style.display = 'none';
+
+      // Render Options
+      const optionsContainer = document.getElementById('options-container');
+      optionsContainer.innerHTML = '';
+
+      const letters = ['A', 'B', 'C', 'D'];
+      stage.options.forEach((opt, optIdx) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.id = `option-${optIdx}`;
+        btn.onclick = () => onSelectOption(optIdx);
+        btn.innerHTML = `
+          <span class="option-key">${letters[optIdx]}</span>
+          <span class="option-text">${opt.text}</span>
+        `;
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    /* =========================================================================
+       HANDLE OPTION SELECTION & GAMIFICATION RULES
+       ========================================================================= */
+    function onSelectOption(optionIndex) {
+      if (state.isAnswerLocked || state.isLockedByScreenSwitch) return;
+      sound.init();
+
+      const stage = STAGES[state.currentStageIndex];
+      const selected = stage.options[optionIndex];
+      const selectedBtn = document.getElementById(`option-${optionIndex}`);
+      const feedback = document.getElementById('feedback-banner');
+      const nextBtn = document.getElementById('btn-next-action');
+
+      if (selected.correct) {
+        state.isAnswerLocked = true;
+        selectedBtn.classList.add('correct');
+        sound.playCorrect();
+
+        const earnedPts = 150;
+        state.score += earnedPts;
+        state.correctCount += 1;
+        updateHud();
+
+        feedback.className = 'feedback-banner success';
+        feedback.style.display = 'block';
+        document.getElementById('feedback-title').innerHTML = `<span>✅</span> RESPOSTA EXATA! (+${earnedPts} PTS)`;
+        document.getElementById('feedback-explanation').innerHTML = `
+          <strong>${selected.feedback}</strong><br>
+          <span style="opacity: 0.9; font-size: 13px;">${stage.explanation}</span>
+        `;
+
+        state.stageResults.push({
+          stageNum: state.currentStageIndex + 1,
+          concept: stage.concept,
+          passed: true,
+          points: earnedPts
+        });
+
+        notifyStageProgress(true);
+        saveLocalAttempt(`EM ANDAMENTO (Fase ${state.currentStageIndex + 1})`);
+
+        nextBtn.style.display = 'flex';
+        nextBtn.textContent = (state.currentStageIndex === STAGES.length - 1) ? 'VER RESULTADO FINAL ➔' : 'PRÓXIMA FASE ➔';
+      } else {
+        selectedBtn.classList.add('wrong');
+        sound.playError();
+        state.wrongCount += 1;
+        state.lives -= 1;
+        updateHud();
+
+        feedback.className = 'feedback-banner error';
+        feedback.style.display = 'block';
+        document.getElementById('feedback-title').innerHTML = `<span>⚠️</span> SINTAXE INCORRETA! (-1 VIDA)`;
+        document.getElementById('feedback-explanation').innerHTML = `
+          <strong>${selected.feedback}</strong><br>
+          <span style="opacity: 0.9; font-size: 13px;">Analise o código com atenção e tente outra alternativa.</span>
+        `;
+
+        if (state.lives <= 0) {
+          state.isAnswerLocked = true;
+          setTimeout(() => {
+            handleGameOver();
+          }, 1200);
+        } else {
+          notifyStageProgress(false);
+          saveLocalAttempt(`EM ANDAMENTO (Fase ${state.currentStageIndex + 1} - Erro cometido)`);
+        }
+      }
+    }
+
+    function onNextStageClicked() {
+      sound.playBlip();
+      loadStage(state.currentStageIndex + 1);
+    }
+
+    /* =========================================================================
+       GAME OVER
+       ========================================================================= */
+    function handleGameOver() {
+      state.isFinished = true;
+      document.getElementById('go-score').textContent = state.score;
+      document.getElementById('go-stages').textContent = `${state.currentStageIndex} / ${STAGES.length}`;
+
+      if (window.AndroidBridge && typeof window.AndroidBridge.onGameOver === 'function') {
+        try {
+          window.AndroidBridge.onGameOver(
+            state.sessionId,
+            state.score,
+            state.currentStageIndex,
+            state.correctCount,
+            state.wrongCount,
+            JSON.stringify(state.stageResults)
+          );
+        } catch(e) { console.error(e); }
+      } else {
+        saveLocalAttempt('REPROVADO (Sem Vidas)');
+      }
+
+      showScreen('screen-gameover');
+    }
+
+    /* =========================================================================
+       VICTORY & COMPLETION
+       ========================================================================= */
+    function finishGameVictory() {
+      state.isFinished = true;
+      state.endTime = Date.now();
+      const elapsedSec = Math.max(1, Math.round((state.endTime - state.startTime) / 1000));
+      const mins = Math.floor(elapsedSec / 60).toString().padStart(2, '0');
+      const secs = (elapsedSec % 60).toString().padStart(2, '0');
+      const timeFormatted = `${mins}:${secs}`;
+
+      const totalQuestions = state.correctCount + state.wrongCount;
+      const accuracy = totalQuestions > 0 ? Math.round((state.correctCount / totalQuestions) * 100) : 100;
+
+      document.getElementById('victory-student-greeting').textContent =
+        `Parabéns, ${state.studentName} (${state.studentClass})! O AI Core foi completamente restaurado com sucesso!`;
+      document.getElementById('victory-score').textContent = state.score;
+      document.getElementById('victory-accuracy').textContent = `${accuracy}%`;
+      document.getElementById('victory-lives').textContent = `${state.lives} / 3`;
+      document.getElementById('victory-time').textContent = timeFormatted;
+
+      const tbody = document.getElementById('victory-breakdown-body');
+      tbody.innerHTML = '';
+      state.stageResults.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>Fase ${r.stageNum}:</strong> ${r.concept}</td>
+          <td style="color: var(--neon-green);">✅ Aprovado</td>
+          <td style="color: var(--neon-yellow); font-family: var(--font-display); font-weight: 700;">+${r.points}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if (window.AndroidBridge && typeof window.AndroidBridge.onGameCompleted === 'function') {
+        try {
+          window.AndroidBridge.onGameCompleted(
+            state.sessionId,
+            state.score,
+            state.correctCount,
+            state.wrongCount,
+            state.lives,
+            JSON.stringify(state.stageResults)
+          );
+        } catch(e) { console.error('Error notifying completion:', e); }
+      } else {
+        saveLocalAttempt('CONCLUÍDO (100%)');
+      }
+
+      sound.playVictory();
+      showScreen('screen-victory');
+    }
+
+    /* =========================================================================
+       ANTI-CHEAT & SCREEN SWITCH DETECTION (LOCKS IMMEDIATELY & ZEROES SCORE)
+       ========================================================================= */
+    function setupExitAndAbandonmentDetection() {
+      const handleFocusViolation = () => {
+        if (state.hasStartedClass && !state.isFinished && !state.isLockedByScreenSwitch) {
+          state.isFinished = true;
+          state.isLockedByScreenSwitch = true;
+
+          const progressPct = Math.round((state.currentStageIndex / STAGES.length) * 100);
+          const violationStatus = `ABANDONADO / ZERADO (Troca de Tela na Fase ${state.currentStageIndex + 1} - ${progressPct}%)`;
+
+          // Zero score as pedagogical penalty
+          state.score = 0;
+
+          // Save to LocalStorage, Supabase and Android Bridge
+          saveLocalAttempt(violationStatus);
+
+          if (window.AndroidBridge && typeof window.AndroidBridge.onGameAbandoned === 'function') {
+            try {
+              window.AndroidBridge.onGameAbandoned(
+                state.sessionId,
+                0,
+                state.currentStageIndex,
+                state.correctCount,
+                JSON.stringify(state.stageResults)
+              );
+            } catch(e) {}
+          }
+
+          // Populate locked screen
+          document.getElementById('ab-student-meta').textContent = `${state.studentName} (${state.studentClass})`;
+          document.getElementById('ab-progress-pct').textContent = `${progressPct}% (Fase ${state.currentStageIndex + 1}/${STAGES.length})`;
+          document.getElementById('ab-correct-val').textContent = `${state.correctCount} vezes`;
+          document.getElementById('ab-wrong-val').textContent = `${state.wrongCount} vezes`;
+
+          sound.playError();
+          showScreen('screen-abandoned');
+        }
+      };
+
+      let blurTimeout = null;
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+          handleFocusViolation();
+        }
+      });
+
+      window.addEventListener('blur', () => {
+        clearTimeout(blurTimeout);
+        // Aguarda 500ms para evitar falsos positivos causados por balões nativos do Chrome / sistema
+        blurTimeout = setTimeout(() => {
+          if (document.visibilityState === 'hidden' || !document.hasFocus()) {
+            handleFocusViolation();
+          }
+        }, 500);
+      });
+
+      window.addEventListener('focus', () => {
+        // Se o foco retornar rapidamente (ex: fechar aviso do Chrome), cancela a penalidade
+        clearTimeout(blurTimeout);
+      });
+
+      window.addEventListener('beforeunload', handleFocusViolation);
+      window.addEventListener('pagehide', handleFocusViolation);
+    }
+
+    function notifyStageProgress(isCorrect) {
+      if (window.AndroidBridge && typeof window.AndroidBridge.onStageAnswer === 'function') {
+        try {
+          window.AndroidBridge.onStageAnswer(
+            state.sessionId,
+            state.currentStageIndex + 1,
+            isCorrect,
+            state.score,
+            state.lives,
+            state.correctCount,
+            state.wrongCount,
+            JSON.stringify(state.stageResults)
+          );
+        } catch(e) {}
+      }
+    }
+
+    /* =========================================================================
+       SUPABASE CLIENT (REST API NATIVE - NO DEPENDENCIES)
+       ========================================================================= */
+    const SupabaseCloud = {
+      getConfig() {
+        return {
+          url: localStorage.getItem('cyber_runner_supabase_url') || '',
+          key: localStorage.getItem('cyber_runner_supabase_key') || ''
+        };
+      },
+      isConfigured() {
+        const conf = this.getConfig();
+        return conf.url.length > 5 && conf.key.length > 10;
+      },
+      async saveAttempt(record) {
+        if (!this.isConfigured()) return false;
+        const { url, key } = this.getConfig();
+        try {
+          const endpoint = `${url.replace(/\/+$/, '')}/rest/v1/student_attempts`;
+          const payload = {
+            id: String(record.id),
+            student_name: record.studentName,
+            student_class: record.studentClass,
+            student_login: record.studentLogin || '',
+            character_name: record.characterName,
+            character_avatar: record.characterAvatar,
+            score: record.score,
+            progress_percentage: record.progressPercentage || 0,
+            stages_completed: record.stagesCompleted || 0,
+            correct_answers: record.correctAnswers,
+            wrong_attempts: record.wrongAttempts,
+            lives_remaining: record.livesRemaining,
+            status: record.status,
+            stage_results: record.stageResults || []
+          };
+
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'apikey': key,
+              'Authorization': `Bearer ${key}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'resolution=merge-duplicates'
+            },
+            body: JSON.stringify(payload)
+          });
+          return res.ok;
+        } catch(e) {
+          console.warn('Supabase saveAttempt error:', e);
+          return false;
+        }
+      },
+      async saveUser(user) {
+        if (!this.isConfigured()) return false;
+        const { url, key } = this.getConfig();
+        try {
+          const endpoint = `${url.replace(/\/+$/, '')}/rest/v1/student_users`;
+          const payload = {
+            id: user.id,
+            login: user.login,
+            password_hash: user.password,
+            first_name: user.firstName,
+            student_class: user.studentClass,
+            avatar: user.avatar
+          };
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'apikey': key,
+              'Authorization': `Bearer ${key}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'resolution=merge-duplicates'
+            },
+            body: JSON.stringify(payload)
+          });
+          return res.ok;
+        } catch(e) {
+          return false;
+        }
+      },
+      async getUser(login, password) {
+        if (!this.isConfigured()) return null;
+        const { url, key } = this.getConfig();
+        try {
+          const endpoint = `${url.replace(/\/+$/, '')}/rest/v1/student_users?login=eq.${encodeURIComponent(login)}&password_hash=eq.${encodeURIComponent(password)}&select=*`;
+          const res = await fetch(endpoint, {
+            headers: {
+              'apikey': key,
+              'Authorization': `Bearer ${key}`
+            }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            return data && data.length > 0 ? data[0] : null;
+          }
+        } catch(e) {}
+        return null;
+      },
+      async test() {
+        if (!this.isConfigured()) return { success: false, msg: 'Preencha a URL e a Chave do Supabase.' };
+        const { url, key } = this.getConfig();
+        try {
+          const endpoint = `${url.replace(/\/+$/, '')}/rest/v1/student_attempts?select=id&limit=1`;
+          const res = await fetch(endpoint, {
+            headers: {
+              'apikey': key,
+              'Authorization': `Bearer ${key}`
+            }
+          });
+          if (res.ok) {
+            return { success: true, msg: '✅ Conexão com o Supabase estabelecida com sucesso!' };
+          } else {
+            return { success: false, msg: `⚠️ Supabase retornou status ${res.status}: ${res.statusText}. Verifique se rodou o script SQL das tabelas.` };
+          }
+        } catch(e) {
+          return { success: false, msg: `❌ Falha ao conectar no Supabase: ${e.message}` };
+        }
+      }
+    };
+
+    /* =========================================================================
+       XAMPP SQLITE CLIENT (LOCAL BACKEND PHP)
+       ========================================================================= */
+    const XamppSqlite = {
+      apiEndpoint: 'api.php',
+      
+      async saveAttempt(record) {
+        try {
+          const res = await fetch(this.apiEndpoint + '?action=save_attempt', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(record)
+          });
+          return res.ok;
+        } catch(e) {
+          return false;
+        }
+      },
+
+      async fetchAllAttempts() {
+        try {
+          const res = await fetch(this.apiEndpoint + '?action=get_attempts');
+          if (res.ok) {
+            const data = await res.json();
+            if (data.success && Array.isArray(data.attempts)) {
+              return data.attempts;
+            }
+          }
+        } catch(e) {}
+        return null;
+      },
+
+      async deleteAttempt(id) {
+        try {
+          const res = await fetch(this.apiEndpoint + '?action=delete_attempt&id=' + encodeURIComponent(id), {
+            method: 'DELETE'
+          });
+          return res.ok;
+        } catch(e) {
+          return false;
+        }
+      },
+
+      async clearAll() {
+        try {
+          const res = await fetch(this.apiEndpoint + '?action=clear_all');
+          return res.ok;
+        } catch(e) {
+          return false;
+        }
+      }
+    };
+
+    /* =========================================================================
+       PERSISTENCE & ATTEMPTS STORAGE (LOCAL + SUPABASE + XAMPP SQLITE SYNC)
+       ========================================================================= */
+    function saveLocalAttempt(status) {
+      try {
+        const history = JSON.parse(localStorage.getItem('cyber_runner_history') || '[]');
+        const progressPct = Math.round((state.currentStageIndex / STAGES.length) * 100);
+        const record = {
+          id: state.sessionId,
+          studentName: state.studentName,
+          studentClass: state.studentClass,
+          studentLogin: state.studentLogin,
+          characterName: state.selectedCharacter.name,
+          characterAvatar: state.selectedCharacter.avatar,
+          score: status.includes('ABANDONADO') || status.includes('ZERADO') ? 0 : state.score,
+          progressPercentage: progressPct,
+          stagesCompleted: state.currentStageIndex,
+          correctAnswers: state.correctCount,
+          wrongAttempts: state.wrongCount,
+          livesRemaining: state.lives,
+          status: status,
+          stageResults: state.stageResults,
+          timestamp: new Date().toLocaleString('pt-BR')
+        };
+        const existingIdx = history.findIndex(h => h.id === record.id);
+        if (existingIdx >= 0) {
+          history[existingIdx] = record;
+        } else {
+          history.unshift(record);
+        }
+        localStorage.setItem('cyber_runner_history', JSON.stringify(history));
+
+        // Background Cloud & Local Server Sync
+        SupabaseCloud.saveAttempt(record);
+        XamppSqlite.saveAttempt(record);
+
+        if (document.getElementById('screen-teacher') && document.getElementById('screen-teacher').classList.contains('active')) {
+          refreshTeacherData();
+        }
+      } catch(e) {}
+    }
+
+    /* =========================================================================
+       TEACHER DASHBOARD & FILTERING
+       ========================================================================= */
+    let currentSelectedClass = 'TODAS';
+    let currentSearchTerm = '';
+    let currentModalRecordId = null;
+
+    function switchWebTab(tabName) {
+      if (state.isLockedByScreenSwitch) {
+        alert('A sua sessão foi bloqueada devido à troca de tela.');
+        return;
+      }
+
+      document.getElementById('tab-btn-game').classList.toggle('active', tabName === 'game');
+      document.getElementById('tab-btn-teacher').classList.toggle('active', tabName === 'teacher');
+
+      if (tabName === 'teacher') {
+        refreshTeacherData();
+        showScreen('screen-teacher');
+      } else {
+        if (state.isFinished) {
+          showScreen('screen-victory');
+        } else if (state.hasStartedClass) {
+          showScreen('screen-gameplay');
+        } else {
+          showScreen('screen-login');
+        }
+      }
+    }
+
+    function getLocalAttempts() {
+      try {
+        return JSON.parse(localStorage.getItem('cyber_runner_history') || '[]');
+      } catch(e) {
+        return [];
+      }
+    }
+
+    let cachedXamppAttempts = [];
+
+    async function refreshTeacherData() {
+      let remoteAttempts = null;
+      if (SupabaseCloud.isConfigured()) {
+        remoteAttempts = await SupabaseCloud.fetchAllAttempts();
+      }
+      let sqliteAttempts = await XamppSqlite.fetchAllAttempts();
+      let localAttempts = getLocalAttempts();
+
+      const map = new Map();
+      (remoteAttempts || []).forEach(a => map.set(String(a.id), a));
+      (sqliteAttempts || []).forEach(a => map.set(String(a.id), a));
+      localAttempts.forEach(a => {
+        if (!map.has(String(a.id))) {
+          map.set(String(a.id), a);
+        }
+      });
+      cachedXamppAttempts = Array.from(map.values());
+      renderTeacherDashboard();
+    }
+
+    function renderTeacherDashboard() {
+      const allAttempts = cachedXamppAttempts.length > 0 ? cachedXamppAttempts : getLocalAttempts();
+      
+      const totalCount = allAttempts.length;
+      const completedCount = allAttempts.filter(a => a.status && a.status.startsWith('CONCLUÍDO')).length;
+      const abandonedCount = allAttempts.filter(a => a.status && (a.status.includes('ABANDONADO') || a.status.includes('ZERADO') || a.status.includes('REPROVADO'))).length;
+      const avgScore = totalCount > 0 ? Math.round(allAttempts.reduce((acc, a) => acc + (Number(a.score) || 0), 0) / totalCount) : 0;
+      const compRate = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+      document.getElementById('t-metric-total').textContent = totalCount;
+      document.getElementById('t-metric-avg').textContent = avgScore;
+      document.getElementById('t-metric-rate').textContent = `${compRate}%`;
+      document.getElementById('t-metric-abandoned').textContent = abandonedCount;
+
+      const classSet = new Set();
+      allAttempts.forEach(a => { if (a.studentClass) classSet.add(a.studentClass); });
+      const classesList = ['TODAS', ...Array.from(classSet)];
+
+      const chipsContainer = document.getElementById('teacher-chips-list');
+      chipsContainer.innerHTML = '';
+      classesList.forEach(cls => {
+        const chip = document.createElement('button');
+        chip.className = `teacher-chip ${currentSelectedClass === cls ? 'active' : ''}`;
+        chip.textContent = cls;
+        chip.onclick = () => {
+          currentSelectedClass = cls;
+          renderTeacherDashboard();
+        };
+        chipsContainer.appendChild(chip);
+      });
+
+      const filtered = allAttempts.filter(a => {
+        const matchClass = currentSelectedClass === 'TODAS' || a.studentClass === currentSelectedClass;
+        const q = currentSearchTerm.toLowerCase();
+        const matchSearch = !q || 
+          (a.studentName && a.studentName.toLowerCase().includes(q)) ||
+          (a.studentClass && a.studentClass.toLowerCase().includes(q)) ||
+          (a.studentLogin && a.studentLogin.toLowerCase().includes(q)) ||
+          (a.status && a.status.toLowerCase().includes(q));
+        return matchClass && matchSearch;
+      });
+
+      document.getElementById('teacher-records-count-lbl').textContent = `Registros dos Alunos (${filtered.length})`;
+
+      const recordsContainer = document.getElementById('teacher-records-container');
+      recordsContainer.innerHTML = '';
+
+      if (filtered.length === 0) {
+        recordsContainer.innerHTML = `
+          <div style="text-align: center; padding: 28px 16px; background: var(--bg-surface); border-radius: 16px; border: 1px dashed var(--border-subtle);">
+            <div style="font-size: 32px; margin-bottom: 6px;">👾</div>
+            <div style="font-weight: 700; color: var(--text-main); font-size: 14px;">${totalCount === 0 ? 'Nenhum aluno jogou ainda.' : 'Nenhum registro encontrado para este filtro.'}</div>
+            <div style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">Assim que um aluno iniciar e responder as fases no navegador Google Chrome, seus dados aparecerão aqui em tempo real.</div>
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(record => {
+        const isCompleted = record.status && record.status.startsWith('CONCLUÍDO');
+        const isAbandoned = record.status && (record.status.includes('ABANDONADO') || record.status.includes('ZERADO'));
+        const statusColor = isCompleted ? 'var(--neon-green)' : (isAbandoned ? 'var(--neon-magenta)' : 'var(--neon-yellow)');
+
+        const card = document.createElement('div');
+        card.className = 'student-item-card';
+        card.onclick = () => openStudentDetailModal(record);
+        card.innerHTML = `
+          <div class="student-avatar-badge">${record.characterAvatar || '⚡'}</div>
+          <div class="student-info-col">
+            <div class="student-name-row">
+              <span class="student-name-text">${record.studentName}</span>
+              <span class="student-class-tag">${record.studentClass}</span>
+            </div>
+            <div class="student-meta-row">
+              <span style="color: ${statusColor}; font-weight: 700;">${record.status}</span>
+              <span>•</span>
+              <span>${record.timestamp || ''}</span>
+            </div>
+          </div>
+          <div class="student-score-col">
+            <div class="student-score-num">${record.score} pts</div>
+            <div style="font-size: 11px; color: var(--text-muted);">${record.correctAnswers || 0} acertos | ${record.wrongAttempts || 0} erros</div>
+          </div>
+        `;
+        recordsContainer.appendChild(card);
+      });
+    }
+
+    function handleTeacherSearch(value) {
+      currentSearchTerm = value;
+      renderTeacherDashboard();
+    }
+
+    function openStudentDetailModal(record) {
+      currentModalRecordId = record.id;
+      document.getElementById('modal-avatar').textContent = record.characterAvatar || '⚡';
+      document.getElementById('modal-name').textContent = record.studentName;
+      document.getElementById('modal-class').textContent = `Turma: ${record.studentClass} • Login: ${record.studentLogin || 'N/A'}`;
+
+      const isCompleted = record.status && record.status.startsWith('CONCLUÍDO');
+      const isAbandoned = record.status && (record.status.includes('ABANDONADO') || record.status.includes('ZERADO'));
+      const statusColor = isCompleted ? 'var(--neon-green)' : (isAbandoned ? 'var(--neon-magenta)' : 'var(--neon-yellow)');
+
+      document.getElementById('modal-body').innerHTML = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+          <div><span style="color: var(--text-muted); font-size: 11px;">STATUS</span><br><strong style="color: ${statusColor};">${record.status}</strong></div>
+          <div><span style="color: var(--text-muted); font-size: 11px;">PONTUAÇÃO</span><br><strong style="color: var(--neon-yellow);">${record.score} pts</strong></div>
+          <div><span style="color: var(--text-muted); font-size: 11px;">ACERTOS / ERROS</span><br><strong>${record.correctAnswers || 0} / ${record.wrongAttempts || 0}</strong></div>
+          <div><span style="color: var(--text-muted); font-size: 11px;">VIDAS RESTANTES</span><br><strong>${record.livesRemaining || 0} / 3 ❤️</strong></div>
+        </div>
+        <div><span style="color: var(--text-muted); font-size: 11px;">REGISTRADO EM</span><br><span>${record.timestamp || 'Hoje'}</span></div>
+        ${isAbandoned ? '<div style="margin-top: 10px; padding: 8px; background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.3); border-radius: 8px; font-size: 12px; color: #fca5a5;">⚠️ O aluno trocou de tela ou saiu antes do término. A sessão foi bloqueada e os pontos foram zerados.</div>' : ''}
+      `;
+      document.getElementById('student-detail-modal').classList.add('active');
+    }
+
+    function closeStudentDetailModal() {
+      document.getElementById('student-detail-modal').classList.remove('active');
+      currentModalRecordId = null;
+    }
+
+    async function deleteCurrentModalRecord() {
+      if (!currentModalRecordId) return;
+      const history = getLocalAttempts().filter(r => String(r.id) !== String(currentModalRecordId));
+      localStorage.setItem('cyber_runner_history', JSON.stringify(history));
+      if (SupabaseCloud.isConfigured()) {
+        await SupabaseCloud.deleteAttempt(currentModalRecordId);
+      }
+      await XamppSqlite.deleteAttempt(currentModalRecordId);
+      cachedXamppAttempts = cachedXamppAttempts.filter(a => String(a.id) !== String(currentModalRecordId));
+      closeStudentDetailModal();
+      renderTeacherDashboard();
+    }
+
+    /* =========================================================================
+       SUPABASE & NETLIFY MODAL MANAGEMENT
+       ========================================================================= */
+    function openSupabaseConfigModal() {
+      loadSupabaseSettingsToInputs();
+      document.getElementById('supabase-config-modal').classList.add('active');
+    }
+
+    function closeSupabaseConfigModal() {
+      document.getElementById('supabase-config-modal').classList.remove('active');
+      updateSupabaseStatusIndicator();
+    }
+
+    function loadSupabaseSettingsToInputs() {
+      document.getElementById('supabase-url-input').value = localStorage.getItem('cyber_runner_supabase_url') || '';
+      document.getElementById('supabase-key-input').value = localStorage.getItem('cyber_runner_supabase_key') || '';
+    }
+
+    function saveSupabaseSettings() {
+      const url = document.getElementById('supabase-url-input').value.trim();
+      const key = document.getElementById('supabase-key-input').value.trim();
+      localStorage.setItem('cyber_runner_supabase_url', url);
+      localStorage.setItem('cyber_runner_supabase_key', key);
+
+      const feedback = document.getElementById('supabase-test-feedback');
+      feedback.style.display = 'block';
+      feedback.style.background = 'rgba(34, 197, 94, 0.15)';
+      feedback.style.color = 'var(--neon-green)';
+      feedback.textContent = 'Configurações do Supabase salvas localmente!';
+
+      updateSupabaseStatusIndicator();
+    }
+
+    async function testSupabaseConnection() {
+      saveSupabaseSettings();
+      const feedback = document.getElementById('supabase-test-feedback');
+      feedback.style.display = 'block';
+      feedback.style.background = 'rgba(34, 211, 238, 0.1)';
+      feedback.style.color = 'var(--neon-cyan)';
+      feedback.textContent = 'Testando conexão com o endpoint do Supabase...';
+
+      const result = await SupabaseCloud.test();
+      feedback.style.background = result.success ? 'rgba(34, 197, 94, 0.15)' : 'rgba(244, 63, 94, 0.15)';
+      feedback.style.color = result.success ? 'var(--neon-green)' : 'var(--neon-magenta)';
+      feedback.textContent = result.msg;
+    }
+
+    function updateSupabaseStatusIndicator() {
+      const isOnline = SupabaseCloud.isConfigured();
+      const badge = document.getElementById('supabase-indicator-badge');
+      const dot = document.getElementById('supabase-dot');
+      const txt = document.getElementById('supabase-status-text');
+      if (!badge) return;
+
+      if (isOnline) {
+        dot.textContent = '🟢';
+        txt.textContent = 'Supabase Conectado';
+        badge.style.borderColor = 'rgba(34, 197, 94, 0.4)';
+        badge.style.color = 'var(--neon-green)';
+      } else {
+        dot.textContent = '⚪';
+        txt.textContent = 'Modo Local / Netlify';
+        badge.style.borderColor = 'rgba(34, 211, 238, 0.3)';
+        badge.style.color = 'var(--neon-cyan)';
+      }
+    }
+
+    function copySupabaseSqlScript() {
+      const code = document.getElementById('supabase-sql-code').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        alert('Script SQL copiado com sucesso! Cole no SQL Editor do seu painel Supabase.');
+      });
+    }
+
+    /* =========================================================================
+       EXPORT & LOCAL FILE DOWNLOADS (.JSON / .CSV)
+       ========================================================================= */
+    function downloadCurrentSessionProof() {
+      const progressPct = Math.round((state.currentStageIndex / STAGES.length) * 100);
+      const proofData = {
+        comprovante: "Cyber Runner - Lógica de Programação",
+        aluno: state.studentName,
+        turma: state.studentClass,
+        login: state.studentLogin || 'N/A',
+        personagem: state.selectedCharacter.name,
+        pontuacao_final: state.score,
+        progresso_percentual: `${progressPct}%`,
+        fases_completadas: `${state.currentStageIndex} de ${STAGES.length}`,
+        acertos: state.correctCount,
+        erros: state.wrongCount,
+        vidas_finais: state.lives,
+        status: state.isLockedByScreenSwitch ? 'ABANDONADO / ZERADO' : (state.score > 0 ? 'CONCLUÍDO COM SUCESSO' : 'REPROVADO'),
+        timestamp: new Date().toLocaleString('pt-BR')
+      };
+
+      const jsonStr = JSON.stringify(proofData, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `comprovante_${state.studentName.toLowerCase().replace(/\s+/g, '_')}_${state.studentClass}.json`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function generateCsvReportString() {
+      const records = getLocalAttempts();
+      const headers = ['ID', 'Aluno', 'Turma', 'Login', 'Personagem', 'Pontos', 'Progresso_%', 'Acertos', 'Erros', 'Vidas', 'Status', 'Data_Hora'];
+      const rows = records.map(r => [
+        `"${r.id || ''}"`,
+        `"${(r.studentName || '').replace(/"/g, '""')}"`,
+        `"${(r.studentClass || '').replace(/"/g, '""')}"`,
+        `"${(r.studentLogin || '').replace(/"/g, '""')}"`,
+        `"${r.characterName || ''}"`,
+        r.score || 0,
+        `"${r.progressPercentage || 0}%"`,
+        r.correctAnswers || 0,
+        r.wrongAttempts || 0,
+        r.livesRemaining || 0,
+        `"${r.status || ''}"`,
+        `"${r.timestamp || ''}"`
+      ]);
+      return [headers.join(';'), ...rows.map(e => e.join(';'))].join('\n');
+    }
+
+    function downloadTeacherReportCsv() {
+      const csv = generateCsvReportString();
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `relatorio_turmas_cyber_runner_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function downloadTeacherBackupJson() {
+      const data = {
+        attempts: getLocalAttempts(),
+        users: JSON.parse(localStorage.getItem('cyber_runner_users') || '[]'),
+        exportedAt: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `backup_cyber_runner_${new Date().toISOString().slice(0, 10)}.json`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function confirmClearTeacherHistory() {
+      if (confirm('Tem certeza que deseja apagar todo o histórico de alunos salvos neste navegador?')) {
+        localStorage.removeItem('cyber_runner_history');
+        renderTeacherDashboard();
+      }
+    }
+
+    /* =========================================================================
+       UI HELPERS & HUD
+       ========================================================================= */
+    function updateHud() {
+      document.getElementById('hud-score-val').textContent = state.score;
+      for (let i = 1; i <= 3; i++) {
+        const el = document.getElementById(`heart-${i}`);
+        if (el) {
+          if (i <= state.lives) {
+            el.classList.remove('heart-lost');
+          } else {
+            el.classList.add('heart-lost');
+          }
+        }
+      }
+    }
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(screenId);
+      if (target) target.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function restartGame() {
+      state.hasStartedClass = false;
+      state.isFinished = false;
+      state.isLockedByScreenSwitch = false;
+      showScreen('screen-login');
+    }
+
+    /* =========================================================================
+       CANVAS CYBER PARTICLES & GRID BACKGROUND ANIMATION
+       ========================================================================= */
+    function initCanvasBackground() {
+      const canvas = document.getElementById('bg-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      let w = (canvas.width = window.innerWidth);
+      let h = (canvas.height = window.innerHeight);
+
+      window.addEventListener('resize', () => {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+      });
+
+      const particles = [];
+      const particleCount = Math.min(45, Math.floor(w / 20));
+
+      for (let i = 0; i < particleCount; i++) {
+        particles.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: (Math.random() - 0.5) * 0.6,
+          vy: Math.random() * 0.8 + 0.2,
+          size: Math.random() * 2 + 1,
+          color: Math.random() > 0.5 ? '#00f5ff' : '#ff007f',
+          alpha: Math.random() * 0.6 + 0.2
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, w, h);
+
+        ctx.strokeStyle = 'rgba(0, 245, 255, 0.04)';
+        ctx.lineWidth = 1;
+        const gridSize = 40;
+        for (let x = 0; x < w; x += gridSize) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, h);
+          ctx.stroke();
+        }
+        for (let y = 0; y < h; y += gridSize) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(w, y);
+          ctx.stroke();
+        }
+
+        particles.forEach(p => {
+          ctx.save();
+          ctx.globalAlpha = p.alpha;
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.y > h) { p.y = 0; p.x = Math.random() * w; }
+          if (p.x < 0) p.x = w;
+          if (p.x > w) p.x = 0;
+        });
+
+        requestAnimationFrame(draw);
+      }
+      draw();
+    }
+  </script>
+</body>
+</html>

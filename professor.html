@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Cyber Runner // Painel do Professor & Monitor em Tempo Real</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #050508;
+      --bg-card: #0c0d12;
+      --bg-card-hover: #12141c;
+      --bg-surface: #12141c;
+      --bg-surface-active: #1b1e2a;
+      --border-subtle: #1e2538;
+      --border-glow: #22d3ee;
+      --neon-cyan: #22d3ee;
+      --neon-cyan-dim: #0891b2;
+      --neon-magenta: #f43f5e;
+      --neon-yellow: #fbbf24;
+      --neon-green: #10b981;
+      --neon-purple: #c084fc;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dark: #64748b;
+      --code-bg: #030305;
+      --font-display: 'Orbitron', -apple-system, sans-serif;
+      --font-body: 'Rajdhani', -apple-system, sans-serif;
+      --font-code: 'Fira Code', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.4;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    #bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.35;
+    }
+
+    .scanlines {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%), linear-gradient(90deg, rgba(34, 211, 238, 0.015), rgba(0, 0, 0, 0.01), rgba(244, 63, 94, 0.015));
+      background-size: 100% 3px, 6px 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    #app-container {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 1200px;
+      padding: 20px 20px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Top Command Header */
+    .teacher-header {
+      background: rgba(12, 13, 18, 0.95);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    }
+
+    .teacher-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .teacher-brand-icon {
+      font-size: 28px;
+      filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.6));
+    }
+
+    .teacher-brand-title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--neon-cyan);
+      text-transform: uppercase;
+    }
+
+    .teacher-brand-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .live-status-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: var(--neon-green);
+      font-family: var(--font-code);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--neon-green);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--neon-green);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.9); opacity: 0.7; }
+      50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 14px var(--neon-green); }
+      100% { transform: scale(0.9); opacity: 0.7; }
+    }
+
+    /* Cards */
+    .cyber-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 24px;
+      padding: 24px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Metrics Grid */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .metric-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric-val {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+
+    .metric-lbl {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    /* Actions Toolbar */
+    .toolbar-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .action-btn-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .cyber-btn-sm {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 9px 14px;
+      color: var(--text-main);
+      font-family: var(--font-display);
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .cyber-btn-sm:hover {
+      background: var(--bg-surface-active);
+      border-color: var(--neon-cyan);
+      color: var(--neon-cyan);
+      transform: translateY(-1px);
+    }
+
+    .cyber-btn-sm.primary {
+      background: linear-gradient(135deg, #0891b2 0%, #22d3ee 100%);
+      color: #040810;
+      border: none;
+      box-shadow: 0 0 16px rgba(34, 211, 238, 0.3);
+    }
+
+    .cyber-btn-sm.primary:hover {
+      box-shadow: 0 0 24px rgba(34, 211, 238, 0.6);
+      transform: translateY(-2px);
+    }
+
+    /* Search & Filter Bar */
+    .search-filter-box {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .cyber-input {
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: var(--text-main);
+      font-family: var(--font-body);
+      font-size: 15px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .cyber-input:focus {
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.2);
+    }
+
+    .chips-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .class-chip {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .class-chip.active {
+      background: rgba(34, 211, 238, 0.15);
+      color: var(--neon-cyan);
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 10px rgba(34, 211, 238, 0.2);
+    }
+
+    /* Student Live Table & Cards */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 14px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+    }
+
+    .student-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13.5px;
+    }
+
+    .student-table th {
+      background: rgba(8, 10, 15, 0.9);
+      padding: 12px 14px;
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--neon-cyan);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+    }
+
+    .student-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: middle;
+    }
+
+    .student-table tr:hover td {
+      background: rgba(34, 211, 238, 0.03);
+      cursor: pointer;
+    }
+
+    .student-badge-class {
+      display: inline-block;
+      background: rgba(34, 211, 238, 0.12);
+      color: var(--neon-cyan);
+      border: 1px solid rgba(34, 211, 238, 0.25);
+      border-radius: 6px;
+      padding: 2px 7px;
+      font-family: var(--font-code);
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+
+    .progress-bar-micro {
+      width: 100px;
+      height: 7px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #22d3ee, #10b981);
+      border-radius: 4px;
+    }
+
+    .status-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .status-active {
+      background: rgba(34, 211, 238, 0.15);
+      color: var(--neon-cyan);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+    }
+
+    .status-done {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--neon-green);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-failed {
+      background: rgba(244, 63, 94, 0.15);
+      color: var(--neon-magenta);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .status-violation {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      border: 1.5px solid var(--neon-magenta);
+    }
+
+    /* Modal Overlay */
+    .custom-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .custom-modal.active {
+      display: flex;
+    }
+
+    .custom-modal-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 24px;
+      max-width: 560px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .code-sql-block {
+      background: #080a0f;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px;
+      font-family: var(--font-code);
+      font-size: 11px;
+      color: #93c5fd;
+      text-align: left;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      max-height: 180px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+  <div class="scanlines"></div>
+
+  <div id="app-container">
+    <!-- Header -->
+    <header class="teacher-header">
+      <div class="teacher-brand">
+        <span class="teacher-brand-icon">🎓</span>
+        <div>
+          <h1 class="teacher-brand-title">Cyber Runner // Painel do Professor</h1>
+          <p class="teacher-brand-subtitle">Monitoramento em Tempo Real das Fases (1 a 60), Turmas e Desempenho</p>
+        </div>
+      </div>
+      <div class="header-controls">
+        <div class="live-status-pill">
+          <span class="pulse-dot"></span>
+          <span id="live-polling-text">AO VIVO (Sincronizado)</span>
+        </div>
+        <button class="cyber-btn-sm" onclick="manualRefreshData()">
+          <span>🔄</span> Atualizar Agora
+        </button>
+        <a href="index.html" class="cyber-btn-sm" style="text-decoration: none;">
+          <span>🎮</span> Abrir Jogo do Aluno
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Dashboard Card -->
+    <main class="cyber-card">
+      <!-- 5 Key Metrics -->
+      <div class="metric-grid">
+        <div class="metric-card">
+          <div class="metric-val" id="metric-total" style="color: var(--neon-cyan);">0</div>
+          <div class="metric-lbl">Total de Alunos</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val" id="metric-active" style="color: var(--neon-yellow);">0</div>
+          <div class="metric-lbl">Em Andamento (Ao Vivo)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val" id="metric-avg" style="color: var(--neon-green);">0 pts</div>
+          <div class="metric-lbl">Média de Pontuação</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val" id="metric-rate" style="color: var(--neon-purple);">0%</div>
+          <div class="metric-lbl">Taxa de Conclusão</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val" id="metric-violation" style="color: var(--neon-magenta);">0</div>
+          <div class="metric-lbl">Troca de Tela / Zerados</div>
+        </div>
+      </div>
+
+      <!-- Action Toolbar -->
+      <div class="toolbar-row">
+        <div class="action-btn-group">
+          <button class="cyber-btn-sm primary" onclick="exportCsvReport()">
+            <span>📊</span> Exportar Planilha (CSV)
+          </button>
+          <button class="cyber-btn-sm" onclick="exportJsonBackup()">
+            <span>💾</span> Backup JSON
+          </button>
+          <button class="cyber-btn-sm" onclick="openSupabaseModal()">
+            <span>⚡</span> Configurar Nuvem (Supabase)
+          </button>
+        </div>
+        <div class="action-btn-group">
+          <button class="cyber-btn-sm" style="color: var(--neon-magenta); border-color: rgba(244, 63, 94, 0.3);" onclick="confirmClearAll()">
+            <span>🗑️</span> Limpar Histórico
+          </button>
+        </div>
+      </div>
+
+      <!-- Search & Filters -->
+      <div class="search-filter-box">
+        <input type="text" id="search-input" class="cyber-input" placeholder="🔍 Filtrar por nome do aluno, turma (ex: 1TECA, 1ADMA) ou status..." oninput="onSearchChanged(this.value)" />
+
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+          Filtrar Turma:
+        </div>
+        <div class="chips-wrapper" id="class-chips-container">
+          <button class="class-chip active" onclick="selectClassFilter('TODAS', this)">TODAS</button>
+        </div>
+      </div>
+
+      <!-- Live Students Table -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h3 style="font-family: var(--font-display); font-size: 13px; color: var(--neon-cyan); letter-spacing: 1px; text-transform: uppercase;" id="table-count-header">
+          Alunos na Sala (0)
+        </h3>
+        <span style="font-size: 12px; color: var(--text-muted);">Clique em qualquer linha para ver o raio-x detalhado de respostas</span>
+      </div>
+
+      <div class="table-container">
+        <table class="student-table">
+          <thead>
+            <tr>
+              <th>Aluno / Avatar</th>
+              <th>Turma</th>
+              <th>Login</th>
+              <th>Fase Atual / Progresso</th>
+              <th>Pontos</th>
+              <th>Acertos / Erros</th>
+              <th>Status</th>
+              <th>Horário</th>
+            </tr>
+          </thead>
+          <tbody id="student-table-body">
+            <!-- Populated via JS -->
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- STUDENT DETAIL AUDIT MODAL -->
+  <div class="custom-modal" id="detail-modal" onclick="if(event.target === this) closeDetailModal()">
+    <div class="custom-modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span id="modal-avatar" style="font-size: 32px;">⚡</span>
+          <div>
+            <h3 id="modal-name" style="font-family: var(--font-display); font-size: 18px; color: var(--text-main);">Aluno</h3>
+            <p id="modal-class" style="color: var(--neon-cyan); font-size: 12px;">Turma</p>
+          </div>
+        </div>
+        <button style="background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer;" onclick="closeDetailModal()">✕</button>
+      </div>
+
+      <div id="modal-body" style="font-size: 13.5px; color: #cbd5e1; line-height: 1.6;">
+        <!-- Filled via JS -->
+      </div>
+
+      <div style="margin-top: 20px; display: flex; gap: 10px;">
+        <button class="cyber-btn-sm primary" style="flex: 1; padding: 10px;" onclick="closeDetailModal()">Fechar</button>
+        <button class="cyber-btn-sm" style="color: var(--neon-magenta); border-color: rgba(244, 63, 94, 0.3);" onclick="deleteCurrentModalRecord()">Excluir Aluno</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUPABASE CLOUD CONFIG MODAL -->
+  <div class="custom-modal" id="supabase-modal" onclick="if(event.target === this) closeSupabaseModal()">
+    <div class="custom-modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 24px;">⚡</span>
+          <div>
+            <h3 style="font-family: var(--font-display); font-size: 16px; color: var(--neon-cyan);">Integração Supabase Cloud</h3>
+            <p style="color: var(--text-muted); font-size: 12px;">Conexão para monitoramento de múltiplas máquinas</p>
+          </div>
+        </div>
+        <button style="background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer;" onclick="closeSupabaseModal()">✕</button>
+      </div>
+
+      <div style="margin-bottom: 14px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; color: var(--neon-cyan); margin-bottom: 4px;">PROJECT URL:</label>
+        <input type="text" id="cfg-supabase-url" class="cyber-input" placeholder="https://xyz.supabase.co" />
+      </div>
+
+      <div style="margin-bottom: 14px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; color: var(--neon-cyan); margin-bottom: 4px;">ANON / PUBLIC API KEY:</label>
+        <input type="password" id="cfg-supabase-key" class="cyber-input" placeholder="eyJhbGciOi..." />
+      </div>
+
+      <div id="cfg-test-result" style="display: none; padding: 10px; border-radius: 10px; font-size: 12.5px; margin-bottom: 14px;"></div>
+
+      <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+        <button class="cyber-btn-sm primary" style="flex: 1;" onclick="saveAndTestSupabaseConfig()">Salvar & Testar Conexão</button>
+      </div>
+
+      <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">
+        Script SQL das Tabelas (Execute no SQL Editor do Supabase):
+      </div>
+      <pre class="code-sql-block" id="sql-code-snippet">-- 1. Tabela de Tentativas dos Alunos
+CREATE TABLE IF NOT EXISTS student_attempts (
+    id TEXT PRIMARY KEY,
+    student_name TEXT NOT NULL,
+    student_class TEXT NOT NULL,
+    student_login TEXT,
+    character_name TEXT,
+    character_avatar TEXT,
+    score INTEGER DEFAULT 0,
+    progress_percentage INTEGER DEFAULT 0,
+    stages_completed INTEGER DEFAULT 0,
+    correct_answers INTEGER DEFAULT 0,
+    wrong_attempts INTEGER DEFAULT 0,
+    lives_remaining INTEGER DEFAULT 3,
+    status TEXT,
+    stage_results JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 2. Tabela de Contas de Alunos
+CREATE TABLE IF NOT EXISTS student_users (
+    id TEXT PRIMARY KEY,
+    login TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    first_name TEXT NOT NULL,
+    student_class TEXT NOT NULL,
+    avatar TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Desabilitar RLS para sala de aula sem bloqueio
+ALTER TABLE student_attempts DISABLE ROW LEVEL SECURITY;
+ALTER TABLE student_users DISABLE ROW LEVEL SECURITY;</pre>
+
+      <button class="cyber-btn-sm" style="width: 100%; margin-top: 8px;" onclick="copySqlScript()">
+        📋 Copiar Script SQL
+      </button>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================================
+       CANVAS PARTICLES BACKGROUND
+       ========================================================================= */
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height, particles = [];
+
+    function resizeCanvas() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    for (let i = 0; i < 40; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        size: Math.random() * 2 + 1,
+        color: Math.random() > 0.5 ? '#22d3ee' : '#f43f5e'
+      });
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, width, height);
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
+
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    /* =========================================================================
+       SUPABASE REST API CLIENT
+       ========================================================================= */
+    const SupabaseCloud = {
+      getConfig() {
+        return {
+          url: localStorage.getItem('cyber_runner_supabase_url') || '',
+          key: localStorage.getItem('cyber_runner_supabase_key') || ''
+        };
+      },
+      isConfigured() {
+        const conf = this.getConfig();
+        return conf.url.length > 5 && conf.key.length > 10;
+      },
+      async fetchAllAttempts() {
+        if (!this.isConfigured()) return null;
+        const { url, key } = this.getConfig();
+        try {
+          const endpoint = `${url.replace(/\/+$/, '')}/rest/v1/student_attempts?select=*&order=created_at.desc&limit=250`;
+          const res = await fetch(endpoint, {
+            headers: {
+              'apikey': key,
+              'Authorization': `Bearer ${key}`
+            }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            return data.map(d => ({
+              id: d.id,
+              studentName: d.student_name,
+              studentClass: d.student_class,
+              studentLogin: d.student_login || '',
+              characterName: d.character_name,
+              characterAvatar: d.character_avatar || '⚡',
+              score: d.score || 0,
+              progressPercentage: d.progress_percentage || 0,
+              stagesCompleted: d.stages_completed || 0,
+              correctAnswers: d.correct_answers || 0,
+              wrongAttempts: d.wrong_attempts || 0,
+              livesRemaining: d.lives_remaining !== undefined ? d.lives_remaining : 3,
+              status: d.status || 'EM ANDAMENTO',
+              stageResults: d.stage_results || [],
+              timestamp: d.created_at ? new Date(d.created_at).toLocaleString('pt-BR') : 'Hoje'
+            }));
+          }
+        } catch(e) {
+          console.warn('Supabase fetch error:', e);
+        }
+        return null;
+      },
+      async deleteAttempt(id) {
+        if (!this.isConfigured()) return false;
+        const { url, key } = this.getConfig();
+        try {
+          const endpoint = `${url.replace(/\/+$/, '')}/rest/v1/student_attempts?id=eq.${encodeURIComponent(id)}`;
+          const res = await fetch(endpoint, {
+            method: 'DELETE',
+            headers: {
+              'apikey': key,
+              'Authorization': `Bearer ${key}`
+            }
+          });
+          return res.ok;
+        } catch(e) {
+          return false;
+        }
+      }
+    };
+
+    /* =========================================================================
+       XAMPP SQLITE CLIENT (LOCAL BACKEND PHP)
+       ========================================================================= */
+    const XamppSqlite = {
+      apiEndpoint: 'api.php',
+      
+      async saveAttempt(record) {
+        try {
+          const res = await fetch(this.apiEndpoint + '?action=save_attempt', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(record)
+          });
+          return res.ok;
+        } catch(e) {
+          return false;
+        }
+      },
+
+      async fetchAllAttempts() {
+        try {
+          const res = await fetch(this.apiEndpoint + '?action=get_attempts');
+          if (res.ok) {
+            const data = await res.json();
+            if (data.success && Array.isArray(data.attempts)) {
+              return data.attempts;
+            }
+          }
+        } catch(e) {}
+        return null;
+      },
+
+      async deleteAttempt(id) {
+        try {
+          const res = await fetch(this.apiEndpoint + '?action=delete_attempt&id=' + encodeURIComponent(id), {
+            method: 'DELETE'
+          });
+          return res.ok;
+        } catch(e) {
+          return false;
+        }
+      },
+
+      async clearAll() {
+        try {
+          const res = await fetch(this.apiEndpoint + '?action=clear_all');
+          return res.ok;
+        } catch(e) {
+          return false;
+        }
+      }
+    };
+
+    /* =========================================================================
+       DASHBOARD STATE & RENDERING
+       ========================================================================= */
+    let currentClassFilter = 'TODAS';
+    let currentSearchTerm = '';
+    let currentModalId = null;
+    let cachedAttempts = [];
+
+    async function loadData() {
+      let remoteAttempts = null;
+      if (SupabaseCloud.isConfigured()) {
+        remoteAttempts = await SupabaseCloud.fetchAllAttempts();
+      }
+
+      let sqliteAttempts = await XamppSqlite.fetchAllAttempts();
+
+      let localAttempts = [];
+      try {
+        localAttempts = JSON.parse(localStorage.getItem('cyber_runner_history') || '[]');
+      } catch(e) {}
+
+      // Merge remote, sqlite, and local without duplicates
+      const map = new Map();
+      (remoteAttempts || []).forEach(a => map.set(String(a.id), a));
+      (sqliteAttempts || []).forEach(a => map.set(String(a.id), a));
+      localAttempts.forEach(a => {
+        if (!map.has(String(a.id))) {
+          map.set(String(a.id), a);
+        }
+      });
+
+      cachedAttempts = Array.from(map.values());
+      renderDashboard();
+    }
+
+    function renderDashboard() {
+      const all = cachedAttempts;
+      const total = all.length;
+      const active = all.filter(a => a.status && a.status.startsWith('EM ANDAMENTO')).length;
+      const done = all.filter(a => a.status && a.status.startsWith('CONCLUÍDO')).length;
+      const violations = all.filter(a => a.status && (a.status.includes('ABANDONADO') || a.status.includes('ZERADO'))).length;
+      const avgScore = total > 0 ? Math.round(all.reduce((acc, a) => acc + (Number(a.score) || 0), 0) / total) : 0;
+      const rate = total > 0 ? Math.round((done / total) * 100) : 0;
+
+      document.getElementById('metric-total').textContent = total;
+      document.getElementById('metric-active').textContent = active;
+      document.getElementById('metric-avg').textContent = `${avgScore} pts`;
+      document.getElementById('metric-rate').textContent = `${rate}%`;
+      document.getElementById('metric-violation').textContent = violations;
+
+      // Extract unique classes
+      const classSet = new Set();
+      all.forEach(a => { if (a.studentClass) classSet.add(a.studentClass); });
+      const classes = ['TODAS', ...Array.from(classSet).sort()];
+
+      const chipsContainer = document.getElementById('class-chips-container');
+      chipsContainer.innerHTML = '';
+      classes.forEach(cls => {
+        const btn = document.createElement('button');
+        btn.className = `class-chip ${currentClassFilter === cls ? 'active' : ''}`;
+        btn.textContent = cls;
+        btn.onclick = () => selectClassFilter(cls, btn);
+        chipsContainer.appendChild(btn);
+      });
+
+      // Filter
+      const filtered = all.filter(a => {
+        const matchClass = currentClassFilter === 'TODAS' || a.studentClass === currentClassFilter;
+        const q = currentSearchTerm.toLowerCase();
+        const matchSearch = !q ||
+          (a.studentName && a.studentName.toLowerCase().includes(q)) ||
+          (a.studentClass && a.studentClass.toLowerCase().includes(q)) ||
+          (a.studentLogin && a.studentLogin.toLowerCase().includes(q)) ||
+          (a.status && a.status.toLowerCase().includes(q));
+        return matchClass && matchSearch;
+      });
+
+      document.getElementById('table-count-header').textContent = `Alunos na Sala (${filtered.length})`;
+
+      const tbody = document.getElementById('student-table-body');
+      tbody.innerHTML = '';
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 32px; color: var(--text-muted);">
+              <div style="font-size: 28px; margin-bottom: 6px;">👾</div>
+              Nenhum aluno encontrado para este filtro. Quando os alunos acessarem <strong>index.html</strong>, seus dados surgirão aqui em tempo real.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      filtered.forEach(student => {
+        const tr = document.createElement('tr');
+        tr.onclick = () => openStudentDetail(student.id);
+
+        let statusClass = 'status-active';
+        let statusIcon = '⚡';
+        const st = student.status || '';
+
+        if (st.includes('CONCLUÍDO')) {
+          statusClass = 'status-done';
+          statusIcon = '🏆';
+        } else if (st.includes('ABANDONADO') || st.includes('ZERADO')) {
+          statusClass = 'status-violation';
+          statusIcon = '🚨';
+        } else if (st.includes('REPROVADO')) {
+          statusClass = 'status-failed';
+          statusIcon = '💀';
+        }
+
+        const pct = student.progressPercentage || 0;
+        const stagesText = `Fase ${(student.stagesCompleted || 0) + (st.includes('CONCLUÍDO') ? 0 : 1)}/60 (${pct}%)`;
+
+        tr.innerHTML = `
+          <td>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 20px;">${student.characterAvatar || '⚡'}</span>
+              <div>
+                <strong>${student.studentName || 'Aluno'}</strong>
+              </div>
+            </div>
+          </td>
+          <td><span class="student-badge-class">${student.studentClass || '1TECA'}</span></td>
+          <td><code style="font-family: var(--font-code); color: #94a3b8; font-size: 12px;">${student.studentLogin || '-'}</code></td>
+          <td>
+            <div>${stagesText}</div>
+            <div class="progress-bar-micro">
+              <div class="progress-bar-fill" style="width: ${pct}%"></div>
+            </div>
+          </td>
+          <td><strong style="color: var(--neon-yellow); font-family: var(--font-display); font-size: 15px;">${student.score || 0}</strong></td>
+          <td>
+            <span style="color: var(--neon-green); font-weight: 700;">${student.correctAnswers || 0} ✔</span> / 
+            <span style="color: var(--neon-magenta); font-weight: 700;">${student.wrongAttempts || 0} ✖</span>
+          </td>
+          <td>
+            <span class="status-tag ${statusClass}">
+              <span>${statusIcon}</span> ${st}
+            </span>
+          </td>
+          <td style="color: var(--text-muted); font-size: 11.5px; white-space: nowrap;">${student.timestamp || 'Agora'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function selectClassFilter(cls, btn) {
+      currentClassFilter = cls;
+      document.querySelectorAll('.class-chip').forEach(c => c.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderDashboard();
+    }
+
+    function onSearchChanged(val) {
+      currentSearchTerm = val;
+      renderDashboard();
+    }
+
+    function manualRefreshData() {
+      const btnText = document.getElementById('live-polling-text');
+      btnText.textContent = 'Sincronizando...';
+      loadData().then(() => {
+        setTimeout(() => {
+          btnText.textContent = 'AO VIVO (Sincronizado)';
+        }, 400);
+      });
+    }
+
+    // Auto-polling every 4 seconds for live monitor in classroom
+    setInterval(loadData, 4000);
+    loadData();
+
+    /* =========================================================================
+       MODAL RAIO-X DO ALUNO
+       ========================================================================= */
+    function openStudentDetail(id) {
+      const student = cachedAttempts.find(a => String(a.id) === String(id));
+      if (!student) return;
+      currentModalId = id;
+
+      document.getElementById('modal-avatar').textContent = student.characterAvatar || '⚡';
+      document.getElementById('modal-name').textContent = student.studentName;
+      document.getElementById('modal-class').textContent = `Turma: ${student.studentClass} // Login: ${student.studentLogin || '-'}`;
+
+      let resultsHtml = '';
+      if (student.stageResults && student.stageResults.length > 0) {
+        resultsHtml = `
+          <div style="font-weight: 700; color: var(--neon-cyan); margin-top: 12px; margin-bottom: 6px; font-size: 12px; text-transform: uppercase;">
+            Histórico das Questões Respondidas (${student.stageResults.length}):
+          </div>
+          <div style="max-height: 180px; overflow-y: auto; background: rgba(0,0,0,0.4); border-radius: 10px; padding: 8px; border: 1px solid var(--border-subtle); font-size: 12px;">
+            ${student.stageResults.map(r => `
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 4px 0;">
+                <span><strong>Fase ${r.stageNum}:</strong> ${r.concept}</span>
+                <span style="color: var(--neon-green);">+${r.points} pts</span>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      document.getElementById('modal-body').innerHTML = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: rgba(0,0,0,0.5); padding: 12px; border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border-subtle);">
+          <div><span style="color: var(--text-muted); font-size: 11px;">PONTUAÇÃO:</span><br><strong style="color: var(--neon-yellow); font-size: 18px;">${student.score} pts</strong></div>
+          <div><span style="color: var(--text-muted); font-size: 11px;">STATUS ATUAL:</span><br><strong style="font-size: 13px;">${student.status}</strong></div>
+          <div><span style="color: var(--text-muted); font-size: 11px;">ACERTOS:</span><br><strong style="color: var(--neon-green);">${student.correctAnswers || 0}</strong></div>
+          <div><span style="color: var(--text-muted); font-size: 11px;">ERROS / TENTATIVAS:</span><br><strong style="color: var(--neon-magenta);">${student.wrongAttempts || 0}</strong></div>
+          <div><span style="color: var(--text-muted); font-size: 11px;">VIDAS RESTANTES:</span><br><strong>${student.livesRemaining || 0} / 3</strong></div>
+          <div><span style="color: var(--text-muted); font-size: 11px;">DATA / HORA:</span><br><span style="font-size: 12px;">${student.timestamp || 'Hoje'}</span></div>
+        </div>
+        ${resultsHtml}
+      `;
+
+      document.getElementById('detail-modal').classList.add('active');
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detail-modal').classList.remove('active');
+      currentModalId = null;
+    }
+
+    async function deleteCurrentModalRecord() {
+      if (!currentModalId) return;
+      if (!confirm('Deseja realmente remover este registro de aluno?')) return;
+
+      // 1. Delete locally
+      try {
+        let history = JSON.parse(localStorage.getItem('cyber_runner_history') || '[]');
+        history = history.filter(h => String(h.id) !== String(currentModalId));
+        localStorage.setItem('cyber_runner_history', JSON.stringify(history));
+      } catch(e) {}
+
+      // 2. Delete from Supabase
+      if (SupabaseCloud.isConfigured()) {
+        await SupabaseCloud.deleteAttempt(currentModalId);
+      }
+
+      // 3. Delete from XAMPP SQLite
+      await XamppSqlite.deleteAttempt(currentModalId);
+
+      cachedAttempts = cachedAttempts.filter(a => String(a.id) !== String(currentModalId));
+      closeDetailModal();
+      renderDashboard();
+    }
+
+    /* =========================================================================
+       EXPORT CSV & BACKUP JSON
+       ========================================================================= */
+    function exportCsvReport() {
+      const all = cachedAttempts;
+      if (all.length === 0) {
+        alert('Não há registros para exportar no momento.');
+        return;
+      }
+
+      const headers = ['Turma', 'Nome do Aluno', 'Login', 'Pontuacao', 'Progresso (%)', 'Fases Concluidas', 'Acertos', 'Erros', 'Vidas', 'Status', 'Data_Hora'];
+      const rows = all.map(a => [
+        `"${a.studentClass || ''}"`,
+        `"${a.studentName || ''}"`,
+        `"${a.studentLogin || ''}"`,
+        a.score || 0,
+        a.progressPercentage || 0,
+        a.stagesCompleted || 0,
+        a.correctAnswers || 0,
+        a.wrongAttempts || 0,
+        a.livesRemaining || 0,
+        `"${a.status || ''}"`,
+        `"${a.timestamp || ''}"`
+      ]);
+
+      const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `relatorio_cyber_runner_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function exportJsonBackup() {
+      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(cachedAttempts, null, 2));
+      const dlAnchor = document.createElement('a');
+      dlAnchor.setAttribute('href', dataStr);
+      dlAnchor.setAttribute('download', `backup_cyber_runner_${new Date().toISOString().slice(0,10)}.json`);
+      dlAnchor.click();
+    }
+
+    async function confirmClearAll() {
+      if (confirm('ATENÇÃO: Deseja apagar todos os registros da memória local e do banco SQLite local?')) {
+        localStorage.removeItem('cyber_runner_history');
+        await XamppSqlite.clearAll();
+        cachedAttempts = [];
+        renderDashboard();
+      }
+    }
+
+    /* =========================================================================
+       SUPABASE CONFIG MODAL
+       ========================================================================= */
+    function openSupabaseModal() {
+      const conf = SupabaseCloud.getConfig();
+      document.getElementById('cfg-supabase-url').value = conf.url;
+      document.getElementById('cfg-supabase-key').value = conf.key;
+      document.getElementById('cfg-test-result').style.display = 'none';
+      document.getElementById('supabase-modal').classList.add('active');
+    }
+
+    function closeSupabaseModal() {
+      document.getElementById('supabase-modal').classList.remove('active');
+    }
+
+    async function saveAndTestSupabaseConfig() {
+      const url = document.getElementById('cfg-supabase-url').value.trim();
+      const key = document.getElementById('cfg-supabase-key').value.trim();
+      const resultBox = document.getElementById('cfg-test-result');
+
+      localStorage.setItem('cyber_runner_supabase_url', url);
+      localStorage.setItem('cyber_runner_supabase_key', key);
+
+      resultBox.style.display = 'block';
+      resultBox.style.background = 'rgba(34, 211, 238, 0.15)';
+      resultBox.style.color = 'var(--neon-cyan)';
+      resultBox.textContent = 'Testando conexão com o Supabase...';
+
+      try {
+        const endpoint = `${url.replace(/\/+$/, '')}/rest/v1/student_attempts?select=id&limit=1`;
+        const res = await fetch(endpoint, {
+          headers: { 'apikey': key, 'Authorization': `Bearer ${key}` }
+        });
+        if (res.ok) {
+          resultBox.style.background = 'rgba(16, 185, 129, 0.2)';
+          resultBox.style.color = 'var(--neon-green)';
+          resultBox.textContent = '✅ Conexão estabelecida com sucesso! Os dados dos alunos serão sincronizados em nuvem.';
+          setTimeout(() => {
+            closeSupabaseModal();
+            loadData();
+          }, 1200);
+        } else {
+          resultBox.style.background = 'rgba(244, 63, 94, 0.2)';
+          resultBox.style.color = 'var(--neon-magenta)';
+          resultBox.textContent = `⚠️ Supabase retornou status ${res.status}: ${res.statusText}. Execute o Script SQL abaixo no SQL Editor do seu projeto Supabase.`;
+        }
+      } catch(e) {
+        resultBox.style.background = 'rgba(244, 63, 94, 0.2)';
+        resultBox.style.color = 'var(--neon-magenta)';
+        resultBox.textContent = `❌ Falha ao conectar: ${e.message}`;
+      }
+    }
+
+    function copySqlScript() {
+      const sql = document.getElementById('sql-code-snippet').textContent;
+      navigator.clipboard.writeText(sql).then(() => {
+        alert('Script SQL copiado para a área de transferência! Cole no SQL Editor do Supabase.');
+      });
+    }
+  </script>
+</body>
+</html>
