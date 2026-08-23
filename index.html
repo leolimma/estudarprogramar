@@ -1424,6 +1424,35 @@
     </div>
   </div>
 
+  
+  <!-- PROFESSOR ACCESS AUTH MODAL (MODAL CYBERPUNK) -->
+  <div class="modal-overlay" id="professor-auth-modal">
+    <div class="modal-box" style="max-width: 420px; text-align: center;">
+      <div style="font-size: 38px; margin-bottom: 6px;">🛡️</div>
+      <h3 style="font-family: var(--font-display); font-size: 17px; color: var(--neon-cyan); margin-bottom: 4px;">ÁREA DO PROFESSOR</h3>
+      <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 16px;">Digite o código de autorização para desbloquear o painel.</p>
+
+      <form onsubmit="event.preventDefault(); submitProfessorModalAuth();">
+        <div class="form-group-compact" style="text-align: left; margin-bottom: 12px;">
+          <label class="form-label-compact" for="prof-modal-passcode">Código de Acesso:</label>
+          <input type="password" id="prof-modal-passcode" class="cyber-input-compact" placeholder="Digite seu código de acesso" required autocomplete="current-password" autofocus style="padding: 10px 12px; font-size: 14px;" />
+        </div>
+
+        <div id="prof-modal-error" style="display: none; padding: 8px 10px; border-radius: 8px; font-size: 12px; margin-bottom: 12px; background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.4); color: #fca5a5;"></div>
+
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="cyber-btn cyber-btn-secondary" style="flex: 1; padding: 10px;" onclick="closeProfessorAuthModal()">
+            Cancelar
+          </button>
+          <button type="submit" class="cyber-btn" style="flex: 1; padding: 10px;">
+            Desbloquear ➔
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
   <!-- SUPABASE CONFIG MODAL -->
   <div class="modal-overlay" id="supabase-config-modal">
     <div class="modal-box">
@@ -2036,12 +2065,12 @@
         // Botão de Avanço com indicação de temporizador automático
         nextBtn.style.display = 'flex';
         const isFinal = (state.currentStageIndex === stagesList.length - 1);
-        nextBtn.textContent = isFinal ? 'VER RESULTADO FINAL ➔' : 'PRÓXIMA FASE ➔ (Avançando em 1.4s...)';
+        nextBtn.textContent = isFinal ? 'VER RESULTADO FINAL ➔' : 'PRÓXIMA FASE ➔ (Avançando em 3s...)';
 
-        // Auto-avanço em 1.4 segundos após acerto
+        // Auto-avanço em 3.0 segundos após acerto para permitir a leitura da explicação
         state.autoAdvanceTimer = setTimeout(() => {
           onNextStageClicked();
-        }, 1400);
+        }, 3000);
 
       } else {
         selectedBtn.classList.add('wrong');
@@ -2515,6 +2544,42 @@
       return expected;
     }
 
+    function openProfessorAuthModal() {
+      const modal = document.getElementById('professor-auth-modal');
+      const input = document.getElementById('prof-modal-passcode');
+      const err = document.getElementById('prof-modal-error');
+      if (err) err.style.display = 'none';
+      if (input) input.value = '';
+      if (modal) modal.classList.add('active');
+      setTimeout(() => { if (input) input.focus(); }, 100);
+    }
+
+    function closeProfessorAuthModal() {
+      const modal = document.getElementById('professor-auth-modal');
+      if (modal) modal.classList.remove('active');
+    }
+
+    async function submitProfessorModalAuth() {
+      const input = document.getElementById('prof-modal-passcode');
+      const err = document.getElementById('prof-modal-error');
+      const entered = (input.value || '').trim();
+      const expected = await getExpectedProfessorCode();
+
+      if (entered === expected.trim()) {
+        sessionStorage.setItem('cyber_runner_professor_auth', 'true');
+        closeProfessorAuthModal();
+        document.getElementById('tab-btn-game').classList.remove('active');
+        document.getElementById('tab-btn-teacher').classList.add('active');
+        refreshTeacherData();
+        showScreen('screen-teacher');
+      } else {
+        err.style.display = 'block';
+        err.textContent = '❌ Código incorreto. Tente novamente.';
+        input.value = '';
+        input.focus();
+      }
+    }
+
     async function switchWebTab(tabName) {
       if (state.isLockedByScreenSwitch) {
         alert('A sua sessão foi bloqueada devido à troca de tela.');
@@ -2524,13 +2589,8 @@
       if (tabName === 'teacher') {
         const isAuth = sessionStorage.getItem('cyber_runner_professor_auth');
         if (isAuth !== 'true') {
-          const expected = await getExpectedProfessorCode();
-          const entered = prompt('🔒 ACESSO RESTRITO AO PROFESSOR:\nDigite o código de acesso (definido em professor_auth.json):');
-          if (!entered || entered.trim() !== expected.trim()) {
-            alert('❌ Código de acesso incorreto. Acesso negado ao painel do professor.');
-            return;
-          }
-          sessionStorage.setItem('cyber_runner_professor_auth', 'true');
+          openProfessorAuthModal();
+          return;
         }
 
         document.getElementById('tab-btn-game').classList.remove('active');
