@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
   <!-- Carregamento do Banco de 60 Fases (Portugol e Python) -->
   <script src="questions.js"></script>
+  <script src="professor_auth.js"></script>
   <style>
     :root {
       --bg-dark: #050505;
@@ -2500,19 +2501,45 @@
     let currentModalRecordId = null;
     let cachedXamppAttempts = [];
 
-    function switchWebTab(tabName) {
+    async function getExpectedProfessorCode() {
+      let expected = (window.PROFESSOR_AUTH && window.PROFESSOR_AUTH.codigoAcesso) ? window.PROFESSOR_AUTH.codigoAcesso : "PROF2026";
+      try {
+        const res = await fetch('professor_auth.json?t=' + Date.now());
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.codigoAcesso) {
+            expected = data.codigoAcesso;
+          }
+        }
+      } catch(e) {}
+      return expected;
+    }
+
+    async function switchWebTab(tabName) {
       if (state.isLockedByScreenSwitch) {
         alert('A sua sessão foi bloqueada devido à troca de tela.');
         return;
       }
 
-      document.getElementById('tab-btn-game').classList.toggle('active', tabName === 'game');
-      document.getElementById('tab-btn-teacher').classList.toggle('active', tabName === 'teacher');
-
       if (tabName === 'teacher') {
+        const isAuth = sessionStorage.getItem('cyber_runner_professor_auth');
+        if (isAuth !== 'true') {
+          const expected = await getExpectedProfessorCode();
+          const entered = prompt('🔒 ACESSO RESTRITO AO PROFESSOR:\nDigite o código de acesso (definido em professor_auth.json):');
+          if (!entered || entered.trim() !== expected.trim()) {
+            alert('❌ Código de acesso incorreto. Acesso negado ao painel do professor.');
+            return;
+          }
+          sessionStorage.setItem('cyber_runner_professor_auth', 'true');
+        }
+
+        document.getElementById('tab-btn-game').classList.remove('active');
+        document.getElementById('tab-btn-teacher').classList.add('active');
         refreshTeacherData();
         showScreen('screen-teacher');
       } else {
+        document.getElementById('tab-btn-teacher').classList.remove('active');
+        document.getElementById('tab-btn-game').classList.add('active');
         if (state.isFinished) {
           showScreen('screen-victory');
         } else if (state.hasStartedClass) {
