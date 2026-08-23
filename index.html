@@ -1129,6 +1129,72 @@
       white-space: pre-wrap;
       max-height: 160px;
     }
+  
+    /* Ultra-Compact Registration Form (Inline Layout - No Scroll) */
+    .inline-form-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    @media (max-width: 640px) {
+      .inline-form-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .form-group-compact {
+      margin-bottom: 4px;
+    }
+
+    .form-label-compact {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 10px;
+      color: var(--neon-cyan);
+      letter-spacing: 1px;
+      margin-bottom: 3px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .cyber-input-compact, .cyber-select-compact {
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 7px 10px;
+      color: var(--text-main);
+      font-family: var(--font-body);
+      font-size: 13.5px;
+      font-weight: 600;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .cyber-input-compact:focus, .cyber-select-compact:focus {
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 10px rgba(34, 211, 238, 0.25);
+      background: var(--bg-surface-active);
+    }
+
+    .lang-selection-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 6px 10px;
+      margin-bottom: 8px;
+    }
+
+    .characters-grid-compact {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
   </style>
 </head>
 <body>
@@ -1168,96 +1234,103 @@
 
     <!-- SCREEN 1: LOGIN & CHARACTER SELECT -->
     <section class="screen active" id="screen-login">
-      <div class="cyber-card">
-        <h1 class="hero-title">Cyber Runner</h1>
-        <p class="hero-subtitle">O Resgate do Algoritmo // Treinamento de Lógica de Programação</p>
+      <div class="cyber-card" style="padding: 16px 20px;">
+        <h1 class="hero-title" style="font-size: 22px; margin-bottom: 2px;">Cyber Runner</h1>
+        <p class="hero-subtitle" style="font-size: 12.5px; margin-bottom: 12px;">O Resgate do Algoritmo // Lógica de Programação</p>
 
         <!-- Auth Mode Switcher -->
-        <div class="auth-tabs-row">
-          <button type="button" class="auth-tab-btn active" id="tab-auth-register" onclick="switchAuthMode('register')">
+        <div class="auth-tabs-row" style="margin-bottom: 12px;">
+          <button type="button" class="auth-tab-btn active" id="tab-auth-register" onclick="switchAuthMode('register')" style="padding: 8px 12px; font-size: 12px;">
             <span>🌟</span> NOVO ALUNO / CADASTRAR
           </button>
-          <button type="button" class="auth-tab-btn" id="tab-auth-login" onclick="switchAuthMode('login')">
+          <button type="button" class="auth-tab-btn" id="tab-auth-login" onclick="switchAuthMode('login')" style="padding: 8px 12px; font-size: 12px;">
             <span>🔑</span> JÁ TENHO LOGIN
           </button>
         </div>
 
-        <!-- FORM 1: NOVO ALUNO / CADASTRAR -->
+        <!-- FORM 1: NOVO ALUNO / CADASTRAR (TUDO EM LINHA) -->
         <form id="register-form" onsubmit="event.preventDefault(); handleStudentRegister();">
-          <div class="form-group">
-            <label class="form-label" for="student-first-name">Primeiro Nome do Aluno</label>
-            <input type="text" id="student-first-name" class="cyber-input" placeholder="Ex: Gabriel" required autocomplete="given-name" oninput="autoGenerateLoginSuggestion(this.value)" />
-            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Digite apenas o seu primeiro nome.</div>
-          </div>
+          <!-- Linha com os 4 campos de preenchimento -->
+          <div class="inline-form-grid">
+            <div class="form-group-compact">
+              <label class="form-label-compact" for="student-first-name">Nome</label>
+              <input type="text" id="student-first-name" class="cyber-input-compact" placeholder="Ex: Gabriel" required autocomplete="given-name" oninput="autoGenerateLoginSuggestion(this.value)" />
+            </div>
 
-          <div class="form-group">
-            <label class="form-label" for="student-class-select">Selecione sua Turma</label>
-            <select id="student-class-select" class="cyber-select" onchange="onClassSelectChanged(this.value)">
-              <optgroup label="1º Ano">
-                <option value="1TECA" selected>1TECA (1º Técnico A)</option>
-                <option value="1TECB">1TECB (1º Técnico B)</option>
-                <option value="1ADMA">1ADMA (1º Administração A)</option>
-                <option value="1ADMB">1ADMB (1º Administração B)</option>
-                <option value="1INFOA">1INFOA (1º Informática A)</option>
-                <option value="1INFOB">1INFOB (1º Informática B)</option>
-                <option value="1DSA">1DSA (1º Desenv. Sistemas A)</option>
-                <option value="1DSB">1DSB (1º Desenv. Sistemas B)</option>
-              </optgroup>
-              <optgroup label="2º Ano">
-                <option value="2TECA">2TECA (2º Técnico A)</option>
-                <option value="2TECB">2TECB (2º Técnico B)</option>
-                <option value="2ADMA">2ADMA (2º Administração A)</option>
-                <option value="2ADMB">2ADMB (2º Administração B)</option>
-                <option value="2INFOA">2INFOA (2º Informática A)</option>
-                <option value="2INFOB">2INFOB (2º Informática B)</option>
-                <option value="2DSA">2DSA (2º Desenv. Sistemas A)</option>
-                <option value="2DSB">2DSB (2º Desenv. Sistemas B)</option>
-              </optgroup>
-              <optgroup label="3º Ano">
-                <option value="3TECA">3TECA (3º Técnico A)</option>
-                <option value="3TECB">3TECB (3º Técnico B)</option>
-                <option value="3ADMA">3ADMA (3º Administração A)</option>
-                <option value="3ADMB">3ADMB (3º Administração B)</option>
-                <option value="3INFOA">3INFOA (3º Informática A)</option>
-                <option value="3INFOB">3INFOB (3º Informática B)</option>
-                <option value="3DSA">3DSA (3º Desenv. Sistemas A)</option>
-                <option value="3DSB">3DSB (3º Desenv. Sistemas B)</option>
-              </optgroup>
-              <option value="CUSTOM">✏️ Digitar Outra Turma no Padrão...</option>
-            </select>
+            <div class="form-group-compact">
+              <label class="form-label-compact" for="student-class-select">Turma</label>
+              <select id="student-class-select" class="cyber-select-compact" onchange="onClassSelectChanged(this.value)">
+                <optgroup label="1º Ano">
+                  <option value="1TECA" selected>1TECA</option>
+                  <option value="1TECB">1TECB</option>
+                  <option value="1ADMA">1ADMA</option>
+                  <option value="1ADMB">1ADMB</option>
+                  <option value="1INFOA">1INFOA</option>
+                  <option value="1INFOB">1INFOB</option>
+                  <option value="1DSA">1DSA</option>
+                  <option value="1DSB">1DSB</option>
+                </optgroup>
+                <optgroup label="2º Ano">
+                  <option value="2TECA">2TECA</option>
+                  <option value="2TECB">2TECB</option>
+                  <option value="2ADMA">2ADMA</option>
+                  <option value="2ADMB">2ADMB</option>
+                  <option value="2INFOA">2INFOA</option>
+                  <option value="2INFOB">2INFOB</option>
+                  <option value="2DSA">2DSA</option>
+                  <option value="2DSB">2DSB</option>
+                </optgroup>
+                <optgroup label="3º Ano">
+                  <option value="3TECA">3TECA</option>
+                  <option value="3TECB">3TECB</option>
+                  <option value="3ADMA">3ADMA</option>
+                  <option value="3ADMB">3ADMB</option>
+                  <option value="3INFOA">3INFOA</option>
+                  <option value="3INFOB">3INFOB</option>
+                  <option value="3DSA">3DSA</option>
+                  <option value="3DSB">3DSB</option>
+                </optgroup>
+                <option value="CUSTOM">✏️ Outra...</option>
+              </select>
+            </div>
 
-            <!-- Custom Class Input (appears if CUSTOM is selected) -->
-            <input type="text" id="student-class-custom" class="cyber-input" style="display: none; margin-top: 8px; text-transform: uppercase;" placeholder="Ex: 1TECA, 2ADMB, 1MTEC" maxlength="10" oninput="onCustomClassInput(this)" />
+            <div class="form-group-compact">
+              <label class="form-label-compact" for="student-login-input">Login</label>
+              <input type="text" id="student-login-input" class="cyber-input-compact" placeholder="gabriel.1teca" required autocomplete="username" />
+            </div>
 
-            <div class="class-guide-box">
-              <span>💡 <strong>Padrão de Turma:</strong></span>
-              <span class="class-guide-tag">1</span> (Ano) + 
-              <span class="class-guide-tag">TEC</span> (Curso) + 
-              <span class="class-guide-tag">A</span> (Turma) = 
-              <span class="class-guide-tag" id="class-preview-tag">1TECA</span>
+            <div class="form-group-compact">
+              <label class="form-label-compact" for="student-password-input">Senha</label>
+              <input type="text" id="student-password-input" class="cyber-input-compact cyber-password-mask" placeholder="Sua senha" required autocomplete="off" spellcheck="false" />
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div class="form-group">
-              <label class="form-label" for="student-login-input">Login / Usuário</label>
-              <input type="text" id="student-login-input" class="cyber-input" placeholder="Ex: gabriel.1teca" required autocomplete="username" />
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="student-password-input">Senha de Acesso</label>
-              <input type="text" id="student-password-input" class="cyber-input cyber-password-mask" placeholder="Crie sua senha" required autocomplete="off" spellcheck="false" />
+          <!-- Input customizado de Turma (caso selecione CUSTOM) -->
+          <input type="text" id="student-class-custom" class="cyber-input-compact" style="display: none; margin-bottom: 8px; text-transform: uppercase;" placeholder="Ex: 1TECA" maxlength="10" oninput="onCustomClassInput(this)" />
+
+          <!-- Seleção da Linguagem dos Desafios (Portugol vs Python) -->
+          <div class="lang-selection-row">
+            <span class="form-label-compact" style="margin-bottom: 0; white-space: nowrap;">Linguagem do Jogo:</span>
+            <div style="display: flex; gap: 8px; flex: 1;">
+              <button type="button" id="lang-select-portugol" class="cyber-btn cyber-btn-secondary lang-active-btn" onclick="setLanguageMode('portugol')" style="flex: 1; padding: 6px 10px; font-size: 12px; margin: 0; min-height: 32px;">
+                🇧🇷 Portugol
+              </button>
+              <button type="button" id="lang-select-python" class="cyber-btn cyber-btn-secondary" onclick="setLanguageMode('python')" style="flex: 1; padding: 6px 10px; font-size: 12px; margin: 0; min-height: 32px;">
+                🐍 Python
+              </button>
             </div>
           </div>
 
-          <div class="form-group">
-            <label class="form-label">Escolha seu Avatar Cyberpunk</label>
-            <div class="characters-grid" id="characters-container">
+          <!-- Escolha de Avatar Compacta -->
+          <div class="form-group-compact">
+            <label class="form-label-compact">Escolha seu Avatar Cyberpunk</label>
+            <div class="characters-grid-compact" id="characters-container">
               <!-- Rendered via JS -->
             </div>
           </div>
 
-          <div style="margin-top: 18px;">
-            <button type="submit" class="cyber-btn" id="btn-start-class">
+          <div style="margin-top: 10px;">
+            <button type="submit" class="cyber-btn" id="btn-start-class" style="padding: 10px 16px; font-size: 13px;">
               <span>🚀</span> INICIAR MISSÃO & SALVAR PROGRESSO
             </button>
           </div>
@@ -1265,20 +1338,35 @@
 
         <!-- FORM 2: JÁ TENHO LOGIN / ENTRAR -->
         <form id="login-existing-form" style="display: none;" onsubmit="event.preventDefault(); handleStudentLogin();">
-          <div class="form-group">
-            <label class="form-label" for="existing-login-input">Seu Login de Aluno</label>
-            <input type="text" id="existing-login-input" class="cyber-input" placeholder="Ex: gabriel.1teca" required autocomplete="username" />
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px;">
+            <div class="form-group-compact">
+              <label class="form-label-compact" for="existing-login-input">Login de Aluno</label>
+              <input type="text" id="existing-login-input" class="cyber-input-compact" placeholder="Ex: gabriel.1teca" required autocomplete="username" />
+            </div>
+
+            <div class="form-group-compact">
+              <label class="form-label-compact" for="existing-password-input">Sua Senha</label>
+              <input type="text" id="existing-password-input" class="cyber-input-compact cyber-password-mask" placeholder="Digite sua senha" required autocomplete="off" spellcheck="false" />
+            </div>
           </div>
 
-          <div class="form-group">
-            <label class="form-label" for="existing-password-input">Sua Senha</label>
-            <input type="text" id="existing-password-input" class="cyber-input cyber-password-mask" placeholder="Digite sua senha cadastrada" required autocomplete="off" spellcheck="false" />
+          <!-- Seleção da Linguagem dos Desafios para Login Existente -->
+          <div class="lang-selection-row">
+            <span class="form-label-compact" style="margin-bottom: 0; white-space: nowrap;">Linguagem do Jogo:</span>
+            <div style="display: flex; gap: 8px; flex: 1;">
+              <button type="button" id="lang-select-portugol-login" class="cyber-btn cyber-btn-secondary lang-active-btn" onclick="setLanguageMode('portugol')" style="flex: 1; padding: 6px 10px; font-size: 12px; margin: 0; min-height: 32px;">
+                🇧🇷 Portugol
+              </button>
+              <button type="button" id="lang-select-python-login" class="cyber-btn cyber-btn-secondary" onclick="setLanguageMode('python')" style="flex: 1; padding: 6px 10px; font-size: 12px; margin: 0; min-height: 32px;">
+                🐍 Python
+              </button>
+            </div>
           </div>
 
-          <div id="login-status-msg" style="display: none; font-size: 13px; margin-bottom: 12px; padding: 10px; border-radius: 10px;"></div>
+          <div id="login-status-msg" style="display: none; font-size: 12px; margin-bottom: 8px; padding: 8px; border-radius: 8px;"></div>
 
-          <div style="margin-top: 18px;">
-            <button type="submit" class="cyber-btn">
+          <div style="margin-top: 10px;">
+            <button type="submit" class="cyber-btn" style="padding: 10px 16px; font-size: 13px;">
               <span>🔑</span> ENTRAR & RETOMAR MISSÃO
             </button>
           </div>
@@ -2969,6 +3057,8 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       studentClass: '',
       studentLogin: '',
       selectedCharacter: CHARACTERS[0],
+      languageMode: 'portugol',
+      autoAdvanceTimer: null,
       currentStageIndex: 0,
       score: 0,
       lives: 3,
