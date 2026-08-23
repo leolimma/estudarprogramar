@@ -3369,9 +3369,20 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
         return;
       }
 
+      if (state.autoAdvanceTimer) {
+        clearTimeout(state.autoAdvanceTimer);
+        state.autoAdvanceTimer = null;
+      }
+
       state.currentStageIndex = index;
       state.isAnswerLocked = false;
       const stage = STAGES[index];
+      const isPy = state.languageMode === 'python';
+
+      const filename = (isPy && stage.pythonFilename) ? stage.pythonFilename : (stage.filename || 'modulo.algo');
+      const scenario = (isPy && stage.pythonScenario) ? stage.pythonScenario : stage.scenario;
+      const codeTemplate = (isPy && stage.pythonCodeTemplate) ? stage.pythonCodeTemplate : stage.codeTemplate;
+      const options = (isPy && stage.pythonOptions) ? stage.pythonOptions : stage.options;
 
       // Update badges & progress
       document.getElementById('game-stage-badge').textContent = `FASE ${index + 1} / ${STAGES.length}`;
@@ -3379,7 +3390,7 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       document.getElementById('game-character-badge').textContent = `${state.selectedCharacter.name} ${state.selectedCharacter.avatar}`;
       document.getElementById('game-progress-bar').style.width = `${((index + 1) / STAGES.length) * 100}%`;
 
-      document.getElementById('game-scenario-text').textContent = stage.scenario;
+      document.getElementById('game-scenario-text').textContent = scenario;
       document.getElementById('terminal-filename').textContent = filename;
       document.getElementById('terminal-code').innerHTML = codeTemplate;
 
@@ -3561,43 +3572,43 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
     }
 
     /* =========================================================================
-       ANTI-CHEAT & SCREEN SWITCH DETECTION (LOCKS IMMEDIATELY & ZEROES SCORE)
+       ANTI-CHEAT & SCREEN SWITCH DETECTION (REDUCES LIVES ON VIOLATION)
        ========================================================================= */
     function setupExitAndAbandonmentDetection() {
       const handleFocusViolation = () => {
         if (state.hasStartedClass && !state.isFinished && !state.isLockedByScreenSwitch) {
-          state.isFinished = true;
-          state.isLockedByScreenSwitch = true;
+          sound.playError();
+          state.wrongCount += 1;
+          state.lives -= 1;
+          updateHud();
 
-          const progressPct = Math.round((state.currentStageIndex / STAGES.length) * 100);
-          const violationStatus = `ABANDONADO / ZERADO (Troca de Tela na Fase ${state.currentStageIndex + 1} - ${progressPct}%)`;
-
-          // Zero score as pedagogical penalty
-          state.score = 0;
-
-          // Save to LocalStorage, Supabase and Android Bridge
-          saveLocalAttempt(violationStatus);
-
-          if (window.AndroidBridge && typeof window.AndroidBridge.onGameAbandoned === 'function') {
-            try {
-              window.AndroidBridge.onGameAbandoned(
-                state.sessionId,
-                0,
-                state.currentStageIndex,
-                state.correctCount,
-                JSON.stringify(state.stageResults)
-              );
-            } catch(e) {}
+          const feedback = document.getElementById('feedback-banner');
+          if (feedback) {
+            feedback.className = 'feedback-banner error';
+            feedback.style.display = 'block';
+            document.getElementById('feedback-title').innerHTML = `<span>⚠️</span> VIOLAÇÃO DE TELA/ABA! (-1 VIDA)`;
+            document.getElementById('feedback-explanation').innerHTML = `
+              <strong>Troca de janela/aba detectada pelo sistema!</strong><br>
+              <span style="opacity: 0.9; font-size: 13px;">Mantenha a atenção total no jogo. Vidas restantes: ${state.lives} / 3.</span>
+            `;
           }
 
-          // Populate locked screen
-          document.getElementById('ab-student-meta').textContent = `${state.studentName} (${state.studentClass})`;
-          document.getElementById('ab-progress-pct').textContent = `${progressPct}% (Fase ${state.currentStageIndex + 1}/${STAGES.length})`;
-          document.getElementById('ab-correct-val').textContent = `${state.correctCount} vezes`;
-          document.getElementById('ab-wrong-val').textContent = `${state.wrongCount} vezes`;
+          if (state.lives <= 0) {
+            state.isAnswerLocked = true;
+            state.isFinished = true;
+            state.isLockedByScreenSwitch = true;
 
-          sound.playError();
-          showScreen('screen-abandoned');
+            const progressPct = Math.round((state.currentStageIndex / STAGES.length) * 100);
+            const violationStatus = `REPROVADO (Vidas Esgotadas por Violação de Foco na Fase ${state.currentStageIndex + 1} - ${progressPct}%)`;
+
+            saveLocalAttempt(violationStatus);
+
+            setTimeout(() => {
+              handleGameOver();
+            }, 1000);
+          } else {
+            saveLocalAttempt(`EM ANDAMENTO (Fase ${state.currentStageIndex + 1} - Violação de Tela: ${state.lives} vidas restantes)`);
+          }
         }
       };
 
@@ -3611,7 +3622,6 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
 
       window.addEventListener('blur', () => {
         clearTimeout(blurTimeout);
-        // Aguarda 500ms para evitar falsos positivos causados por balões nativos do Chrome / sistema
         blurTimeout = setTimeout(() => {
           if (document.visibilityState === 'hidden' || !document.hasFocus()) {
             handleFocusViolation();
@@ -3620,12 +3630,8 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       });
 
       window.addEventListener('focus', () => {
-        // Se o foco retornar rapidamente (ex: fechar aviso do Chrome), cancela a penalidade
         clearTimeout(blurTimeout);
       });
-
-      window.addEventListener('beforeunload', handleFocusViolation);
-      window.addEventListener('pagehide', handleFocusViolation);
     }
 
     function notifyStageProgress(isCorrect) {
