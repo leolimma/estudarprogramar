@@ -1143,6 +1143,9 @@
         <span>⚡</span> CYBER RUNNER
       </div>
       <div class="hud-stats">
+        <div class="hud-stat-pill" id="hud-lang-pill" onclick="toggleLanguageMode()" style="cursor: pointer;" title="Clique para alternar entre Portugol e Python">
+          <span class="hud-stat-item" style="color: var(--neon-cyan); font-size: 12px; font-weight: 700;" id="hud-lang-text">🇧🇷 Portugol</span>
+        </div>
         <div class="hud-stat-pill">
           <div class="hud-stat-item hud-lives" id="hud-lives-container" title="Baterias de Vida">
             <span class="heart-icon" id="heart-1">❤️</span>
@@ -1803,6 +1806,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       // 1-6: FUNDAMENTOS CONDICIONAIS E LAÇOS BÁSICOS
       {
         id: 1,
+        pythonFilename: "modulo_portao.py",
+        pythonCodeTemplate: "if chave_de_acesso == \"CYBER_KEY\":\n    abrir_portao()\n<span class=\"code-gap\">_____</span>:\n    disparar_alarme()",
+        pythonOptions: [ { "text": "else", "correct": true, "feedback": "Correto! O bloco 'else' executa quando a condição do 'if' é falsa em Python." }, { "text": "while", "correct": false, "feedback": "Incorreto! 'while' é um laço de repetição." }, { "text": "for", "correct": false, "feedback": "Incorreto! 'for' percorre iterações." }, { "text": "return", "correct": false, "feedback": "Incorreto! 'return' encerra a função." } ], 
+        pythonExplanation: "Em Python, a estrutura if / else permite decidir entre dois blocos com base em um teste lógico.",
         title: "Fase 1: Condicionais Simples (SE / SENÃO)",
         concept: "Decisão Binária Básica (if / else)",
         filename: "modulo_portao.algo",
@@ -1818,6 +1825,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 2,
+        pythonFilename: "roteador_trafego.py",
+        pythonCodeTemplate: "if pacote[\"tipo\"] == \"URGENTE\":\n    enviar_canal(\"Alfa\")\n<span class=\"code-gap\">____</span> pacote[\"tipo\"] == \"NORMAL\":\n    enviar_canal(\"Beta\")\nelse:\n    enviar_canal(\"Padrao\")",
+        pythonOptions: [ { "text": "elif", "correct": true, "feedback": "Exato! Em Python, 'elif' (else if) testa uma nova condição se o 'if' anterior for falso." }, { "text": "and", "correct": false, "feedback": "Incorreto! 'and' é um operador lógico de conjunção." }, { "text": "for", "correct": false, "feedback": "Incorreto! 'for' é um laço de repetição." }, { "text": "break", "correct": false, "feedback": "Incorreto! 'break' interrompe um laço." } ], 
+        pythonExplanation: "O 'elif' em Python permite encadear múltiplos testes em ordem hierárquica.",
         title: "Fase 2: Condicionais Encadeadas (SENÃO SE)",
         concept: "Múltiplas Condições Sequenciais (else if)",
         filename: "roteador_trafego.algo",
@@ -1833,6 +1844,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 3,
+        pythonFilename: "escudo_quantico.py",
+        pythonCodeTemplate: "if energia >= 80 <span class=\"code-gap\">___</span> gerador_calibrado == True:\n    ativar_escudo_quantico()",
+        pythonOptions: [ { "text": "and (E lógico)", "correct": true, "feedback": "Perfeito! Em Python, o operador 'and' exige que ambas as condições sejam verdadeiras." }, { "text": "or (OU lógico)", "correct": false, "feedback": "Incorreto! 'or' ativaria o escudo mesmo descalibrado!" }, { "text": "not (NÃO lógico)", "correct": false, "feedback": "Incorreto! 'not' inverte o valor booleano." }, { "text": "==", "correct": false, "feedback": "Incorreto! '==' é comparação de igualdade." } ], 
+        pythonExplanation: "Em Python, o operador 'and' retorna True apenas quando ambas as expressões forem verdadeiras.",
         title: "Fase 3: Operadores Lógicos (E / AND / &&)",
         concept: "Conjunção Lógica: Ambos devem ser Verdadeiros",
         filename: "escudo_quantico.algo",
@@ -1848,6 +1863,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 4,
+        pythonFilename: "sensor_intrusao.py",
+        pythonCodeTemplate: "if (sensor_optico == True <span class=\"code-gap\">__</span> sensor_sonoro == True) and not modo_manutencao:\n    ativar_protocolo_defesa()",
+        pythonOptions: [ { "text": "or (OU lógico)", "correct": true, "feedback": "Excelente! Em Python, o operador 'or' é verdadeiro se pelo menos um sensor disparar." }, { "text": "and (E lógico)", "correct": false, "feedback": "Incorreto! 'and' exigiria ambos os sensores juntos." }, { "text": "!=", "correct": false, "feedback": "Incorreto! '!=' compara diferença." }, { "text": "+=", "correct": false, "feedback": "Incorreto! '+=' é atribuição de incremento." } ], 
+        pythonExplanation: "Em Python, usam-se as palavras-chave em inglês 'or' (para disjunção) e 'not' (para negação).",
         title: "Fase 4: Operadores Lógicos (OU / || e NÃO / !)",
         concept: "Disjunção e Negação Lógica (OR & NOT)",
         filename: "sensor_intrusao.algo",
@@ -1863,6 +1882,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 5,
+        pythonFilename: "restaurar_blocos.py",
+        pythonCodeTemplate: "for contador in <span class=\"code-gap\">________</span>(5):\n    restaurar_bloco_memoria(contador)",
+        pythonOptions: [ { "text": "range", "correct": true, "feedback": "Muito bem! Em Python, 'range(5)' gera a sequência de índices 0, 1, 2, 3 e 4 para o loop 'for'." }, { "text": "step", "correct": false, "feedback": "Incorreto! 'step' é o passo dentro de range()." }, { "text": "len", "correct": false, "feedback": "Incorreto! 'len' calcula o tamanho de uma coleção." }, { "text": "list", "correct": false, "feedback": "Incorreto! 'list' cria uma lista." } ], 
+        pythonExplanation: "Em Python, 'for i in range(N)' é a forma padrão de executar um laço N vezes (de 0 a N-1).",
         title: "Fase 5: Estrutura de Repetição com Contagem (FOR)",
         concept: "Laço com Contador Determinado (for)",
         filename: "restaurar_blocos.algo",
@@ -1878,6 +1901,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 6,
+        pythonFilename: "desarmar_firewall.py",
+        pythonCodeTemplate: "<span class=\"code-gap\">_____</span> firewall_integridade > 0:\n    desferir_golpe_cyber()\n    firewall_integridade -= 25",
+        pythonOptions: [ { "text": "while", "correct": true, "feedback": "Sensacional! 'while' repete o bloco em Python enquanto a condição for True." }, { "text": "if", "correct": false, "feedback": "Incorreto! 'if' executaria apenas uma vez." }, { "text": "return", "correct": false, "feedback": "Incorreto! 'return' sai da função." }, { "text": "def", "correct": false, "feedback": "Incorreto! 'def' declara funções em Python." } ], 
+        pythonExplanation: "O laço 'while' em Python continua executando enquanto sua condição lógica for avaliada como True.",
         title: "Fase 6: Laço Condicional de Repetição (WHILE)",
         concept: "Repetição Baseada em Condição Dinâmica (while)",
         filename: "desarmar_firewall.algo",
@@ -1895,6 +1922,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       // 7-12: TIPOS DE DADOS, OPERADORES ARITMÉTICOS E VETORES
       {
         id: 7,
+        pythonFilename: "nucleo_dados.py",
+        pythonCodeTemplate: "nome_agente = \"Kai\"       # str\nnivel_acesso = 4         # int\ntaxa_energia = 87.5      # float\ncamuflado = <span class=\"code-gap\">____</span>        # bool",
+        pythonOptions: [ { "text": "True", "correct": true, "feedback": "Exato! Em Python, booleanos são escritos com a primeira letra maiúscula: True ou False." }, { "text": "\"True\"", "correct": false, "feedback": "Incorreto! Aspas transformam o valor na string 'str'." }, { "text": "100.0", "correct": false, "feedback": "Incorreto! 100.0 é float." }, { "text": "None", "correct": false, "feedback": "Incorreto! 'None' representa ausência de valor." } ], 
+        pythonExplanation: "Em Python, o tipo booleano usa os literais True e False com a primeira letra maiúscula.",
         title: "Fase 7: Tipos Primitivos de Dados",
         concept: "Identificação de Tipos (Inteiro, Real, Texto, Booleano)",
         filename: "nucleo_dados.algo",
@@ -1910,6 +1941,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 8,
+        pythonFilename: "filtro_frequencia.py",
+        pythonCodeTemplate: "if numero_canal <span class=\"code-gap\">_</span> 2 == 0:\n    sintonizar_canal_par()\nelse:\n    sintonizar_canal_impar()",
+        pythonOptions: [ { "text": "% (módulo/resto)", "correct": true, "feedback": "Perfeito! O operador '%' calcula o resto da divisão em Python. Se numero % 2 == 0, é PAR!" }, { "text": "/", "correct": false, "feedback": "Incorreto! '/' realiza divisão com ponto flutuante." }, { "text": "*", "correct": false, "feedback": "Incorreto! '*' é multiplicação." }, { "text": "**", "correct": false, "feedback": "Incorreto! '**' é potenciação em Python." } ], 
+        pythonExplanation: "O operador de módulo (%) em Python devolve o resto da divisão inteira entre dois números.",
         title: "Fase 8: Operador de Módulo / Resto (%)",
         concept: "Verificação de Números Pares e Múltiplos",
         filename: "filtro_frequencia.algo",
@@ -1925,6 +1960,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 9,
+        pythonFilename: "inventario_chips.py",
+        pythonCodeTemplate: "chips = [\"Chip_Alfa\", \"Chip_Beta\", \"Chip_Gama\"]\nprimeiro_chip = chips<span class=\"code-gap\">___</span>",
+        pythonOptions: [ { "text": "[0]", "correct": true, "feedback": "Excelente! Em Python, listas usam indexação de base zero [0] para o primeiro elemento." }, { "text": "[1]", "correct": false, "feedback": "Cuidado! O índice [1] acessa o segundo elemento." }, { "text": ".first()", "correct": false, "feedback": "Incorreto! Em Python usam-se colchetes diretos [0]." }, { "text": "[3]", "correct": false, "feedback": "Incorreto! Provocaria um IndexError." } ], 
+        pythonExplanation: "Em listas do Python, o primeiro item está no índice 0 e o último no índice -1 ou len - 1.",
         title: "Fase 9: Vetores / Arrays Unidimensionais",
         concept: "Indexação Base Zero (Primeiro Elemento [0])",
         filename: "inventario_chips.algo",
@@ -1940,6 +1979,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 10,
+        pythonFilename: "buffer_seguranca.py",
+        pythonCodeTemplate: "nos = [10, 20, 30, 40]\ntotal_elementos = len(nos) # 4\nultimo_indice = total_elementos <span class=\"code-gap\">___</span>",
+        pythonOptions: [ { "text": "- 1", "correct": true, "feedback": "Correto! Como os índices vão de 0 a len(nos)-1, o último índice é 4 - 1 = 3." }, { "text": "+ 1", "correct": false, "feedback": "Incorreto! Causaria IndexError." }, { "text": "* 2", "correct": false, "feedback": "Incorreto! Dobraria a posição fora do limite." }, { "text": "/ 2", "correct": false, "feedback": "Incorreto! Apontaria para o meio." } ], 
+        pythonExplanation: "Em Python, a função len(lista) retorna a quantidade de itens, e o último índice é len(lista) - 1 (ou lista[-1]).",
         title: "Fase 10: Comprimento e Limite de Vetores",
         concept: "Tamanho da Lista e Último Elemento (tamanho - 1)",
         filename: "buffer_seguranca.algo",
@@ -1955,6 +1998,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 11,
+        pythonFilename: "varredura_setores.py",
+        pythonCodeTemplate: "for i in range(<span class=\"code-gap\">___</span>(setores)):\n    inspecionar_setor(setores[i])",
+        pythonOptions: [ { "text": "len", "correct": true, "feedback": "Muito bem! A função 'len()' em Python retorna o número total de elementos da lista." }, { "text": "1000", "correct": false, "feedback": "Incorreto! Número fixo causaria erro se houver menos elementos." }, { "text": "0", "correct": false, "feedback": "Incorreto! range(0) criaria uma sequência vazia." }, { "text": "max", "correct": false, "feedback": "Incorreto! 'max' retorna o maior valor da lista." } ], 
+        pythonExplanation: "A função embutida len() é a forma padrão em Python para saber o tamanho de listas, tuplas e strings.",
         title: "Fase 11: Percorrendo Vetores com Laço FOR",
         concept: "Iteração Sequencial sobre Coleções",
         filename: "varredura_setores.algo",
@@ -1970,6 +2017,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 12,
+        pythonFilename: "coleta_energia.py",
+        pythonCodeTemplate: "total_energia = 0\nfor bateria in baterias:\n    total_energia = total_energia <span class=\"code-gap\">_</span> bateria",
+        pythonOptions: [ { "text": "+", "correct": true, "feedback": "Exato! Somar o valor atual ao novo elemento acumula o total na variável em Python." }, { "text": "=", "correct": false, "feedback": "Incorreto! Apenas substituir '=' guardaria apenas a última bateria." }, { "text": "* 0 +", "correct": false, "feedback": "Incorreto! Zeraria a conta." }, { "text": "-", "correct": false, "feedback": "Incorreto! Subtrairia em vez de acumular." } ], 
+        pythonExplanation: "Em Python, o acúmulo de totais em laços é feito usando '+' (ex: total_energia += bateria).",
         title: "Fase 12: Variáveis Acumuladoras (Soma Total)",
         concept: "Acúmulo de Valores em Laço (soma = soma + valor)",
         filename: "coleta_energia.algo",
@@ -1987,6 +2038,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       // 13-18: FUNÇÕES, ESCOPO E CONTROLE AVANÇADO DE LAÇOS
       {
         id: 13,
+        pythonFilename: "rastreador_bugs.py",
+        pythonCodeTemplate: "contador_virus = 0\nif pacote[\"eh_virus\"] == True:\n    contador_virus = <span class=\"code-gap\">__________________</span>",
+        pythonOptions: [ { "text": "contador_virus + 1", "correct": true, "feedback": "Correto! Incrementar a própria variável soma 1 ao total de vírus em Python." }, { "text": "0", "correct": false, "feedback": "Incorreto! Resetaria a contagem." }, { "text": "pacote[\"eh_virus\"]", "correct": false, "feedback": "Incorreto! É um valor booleano." }, { "text": "contador_virus * 2", "correct": false, "feedback": "Incorreto! Não contaria ocorrências individuais." } ], 
+        pythonExplanation: "Em Python, incrementa-se contadores com 'contador += 1' ou 'contador = contador + 1'.",
         title: "Fase 13: Variáveis Contadoras (Incremento)",
         concept: "Contagem de Ocorrências com Condicional",
         filename: "rastreador_bugs.algo",
@@ -2002,6 +2057,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 14,
+        pythonFilename: "propulsor_cyber.py",
+        pythonCodeTemplate: "<span class=\"code-gap\">___</span> ativar_propulsor(potencia_desejada):\n    motor.ajustar_potencia(potencia_desejada)\n    motor.ligar()",
+        pythonOptions: [ { "text": "def", "correct": true, "feedback": "Perfeito! Em Python, a palavra-chave 'def' (define) é usada para declarar funções." }, { "text": "while", "correct": false, "feedback": "Incorreto! 'while' é laço." }, { "text": "if", "correct": false, "feedback": "Incorreto! 'if' é condicional." }, { "text": "class", "correct": false, "feedback": "Incorreto! 'class' define classes em POO." } ], 
+        pythonExplanation: "Em Python, todas as funções são definidas utilizando a palavra-chave 'def nome_da_funcao(parametros):'.",
         title: "Fase 14: Declaração e Chamada de Funções",
         concept: "Modularização e Parâmetros de Entrada",
         filename: "propulsor_cyber.algo",
@@ -2017,6 +2076,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 15,
+        pythonFilename: "calculo_hash.py",
+        pythonCodeTemplate: "def calcular_hash(codigo_base):\n    hash_val = (codigo_base * 1337) % 9999\n    <span class=\"code-gap\">______</span> hash_val",
+        pythonOptions: [ { "text": "return", "correct": true, "feedback": "Excelente! Em Python, 'return' encerra a função e devolve o resultado para o chamador." }, { "text": "print", "correct": false, "feedback": "Incorreto! 'print' apenas exibe na tela sem retornar o valor." }, { "text": "break", "correct": false, "feedback": "Incorreto! 'break' é para laços." }, { "text": "continue", "correct": false, "feedback": "Incorreto! 'continue' é para laços." } ], 
+        pythonExplanation: "A instrução 'return' em Python devolve um resultado da função e encerra sua execução.",
         title: "Fase 15: Retorno de Valores em Funções",
         concept: "Devolução de Resultados (return)",
         filename: "calculo_hash.algo",
@@ -2032,6 +2095,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 16,
+        pythonFilename: "modulo_escopo.py",
+        pythonCodeTemplate: "def processar_sinal():\n    senha_secreta = \"1234\"\n\n# Tentativa de acesso fora da função:\nprint(senha_secreta) # <span class=\"code-gap\">___________________</span>",
+        pythonOptions: [ { "text": "Gera erro NameError (Variável não definida)", "correct": true, "feedback": "Exato! Em Python, 'senha_secreta' tem escopo local e gera NameError se acessada fora da função." }, { "text": "Imprime '1234' normalmente", "correct": false, "feedback": "Incorreto! A variável não existe no escopo global." }, { "text": "Cria uma variável vazia", "correct": false, "feedback": "Incorreto! Python não cria variáveis implícitas sem atribuição." }, { "text": "Apaga a memória", "correct": false, "feedback": "Incorreto! Apenas lança a exceção NameError." } ], 
+        pythonExplanation: "Em Python, variáveis definidas dentro de funções possuem escopo local e não podem ser lidas no escopo global.",
         title: "Fase 16: Escopo de Variáveis (Global vs Local)",
         concept: "Visibilidade e Ciclo de Vida de Variáveis",
         filename: "modulo_escopo.algo",
@@ -2047,6 +2114,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 17,
+        pythonFilename: "calibrar_laser.py",
+        pythonCodeTemplate: "while True:\n    disparar_feixe_teste()\n    if calibracao_valida == True:\n        <span class=\"code-gap\">_____</span> # Encerra a repetição pós-testada",
+        pythonOptions: [ { "text": "break", "correct": true, "feedback": "Muito bem! Em Python, a estrutura 'while True:' com 'break' no 'if' simula o laço do-while." }, { "text": "continue", "correct": false, "feedback": "Incorreto! 'continue' voltaria para o topo mantendo o loop infinito." }, { "text": "pass", "correct": false, "feedback": "Incorreto! 'pass' não faz nada." }, { "text": "return", "correct": false, "feedback": "Incorreto! 'return' encerraria a função inteira." } ], 
+        pythonExplanation: "Como Python não tem a palavra 'do-while', usa-se 'while True:' com uma condição 'if' interna executando 'break'.",
         title: "Fase 17: Laço Pós-Testado (FAÇA... ENQUANTO)",
         concept: "Garantia de Execução de Pelo Menos 1 Vez (do... while)",
         filename: "calibrar_laser.algo",
@@ -2062,6 +2133,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 18,
+        pythonFilename: "localizar_antidoto.py",
+        pythonCodeTemplate: "for item in itens:\n    if item == \"ANTIDOTO\":\n        extrair_antidoto()\n        <span class=\"code-gap\">_____</span> # Interrompe o loop agora!",
+        pythonOptions: [ { "text": "break", "correct": true, "feedback": "Correto! O comando 'break' em Python cancela imediatamente a execução do laço 'for'." }, { "text": "continue", "correct": false, "feedback": "Incorreto! 'continue' passaria para o próximo item." }, { "text": "pass", "correct": false, "feedback": "Incorreto! 'pass' é um placeholder nulo." }, { "text": "exit", "correct": false, "feedback": "Incorreto! 'exit()' encerraria o script Python todo." } ], 
+        pythonExplanation: "Em Python, 'break' interrompe a execução do laço 'for' ou 'while' imediatamente.",
         title: "Fase 18: Interrupção Forçada de Loop (PARE / break)",
         concept: "Saída Imediata de Laço ao Atingir Condição",
         filename: "localizar_antidoto.algo",
@@ -2079,6 +2154,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       // 19-24: CONTROLE DE FLUXO, BUSCA E ALGORITMOS EM VETORES
       {
         id: 19,
+        pythonFilename: "ignorar_corrompidos.py",
+        pythonCodeTemplate: "for pacote in pacotes:\n    if pacote[\"esta_corrompido\"] == True:\n        <span class=\"code-gap\">________</span> # Pula para a próxima volta\n    processar_pacote_pesado(pacote)",
+        pythonOptions: [ { "text": "continue", "correct": true, "feedback": "Excelente! Em Python, 'continue' pula o restante do bloco e avança para a próxima iteração." }, { "text": "break", "correct": false, "feedback": "Incorreto! 'break' cancelaria o loop inteiro." }, { "text": "return False", "correct": false, "feedback": "Incorreto! Sairia da função." }, { "text": "del", "correct": false, "feedback": "Incorreto! 'del' remove variáveis." } ], 
+        pythonExplanation: "O comando 'continue' em Python pula a iteração corrente e avança para a próxima execução do laço.",
         title: "Fase 19: Pulo de Iteração (CONTINUE)",
         concept: "Saltar para a Próxima Repetição (continue)",
         filename: "ignorar_corrompidos.algo",
@@ -2094,6 +2173,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 20,
+        pythonFilename: "filtro_seguro.py",
+        pythonCodeTemplate: "if usuario[\"id\"] <span class=\"code-gap\">__</span> \"INVASOR_PROIBIDO\":\n    autorizar_entrada()",
+        pythonOptions: [ { "text": "!=", "correct": true, "feedback": "Exato! Em Python, o operador '!=' significa 'diferente de'." }, { "text": "==", "correct": false, "feedback": "Incorreto! '==' autorizaria apenas o invasor!" }, { "text": "not", "correct": false, "feedback": "Incorreto! 'not' é operador unário." }, { "text": "<=", "correct": false, "feedback": "Incorreto! '<=' é para menor ou igual numérico." } ], 
+        pythonExplanation: "Em Python, o operador de desigualdade é '!=' (retorna True se os operandos forem diferentes).",
         title: "Fase 20: Operador de Desigualdade / Diferente (!=)",
         concept: "Comparação de Não-Igualdade",
         filename: "filtro_seguro.algo",
@@ -2109,6 +2192,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 21,
+        pythonFilename: "blindagem_regras.py",
+        pythonCodeTemplate: "resultado = (False or True) and True\n# resultado será: <span class=\"code-gap\">______</span>",
+        pythonOptions: [ { "text": "True", "correct": true, "feedback": "Correto! (False or True) resulta em True. Em seguida, True and True é True!" }, { "text": "False", "correct": false, "feedback": "Incorreto! A expressão dentro dos parênteses avalia para True." }, { "text": "None", "correct": false, "feedback": "Incorreto! Expressões lógicas retornam booleanos." }, { "text": "Indeterminado", "correct": false, "feedback": "Incorreto! É determinístico." } ], 
+        pythonExplanation: "Em Python, parênteses têm prioridade, seguidos pelos operadores not, and e or.",
         title: "Fase 21: Precedência de Operadores Lógicos",
         concept: "Uso de Parênteses para Prioridade de Avaliação",
         filename: "blindagem_regras.algo",
@@ -2124,6 +2211,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 22,
+        pythonFilename: "busca_sequencial.py",
+        pythonCodeTemplate: "def buscar_servidor(lista_servidores, alvo):\n    for i in range(len(lista_servidores)):\n        if lista_servidores[i] == alvo:\n            <span class=\"code-gap\">______</span> i # Devolve o índice encontrado\n    return -1",
+        pythonOptions: [ { "text": "return", "correct": true, "feedback": "Perfeito! 'return i' devolve o índice onde o alvo foi localizado em Python." }, { "text": "del", "correct": false, "feedback": "Incorreto! 'del' apagaria o item." }, { "text": "continue", "correct": false, "feedback": "Incorreto! 'continue' seguiria procurando." }, { "text": "pass", "correct": false, "feedback": "Incorreto! 'pass' não faria nada." } ], 
+        pythonExplanation: "A busca linear percorre os índices de 0 a len-1 e usa 'return' assim que encontra o elemento.",
         title: "Fase 22: Algoritmo de Busca Linear",
         concept: "Pesquisa Sequencial em Coleções",
         filename: "busca_sequencial.algo",
@@ -2139,6 +2230,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 23,
+        pythonFilename: "pico_tensao.py",
+        pythonCodeTemplate: "maior = tensoes[0]\nfor t in tensoes[1:]:\n    if t <span class=\"code-gap\">_</span> maior:\n        maior = t",
+        pythonOptions: [ { "text": ">", "correct": true, "feedback": "Muito bem! Em Python, '>' verifica se a tensão atual 't' é maior que o recorde 'maior'." }, { "text": "<", "correct": false, "feedback": "Incorreto! '<' buscaria o menor valor." }, { "text": "==", "correct": false, "feedback": "Incorreto! '==' só testaria igualdade." }, { "text": "!=", "correct": false, "feedback": "Incorreto! '!=' atualizaria para qualquer número diferente." } ], 
+        pythonExplanation: "Para encontrar o maior elemento em Python, compara-se cada item com o maior conhecido até então usando '>'.",
         title: "Fase 23: Encontrando o Maior Valor em Vetor",
         concept: "Algoritmo de Seleção de Máximo",
         filename: "pico_tensao.algo",
@@ -2154,6 +2249,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 24,
+        pythonFilename: "menor_ping.py",
+        pythonCodeTemplate: "menor_latencia = <span class=\"code-gap\">________</span>\nfor r in rotas[1:]:\n    if r < menor_latencia:\n        menor_latencia = r",
+        pythonOptions: [ { "text": "rotas[0]", "correct": true, "feedback": "Correto! Em Python, inicializar com rotas[0] garante uma comparação segura com um elemento real da lista." }, { "text": "0", "correct": false, "feedback": "Cuidado! Se todos os pings forem maiores que 0, a busca falhará." }, { "text": "-9999", "correct": false, "feedback": "Incorreto! Valor negativo quebraria o cálculo." }, { "text": "len(rotas)", "correct": false, "feedback": "Incorreto! É a quantidade de rotas, não uma latência." } ], 
+        pythonExplanation: "Inicializar o valor mínimo com o primeiro item da lista (lista[0]) evita falsos mínimos zerados.",
         title: "Fase 24: Encontrando o Menor Valor em Vetor",
         concept: "Algoritmo de Seleção de Mínimo (Menor Latência)",
         filename: "menor_ping.algo",
@@ -2171,6 +2270,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       // 25-30: MANIPULAÇÃO DE STRINGS, MATRIZES E SWITCH
       {
         id: 25,
+        pythonFilename: "montar_identidade.py",
+        pythonCodeTemplate: "prefixo = \"AGENTE_\"\ncodigo = \"77\"\ncracha_final = prefixo <span class=\"code-gap\">_</span> codigo # \"AGENTE_77\"",
+        pythonOptions: [ { "text": "+ (concatenação)", "correct": true, "feedback": "Exato! Em Python, o operador '+' junta duas strings (ex: 'AGENTE_' + '77' -> 'AGENTE_77')." }, { "text": "-", "correct": false, "feedback": "Incorreto! '-' não funciona com strings em Python." }, { "text": "*", "correct": false, "feedback": "Incorreto! '*' com string e string gera erro de tipo." }, { "text": "and", "correct": false, "feedback": "Incorreto! 'and' é operador lógico booleano." } ], 
+        pythonExplanation: "Em Python, o operador '+' une duas strings. Alternativamente, pode-se usar f-strings f'{prefixo}{codigo}'.",
         title: "Fase 25: Concatenação de Strings (Textos)",
         concept: "União de Textos com Operador +",
         filename: "montar_identidade.algo",
@@ -2186,6 +2289,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 26,
+        pythonFilename: "extrair_protocolo.py",
+        pythonCodeTemplate: "chave = \"CYBER_2026\"\nprefixo = chave<span class=\"code-gap\">_______</span> # Extrai os 5 primeiros caracteres: \"CYBER\"",
+        pythonOptions: [ { "text": "[0:5] (fatiamento/slice)", "correct": true, "feedback": "Muito bem! Em Python, a notação de fatiamento string[0:5] extrai do índice 0 até o índice 4." }, { "text": "[0, 5]", "correct": false, "feedback": "Incorreto! Em Python fatiamento usa dois-pontos [inicio:fim]." }, { "text": ".substring(5)", "correct": false, "feedback": "Incorreto! Python não tem método .substring(), usa-se slicing [0:5]." }, { "text": "[5]", "correct": false, "feedback": "Incorreto! [5] pegaria apenas o caractere único no índice 5 ('_')." } ], 
+        pythonExplanation: "Em Python, o fatiamento de sequências (slicing) é feito com a sintaxe string[inicio:fim].",
         title: "Fase 26: Extração de Substrings (Fatiamento)",
         concept: "Obtenção de Pedaços de Texto",
         filename: "extrair_protocolo.algo",
@@ -2201,6 +2308,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 27,
+        pythonFilename: "converter_input.py",
+        pythonCodeTemplate: "entrada_texto = \"150\"\nnumero = <span class=\"code-gap\">___</span>(entrada_texto)\ntotal = numero + 50 # Deve resultar em 200 (inteiro)",
+        pythonOptions: [ { "text": "int", "correct": true, "feedback": "Correto! A função embutida int() converte uma string de dígitos numéricos em um número inteiro em Python." }, { "text": "str", "correct": false, "feedback": "Incorreto! 'str' converteria para texto, gerando '15050'." }, { "text": "len", "correct": false, "feedback": "Incorreto! 'len' retornaria 3 (tamanho da string)." }, { "text": "float", "correct": false, "feedback": "Incorreto! 'float' criaria 150.0 (número decimal)." } ], 
+        pythonExplanation: "Em Python, int('150') converte string em inteiro e float('150.5') converte em ponto flutuante.",
         title: "Fase 27: Conversão de Tipos (Type Casting)",
         concept: "Conversão de Texto para Número Inteiro",
         filename: "converter_input.algo",
@@ -2216,6 +2327,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 28,
+        pythonFilename: "seletor_modulo.py",
+        pythonCodeTemplate: "match codigo_arma:\n    case 1:\n        equipar_laser()\n    case 2:\n        equipar_canhao_emp()\n    case <span class=\"code-gap\">_</span>:\n        equipar_espada_plasma()",
+        pythonOptions: [ { "text": "_ (padrão/wildcard em match-case)", "correct": true, "feedback": "Excelente! Em Python 3.10+, o símbolo '_' em match/case atua como o caso padrão (default)." }, { "text": "default:", "correct": false, "feedback": "Incorreto! 'default' é da linguagem C/Java, em Python usa-se 'case _:'." }, { "text": "else:", "correct": false, "feedback": "Incorreto! Dentro do bloco match em Python usa-se 'case _:'." }, { "text": "other:", "correct": false, "feedback": "Incorreto! 'other' não é palavra reservada de match-case." } ], 
+        pythonExplanation: "O Python introduziu a estrutura match/case no Python 3.10, usando 'case _:' para o tratamento padrão.",
         title: "Fase 28: Estrutura Condicional Múltipla (ESCOLHA / switch)",
         concept: "Seleção Múltipla com CASO / switch case",
         filename: "seletor_modulo.algo",
@@ -2231,6 +2346,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 29,
+        pythonFilename: "inverter_chaves.py",
+        pythonCodeTemplate: "aux = A\nA = B\nB = <span class=\"code-gap\">___</span>",
+        pythonOptions: [ { "text": "aux", "correct": true, "feedback": "Muito bem! Usando a variável 'aux' preservamos o valor original de A para passar para B." }, { "text": "A", "correct": false, "feedback": "Incorreto! A já foi sobrescrito pelo valor de B." }, { "text": "0", "correct": false, "feedback": "Incorreto! Apagaria o valor." }, { "text": "B", "correct": false, "feedback": "Incorreto! B = B não altera nada." } ], 
+        pythonExplanation: "Em Python tradicional usa-se 'aux = A; A = B; B = aux' ou a sintaxe de desempacotamento direta 'A, B = B, A'.",
         title: "Fase 29: Troca de Valores entre Duas Variáveis (Swap)",
         concept: "Algoritmo de Permutação com Variável Auxiliar",
         filename: "inverter_chaves.algo",
@@ -2246,6 +2365,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 30,
+        pythonFilename: "mapa_grade.py",
+        pythonCodeTemplate: "grade = [\n    [\"A\", \"B\", \"C\"], # Linha 0\n    [\"D\", \"E\", \"F\"], # Linha 1\n    [\"G\", \"H\", \"I\"]  # Linha 2\n]\ncelula = grade<span class=\"code-gap\">______</span> # Acessa \"F\"",
+        pythonOptions: [ { "text": "[1][2]", "correct": true, "feedback": "Correto! Em Python, matrizes 2D acessam primeiro a linha grade[1] e depois a coluna [2] -> 'F'." }, { "text": "[2][1]", "correct": false, "feedback": "Incorreto! [2][1] acessaria 'H'." }, { "text": "[1, 2]", "correct": false, "feedback": "Incorreto! Listas aninhadas em Python usam [linha][coluna]." }, { "text": "[3][3]", "correct": false, "feedback": "Incorreto! Geraria IndexError em grade 3x3." } ], 
+        pythonExplanation: "Em Python, matrizes são representadas por listas de listas, acessadas com matriz[linha][coluna].",
         title: "Fase 30: Matrizes / Vetores Bidimensionais",
         concept: "Acesso a Elementos por Linha e Coluna [L][C]",
         filename: "mapa_grade.algo",
@@ -2263,6 +2386,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       // 31-36: ESTRUTURAS DE DADOS (PILHA, FILA, OBJETOS) E TRATAMENTO DE ERROS
       {
         id: 31,
+        pythonFilename: "renderizar_tela.py",
+        pythonCodeTemplate: "for l in range(total_linhas):\n    for c in range(<span class=\"code-gap\">_____________</span>):\n        desenhar_pixel(matriz[l][c])",
+        pythonOptions: [ { "text": "total_colunas", "correct": true, "feedback": "Exato! O laço interno 'range(total_colunas)' percorre todas as colunas de cada linha em Python." }, { "text": "total_linhas", "correct": false, "feedback": "Incorreto! Percorrer a dimensão errada causaria erro ou distorção." }, { "text": "0", "correct": false, "feedback": "Incorreto! range(0) criaria loop vazio." }, { "text": "1", "correct": false, "feedback": "Incorreto! range(1) processaria apenas a primeira coluna." } ], 
+        pythonExplanation: "Em Python, laços for aninhados percorrem matrizes linha por linha (for l in range(L): for c in range(C):).",
         title: "Fase 31: Laços Aninhados (FOR dentro de FOR)",
         concept: "Varredura Completa de Matriz 2D",
         filename: "renderizar_tela.algo",
@@ -2278,6 +2405,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 32,
+        pythonFilename: "historico_desfazer.py",
+        pythonCodeTemplate: "acoes = []\nacoes.append(\"Mover\")\nacoes.append(\"Pular\")\nacoes.append(\"Atirar\")\nremovido = acoes.<span class=\"code-gap\">_____</span>() # Remove \"Atirar\" (LIFO)",
+        pythonOptions: [ { "text": "pop()", "correct": true, "feedback": "Perfeito! O método .pop() sem argumentos em listas de Python remove e retorna o último elemento inserido (LIFO)." }, { "text": "dequeue()", "correct": false, "feedback": "Incorreto! Python não possui método .dequeue() em listas comuns." }, { "text": "clear()", "correct": false, "feedback": "Incorreto! .clear() esvazia a lista toda." }, { "text": "reverse()", "correct": false, "feedback": "Incorreto! .reverse() apenas inverte a lista." } ], 
+        pythonExplanation: "Em Python, listas funcionam nativamente como pilhas (Stack) usando .append() para empilhar e .pop() para desempilhar.",
         title: "Fase 32: Estrutura de Dados Pilha (LIFO)",
         concept: "Último a Entrar, Primeiro a Sair (Stack)",
         filename: "historico_desfazer.algo",
@@ -2293,6 +2424,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 33,
+        pythonFilename: "buffer_impressao.py",
+        pythonCodeTemplate: "buffer = []\nbuffer.append(\"Msg_1\")\nbuffer.append(\"Msg_2\")\nbuffer.append(\"Msg_3\")\nremovido = buffer.<span class=\"code-gap\">______</span> # Remove \"Msg_1\" (FIFO)",
+        pythonOptions: [ { "text": "pop(0)", "correct": true, "feedback": "Correto! Em Python, .pop(0) remove e retorna o primeiro elemento da lista (posição 0), respeitando FIFO." }, { "text": "pop()", "correct": false, "feedback": "Incorreto! .pop() sem argumentos removeria o último (Msg_3)." }, { "text": "remove()", "correct": false, "feedback": "Incorreto! .remove(valor) necessita do valor exato a ser removido." }, { "text": "clear()", "correct": false, "feedback": "Incorreto! .clear() apagaria a fila inteira." } ], 
+        pythonExplanation: "Para usar uma lista como fila em Python, usa-se .append() para enfileirar e .pop(0) (ou collections.deque) para desenfileirar.",
         title: "Fase 33: Estrutura de Dados Fila (FIFO)",
         concept: "Primeiro a Entrar, Primeiro a Sair (Queue)",
         filename: "buffer_impressao.algo",
@@ -2308,6 +2443,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 34,
+        pythonFilename: "ficha_agente.py",
+        pythonCodeTemplate: "drone = {\n    \"modelo\": \"Cyber-Viper\",\n    \"escudo\": 100,\n    \"ativo\": True\n}\nnivel_escudo = drone<span class=\"code-gap\">__________</span>",
+        pythonOptions: [ { "text": "[\"escudo\"]", "correct": true, "feedback": "Excelente! Em dicionários do Python, acessamos o valor associado a uma chave usando colchetes e a string da chave: dict[\"chave\"]." }, { "text": ".escudo", "correct": false, "feedback": "Incorreto! Dicionários em Python não aceitam sintaxe de ponto como atributos de objeto." }, { "text": "[0]", "correct": false, "feedback": "Incorreto! Dicionários usam chaves nomeadas, não índices numéricos inteiros." }, { "text": "len()", "correct": false, "feedback": "Incorreto! len() daria a quantidade de pares chave-valor (3)." } ], 
+        pythonExplanation: "Em Python, dicionários (dict) armazenam pares de chave-valor acessados com a notação de colchetes dict['chave'].",
         title: "Fase 34: Objetos / Dicionários (Chave e Valor)",
         concept: "Estruturação de Dados com Atributos Nomeados",
         filename: "ficha_agente.algo",
@@ -2323,6 +2462,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 35,
+        pythonFilename: "atualizar_status.py",
+        pythonCodeTemplate: "drone[\"energia\"] = drone[\"energia\"] <span class=\"code-gap\">____</span>",
+        pythonOptions: [ { "text": "- 30", "correct": true, "feedback": "Exato! Em Python, atualizamos o valor da chave do dicionário subtraindo 30." }, { "text": "+ 30", "correct": false, "feedback": "Incorreto! '+' somaria em vez de aplicar o dano." }, { "text": "= 0", "correct": false, "feedback": "Incorreto! Destruiria o drone zerando a energia." }, { "text": "* 30", "correct": false, "feedback": "Incorreto! Multiplicaria por 30." } ], 
+        pythonExplanation: "Dicionários em Python são mutáveis; podemos atualizar qualquer chave existente com atribuição (dict['chave'] -= 30).",
         title: "Fase 35: Modificação de Propriedades de Objeto",
         concept: "Atualização de Estado em Estruturas de Dados",
         filename: "atualizar_status.algo",
@@ -2338,6 +2481,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 36,
+        pythonFilename: "blindagem_excecoes.py",
+        pythonCodeTemplate: "<span class=\"code-gap\">___</span>:\n    conectar_servidor_central()\nexcept Exception as erro:\n    registrar_log(f\"Falha: {erro}\")",
+        pythonOptions: [ { "text": "try", "correct": true, "feedback": "Muito bem! Em Python, o bloco 'try... except' captura e trata exceções sem derrubar o programa." }, { "text": "while", "correct": false, "feedback": "Incorreto! 'while' é laço." }, { "text": "if", "correct": false, "feedback": "Incorreto! 'if' testa condição booleana." }, { "text": "for", "correct": false, "feedback": "Incorreto! 'for' é iteração." } ], 
+        pythonExplanation: "Em Python, o tratamento de erros é feito com o bloco 'try:' e a captura de exceções com 'except Exception as erro:'.",
         title: "Fase 36: Tratamento de Erros e Exceções",
         concept: "Prevenção de Quedas com TENTE / CAPTURE (try / catch)",
         filename: "blindagem_excecoes.algo",
@@ -2355,6 +2502,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       // 37-40: FLAGS, RASTREAMENTO, RECURSÃO E DEPURAÇÃO FINAL
       {
         id: 37,
+        pythonFilename: "flag_alerta.py",
+        pythonCodeTemplate: "perigo_detectado = False\nfor sensor in sensores:\n    if sensor[\"anomalia\"] == True:\n        perigo_detectado = <span class=\"code-gap\">____</span>",
+        pythonOptions: [ { "text": "True", "correct": true, "feedback": "Correto! Em Python, a flag booleana recebe o valor True ao sinalizar a anomalia." }, { "text": "False", "correct": false, "feedback": "Incorreto! False manteria o perigo desativado." }, { "text": "None", "correct": false, "feedback": "Incorreto! None removeria o estado booleano." }, { "text": "0", "correct": false, "feedback": "Incorreto! Usar o tipo int 0 descaracteriza a flag booleana explícita." } ], 
+        pythonExplanation: "Flags booleanas em Python (True/False) sinalizam a ocorrência de condições especiais durante iterações.",
         title: "Fase 37: Variável Sentinela / Flag Booleana",
         concept: "Sinalizadores de Estado no Fluxo de Execução",
         filename: "flag_alerta.algo",
@@ -2370,6 +2521,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 38,
+        pythonFilename: "teste_mesa.py",
+        pythonCodeTemplate: "X = 0\nfor i in range(1, 4):\n    X = X + (i * 2)\n# Valor final de X: <span class=\"code-gap\">__</span>",
+        pythonOptions: [ { "text": "12", "correct": true, "feedback": "Sensacional! i=1: X=0+2=2. i=2: X=2+4=6. i=3: X=6+6=12!" }, { "text": "6", "correct": false, "feedback": "Incorreto! 6 é o valor até i=2." }, { "text": "8", "correct": false, "feedback": "Incorreto! Revise a conta: 2 + 4 + 6 = 12." }, { "text": "18", "correct": false, "feedback": "Incorreto! range(1, 4) itera apenas para i=1, 2, 3." } ], 
+        pythonExplanation: "Em Python, range(1, 4) produz a sequência [1, 2, 3], totalizando X = 2 + 4 + 6 = 12.",
         title: "Fase 38: Teste de Mesa e Rastreamento de Código",
         concept: "Simulação Mental de Execução de Algoritmo",
         filename: "teste_mesa.algo",
@@ -2385,6 +2540,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 39,
+        pythonFilename: "recursao_fatorial.py",
+        pythonCodeTemplate: "def contagem_regressiva(numero):\n    if numero <= 0:\n        return # <span class=\"code-gap\">___________________</span>\n    print(numero)\n    contagem_regressiva(numero - 1)",
+        pythonOptions: [ { "text": "O Caso Base (Condição de Parada)", "correct": true, "feedback": "Perfeito! O 'Caso Base' em Python impede que a função recursiva entre em estouro de pilha (RecursionError)." }, { "text": "O comando print", "correct": false, "feedback": "Incorreto! print apenas exibe dados." }, { "text": "O nome da função", "correct": false, "feedback": "Incorreto! É o identificador da sub-rotina." }, { "text": "O operador -", "correct": false, "feedback": "Incorreto! É o operador de decremento do parâmetro." } ], 
+        pythonExplanation: "O Caso Base é a condição de parada indispensável para evitar estouro do limite de recursão do Python.",
         title: "Fase 39: Recursão Básica e Caso Base",
         concept: "Função que Chama a Si Mesma com Condição de Parada",
         filename: "recursao_fatorial.algo",
@@ -2400,6 +2559,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 40,
+        pythonFilename: "ai_core_restoration.py",
+        pythonCodeTemplate: "blocos_restantes = 10\nwhile blocos_restantes > 0:\n    reparar_bloco()\n    <span class=\"code-gap\">____________________</span> # Essencial para o laço terminar!",
+        pythonOptions: [ { "text": "blocos_restantes -= 1 (ou blocos_restantes = blocos_restantes - 1)", "correct": true, "feedback": "VITÓRIA ABSOLUTA! Sem decrementar a variável em Python, a condição do while permaneceria sempre True!" }, { "text": "blocos_restantes += 1", "correct": false, "feedback": "Incorreto! Incrementar criaria um loop infinito para cima!" }, { "text": "print(\"loop\")", "correct": false, "feedback": "Incorreto! print não altera a variável de controle." }, { "text": "blocos_restantes == 0", "correct": false, "feedback": "Incorreto! '==' apenas compara, sem alterar a variável." } ], 
+        pythonExplanation: "Em Python, a atribuição aumentada 'variavel -= 1' decrementa a variável de controle do laço.",
         title: "Fase 40: Depuração de Código (Bug Hunting Final)",
         concept: "Identificação e Correção de Loop Infinito",
         filename: "ai_core_restoration.algo",
@@ -2417,6 +2580,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       // 41-60: NÍVEL DESAFIO AVANÇADO (ALGORITMOS CLÁSSICOS, ESTRUTURAS AVANÇADAS E OTIMIZAÇÃO)
       {
         id: 41,
+        pythonFilename: "busca_binaria_cyber.py",
+        pythonCodeTemplate: "def busca_binaria(vetor_ordenado, alvo):\n    inicio = 0\n    fim = len(vetor_ordenado) - 1\n    while inicio <= fim:\n        meio = <span class=\"code-gap\">__________________________</span>\n        if vetor_ordenado[meio] == alvo: return meio\n        if vetor_ordenado[meio] < alvo: inicio = meio + 1\n        else: fim = meio - 1\n    return -1",
+        pythonOptions: [ { "text": "(inicio + fim) // 2", "correct": true, "feedback": "Sensacional! Em Python, o operador '//' realiza a divisão inteira (piso), calculando a posição média exata do índice!" }, { "text": "fim - inicio", "correct": false, "feedback": "Incorreto! (fim - inicio) calcula a amplitude, não a posição do meio." }, { "text": "inicio * 2", "correct": false, "feedback": "Incorreto! Não encontra a posição central." }, { "text": "len(vetor_ordenado) // 2", "correct": false, "feedback": "Incorreto! Ignora as variáveis dinâmicas inicio e fim." } ], 
+        pythonExplanation: "Em Python, usamos a divisão inteira '//' (ex: (inicio + fim) // 2) para obter o índice central em número inteiro.",
         title: "Fase 41 (Desafio): Busca Binária (Binary Search)",
         concept: "Divisão e Conquista em Vetor Ordenado (O(log N))",
         filename: "busca_binaria_cyber.algo",
@@ -2432,6 +2599,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 42,
+        pythonFilename: "ordenacao_bolha.py",
+        pythonCodeTemplate: "for i in range(n - 1):\n    for j in range(n - i - 1):\n        if vetor[j] <span class=\"code-gap\">_</span> vetor[j + 1]:\n            vetor[j], vetor[j + 1] = vetor[j + 1], vetor[j]",
+        pythonOptions: [ { "text": "> (maior que)", "correct": true, "feedback": "Exato! Em Python, se vetor[j] > vetor[j+1], os elementos adjacentes estão desalinhados e são trocados." }, { "text": "<", "correct": false, "feedback": "Incorreto! '<' ordenaria em ordem decrescente." }, { "text": "==", "correct": false, "feedback": "Incorreto! Trocar elementos iguais destruiria a estabilidade do algoritmo." }, { "text": "!=", "correct": false, "feedback": "Incorreto! '!=' trocaria inclusive elementos em ordem correta." } ], 
+        pythonExplanation: "No Bubble Sort em Python, a troca de variáveis adjacentes pode ser feita diretamente com 'a, b = b, a'.",
         title: "Fase 42 (Desafio): Ordenação por Bolha (Bubble Sort)",
         concept: "Comparação e Troca de Elementos Adjacentes",
         filename: "ordenacao_bolha.algo",
@@ -2447,6 +2618,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 43,
+        pythonFilename: "fibonacci_recursivo.py",
+        pythonCodeTemplate: "def fibonacci(n):\n    if n == 0: return 0\n    if n == 1: return 1\n    return <span class=\"code-gap\">_________________________________</span>",
+        pythonOptions: [ { "text": "fibonacci(n - 1) + fibonacci(n - 2)", "correct": true, "feedback": "Perfeito! Cada termo de Fibonacci em Python é a soma recursiva dos dois termos anteriores." }, { "text": "fibonacci(n - 1) * fibonacci(n - 2)", "correct": false, "feedback": "Incorreto! Fibonacci é soma, não multiplicação." }, { "text": "fibonacci(n * 2)", "correct": false, "feedback": "Incorreto! Dobrar o parâmetro provocaria estouro de pilha." }, { "text": "n + fibonacci(n)", "correct": false, "feedback": "Incorreto! Travaria em recursão infinita." } ], 
+        pythonExplanation: "Em Python, a função recursiva de Fibonacci retorna a soma de duas chamadas recursivas: F(n-1) + F(n-2).",
         title: "Fase 43 (Desafio): Recursão Múltipla (Sequência de Fibonacci)",
         concept: "Definição de Termos Recursivos (Fn = Fn-1 + Fn-2)",
         filename: "fibonacci_recursivo.algo",
@@ -2462,6 +2637,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 44,
+        pythonFilename: "verificador_palindromo.py",
+        pythonCodeTemplate: "ini, fim = 0, len(texto) - 1\nwhile ini < fim:\n    if texto[ini] != texto[fim]: return False\n    ini <span class=\"code-gap\">____</span>; fim <span class=\"code-gap\">____</span>\nreturn True",
+        pythonOptions: [ { "text": "+= 1 e -= 1", "correct": true, "feedback": "Excelente! Em Python, 'ini += 1' avança o índice para a direita e 'fim -= 1' recua o índice para a esquerda." }, { "text": "-= 1 e += 1", "correct": false, "feedback": "Incorreto! Afastaria os índices para fora dos limites." }, { "text": "+= 1 e += 1", "correct": false, "feedback": "Incorreto! Moveria ambos na mesma direção." }, { "text": "= 0 e = 0", "correct": false, "feedback": "Incorreto! Resetaria as variáveis para 0." } ], 
+        pythonExplanation: "O algoritmo de dois ponteiros em Python ajusta as posições dos índices com 'ini += 1' e 'fim -= 1'.",
         title: "Fase 44 (Desafio): Dois Ponteiros - Verificador de Palíndromo",
         concept: "Convergência de Extremidades (Início e Fim)",
         filename: "verificador_palindromo.algo",
@@ -2477,6 +2656,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 45,
+        pythonFilename: "filtro_bits.py",
+        pythonCodeTemplate: "mascara = 4 # Binário: 0b00000100\nif (registro_status <span class=\"code-gap\">_</span> mascara) != 0:\n    ativar_protocolo_defesa()",
+        pythonOptions: [ { "text": "& (E Bitwise)", "correct": true, "feedback": "Correto! O operador '&' em Python realiza a operação E bit a bit entre os inteiros." }, { "text": "and (E Lógico)", "correct": false, "feedback": "Incorreto! 'and' é operador lógico booleano, não bitwise." }, { "text": "| (OU Bitwise)", "correct": false, "feedback": "Incorreto! '|' força bits a 1." }, { "text": "%", "correct": false, "feedback": "Incorreto! '%' calcula resto da divisão." } ], 
+        pythonExplanation: "Em Python, os operadores bitwise são: & (AND), | (OR), ^ (XOR), ~ (NOT), << (Left Shift) e >> (Right Shift).",
         title: "Fase 45 (Desafio): Operadores Bitwise (Máscara de Bits &)",
         concept: "Manipulação de Bits em Nível de Hardware",
         filename: "filtro_bits.algo",
@@ -2492,6 +2675,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 46,
+        pythonFilename: "analise_algoritmo.py",
+        pythonCodeTemplate: "for i in range(N):\n    for j in range(N):\n        processar_pixel(matriz[i][j])",
+        pythonOptions: [ { "text": "O(N²)", "correct": true, "feedback": "Muito bem! Dois laços 'for' aninhados iterando N vezes em Python resultam em complexidade de tempo O(N²)." }, { "text": "O(N)", "correct": false, "feedback": "Incorreto! O(N) é a complexidade de um único laço simples." }, { "text": "O(1)", "correct": false, "feedback": "Incorreto! O(1) é tempo constante." }, { "text": "O(log N)", "correct": false, "feedback": "Incorreto! O(log N) é divisão logarítmica." } ], 
+        pythonExplanation: "A análise Big-O em Python mede a escalabilidade do algoritmo quando N cresce.",
         title: "Fase 46 (Desafio): Análise de Complexidade de Tempo (Big-O)",
         concept: "Comportamento Assintótico de Algoritmos",
         filename: "analise_algoritmo.algo",
@@ -2507,6 +2694,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 47,
+        pythonFilename: "limpar_duplicatas.py",
+        pythonCodeTemplate: "ids_comuns = [10, 20, 10, 30, 20, 40]\nids_unicos = <span class=\"code-gap\">___</span>(ids_comuns) # {10, 20, 30, 40}",
+        pythonOptions: [ { "text": "set", "correct": true, "feedback": "Exato! Em Python, o tipo nativo set() cria um conjunto que remove automaticamente valores duplicados." }, { "text": "stack", "correct": false, "feedback": "Incorreto! Python não possui o tipo nativo 'stack'." }, { "text": "queue", "correct": false, "feedback": "Incorreto! 'queue' não elimina duplicatas." }, { "text": "list", "correct": false, "feedback": "Incorreto! 'list' manteria todos os elementos duplicados." } ], 
+        pythonExplanation: "A classe embutida set() em Python converte coleções removendo todas as duplicatas em tempo médio O(N).",
         title: "Fase 47 (Desafio): Remoção de Duplicatas com Conjuntos (Set)",
         concept: "Unicidade de Elementos e Tabelas de Dispersão",
         filename: "limpar_duplicatas.algo",
@@ -2522,6 +2713,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 48,
+        pythonFilename: "inverter_vetor.py",
+        pythonCodeTemplate: "ini, fim = 0, len(v) - 1\nwhile <span class=\"code-gap\">_________</span>:\n    v[ini], v[fim] = v[fim], v[ini]\n    ini += 1; fim -= 1",
+        pythonOptions: [ { "text": "ini < fim", "correct": true, "feedback": "Correto! Enquanto 'ini < fim', as pontas do vetor são trocadas in-place em Python." }, { "text": "ini == 0", "correct": false, "feedback": "Incorreto! Só executaria a primeira troca." }, { "text": "ini < len(v)", "correct": false, "feedback": "Incorreto! Trocaria de volta desfazendo a inversão." }, { "text": "fim > 1000", "correct": false, "feedback": "Incorreto! 1000 é um número fixo arbitrário." } ], 
+        pythonExplanation: "Em Python, a troca in-place 'v[ini], v[fim] = v[fim], v[ini]' inverte o vetor sem gastar memória extra.",
         title: "Fase 48 (Desafio): Inversão de Vetor In-Place",
         concept: "Economia de Memória O(1) Auxiliar",
         filename: "inverter_vetor.algo",
@@ -2537,6 +2732,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 49,
+        pythonFilename: "ponteiro_referencia.py",
+        pythonCodeTemplate: "def alterar_primeiro(lista):\n    lista[0] = 999\ndados = [1, 2, 3]\nalterar_primeiro(dados)\n# O valor de dados[0] agora é: <span class=\"code-gap\">___</span>",
+        pythonOptions: [ { "text": "999 (modificado pois listas em Python são mutáveis)", "correct": true, "feedback": "Perfeito! Listas em Python são mutáveis e passadas por referência de memória; portanto, a alteração afeta a lista original." }, { "text": "1", "correct": false, "feedback": "Incorreto! Listas são mutáveis em Python e não são copiadas por valor." }, { "text": "0", "correct": false, "feedback": "Incorreto! A atribuição foi 999." }, { "text": "Gera erro", "correct": false, "feedback": "Incorreto! É um comportamento padrão do Python." } ], 
+        pythonExplanation: "Em Python, objetos mutáveis (como list e dict) são passados por referência para funções.",
         title: "Fase 49 (Desafio): Passagem por Valor vs Referência",
         concept: "Mutabilidade de Coleções e Objetos na Memória",
         filename: "ponteiro_referencia.algo",
@@ -2552,6 +2751,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 50,
+        pythonFilename: "validador_sintaxe.py",
+        pythonCodeTemplate: "if char == '(':\n    pilha.append('(')\nelif char == ')':\n    if not pilha: return False\n    pilha.<span class=\"code-gap\">_____</span>() # Remove o '(' correspondente",
+        pythonOptions: [ { "text": "pop()", "correct": true, "feedback": "Sensacional! O método .pop() em listas do Python desempilha o último parêntese aberto." }, { "text": "append(')')", "correct": false, "feedback": "Incorreto! append(')') empilharia mais um símbolo." }, { "text": "clear()", "correct": false, "feedback": "Incorreto! clear() esvaziaria a pilha inteira." }, { "text": "reverse()", "correct": false, "feedback": "Incorreto! reverse() inverteria a pilha." } ], 
+        pythonExplanation: "Em Python, o método .pop() retira o elemento do topo da pilha em tempo O(1).",
         title: "Fase 50 (Desafio): Balanceamento de Parênteses com Pilha",
         concept: "Validação Sintática de Compiladores",
         filename: "validador_sintaxe.algo",
@@ -2567,6 +2770,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 51,
+        pythonFilename: "algoritmo_troco.py",
+        pythonCodeTemplate: "for moeda in moedas:\n    qtd = valor_restante <span class=\"code-gap\">//</span> moeda\n    valor_restante = valor_restante <span class=\"code-gap\">%</span> moeda",
+        pythonOptions: [ { "text": "// (divisão inteira) e % (resto)", "correct": true, "feedback": "Excelente! Em Python, '//' calcula a divisão inteira e '%' obtém o resto que sobra." }, { "text": "* e +", "correct": false, "feedback": "Incorreto! Multiplicaria em vez de dividir." }, { "text": "== e !=", "correct": false, "feedback": "Incorreto! Comparação lógica." }, { "text": "+ e -", "correct": false, "feedback": "Incorreto! Divisão inteira é mais direta." } ], 
+        pythonExplanation: "Em Python, a divisão inteira '//' descarta a parte fracionária e '%' devolve o resto.",
         title: "Fase 51 (Desafio): Algoritmo Guloso (Problema do Troco)",
         concept: "Escolha da Melhor Opção Local Imediata",
         filename: "algoritmo_troco.algo",
@@ -2582,6 +2789,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 52,
+        pythonFilename: "arvore_busca.py",
+        pythonCodeTemplate: "def inserir(no_atual, novo_valor):\n    if novo_valor < no_atual.valor:\n        no_atual.filho_<span class=\"code-gap\">________</span> = inserir(no_atual.filho_<span class=\"code-gap\">________</span>, novo_valor)\n    else:\n        no_atual.filho_direito = inserir(no_atual.filho_direito, novo_valor)\n    return no_atual",
+        pythonOptions: [ { "text": "esquerdo (left)", "correct": true, "feedback": "Correto! Por regra da Árvore Binária de Busca, valores menores são armazenados no ramo esquerdo." }, { "text": "direito (right)", "correct": false, "feedback": "Incorreto! Valores maiores vão para o ramo direito." }, { "text": "raiz", "correct": false, "feedback": "Incorreto! A raiz é o nó de topo." }, { "text": "nenhum", "correct": false, "feedback": "Incorreto! A árvore precisa inserir o nó." } ], 
+        pythonExplanation: "Em Python, atributos de objetos em BST direcionam a navegação recursiva (no.filho_esquerdo vs no.filho_direito).",
         title: "Fase 52 (Desafio): Árvore Binária de Busca (BST)",
         concept: "Propriedade Fundamental de Ordenação em Árvores",
         filename: "arvore_busca.algo",
@@ -2597,6 +2808,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 53,
+        pythonFilename: "detector_ciclo.py",
+        pythonCodeTemplate: "lento = cabeca\nrapido = cabeca\nwhile rapido and rapido.proximo:\n    lento = lento.proximo\n    rapido = rapido.<span class=\"code-gap\">___________________</span>\n    if lento == rapido: return True",
+        pythonOptions: [ { "text": "proximo.proximo (2 nós por passo)", "correct": true, "feedback": "Muito bem! O ponteiro rápido avança dois nós 'proximo.proximo' a cada iteração em Python." }, { "text": "proximo (1 nó por passo)", "correct": false, "feedback": "Incorreto! Mantendo a mesma velocidade não se encontrariam." }, { "text": "anterior", "correct": false, "feedback": "Incorreto! Lista encadeada simples não tem ponteiro anterior." }, { "text": "cabeca", "correct": false, "feedback": "Incorreto! Voltar para a cabeça travaria a busca." } ], 
+        pythonExplanation: "O algoritmo de Floyd usa ponteiros de velocidades diferentes (rapido = rapido.proximo.proximo) para detectar ciclos.",
         title: "Fase 53 (Desafio): Detecção de Ciclos (Algoritmo de Floyd)",
         concept: "Ponteiro Lento e Rápido (Tartaruga e Lebre)",
         filename: "detector_ciclo.algo",
@@ -2612,6 +2827,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 54,
+        pythonFilename: "transformacao_map.py",
+        pythonCodeTemplate: "numeros = [10, 20, 30]\nduplicados = list(<span class=\"code-gap\">___</span>(lambda x: x * 2, numeros)) # [20, 40, 60]",
+        pythonOptions: [ { "text": "map", "correct": true, "feedback": "Exato! A função embutida map(funcao, iteravel) em Python aplica uma transformação a cada elemento." }, { "text": "filter", "correct": false, "feedback": "Incorreto! filter seleciona por condição booleana." }, { "text": "reduce", "correct": false, "feedback": "Incorreto! reduce condensa a um único valor." }, { "text": "del", "correct": false, "feedback": "Incorreto! del apaga dados." } ], 
+        pythonExplanation: "Em Python, map(funcao, lista) retorna um iterador de itens transformados (convertido para lista com list()).",
         title: "Fase 54 (Desafio): Funções de Alta Ordem - Mapeamento (MAP)",
         concept: "Transformação Funcional Imutável de Vetores",
         filename: "transformacao_map.algo",
@@ -2627,6 +2846,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 55,
+        pythonFilename: "filtragem_segura.py",
+        pythonCodeTemplate: "ativos = list(<span class=\"code-gap\">______</span>(lambda u: u[\"status\"] == \"ATIVO\", usuarios))",
+        pythonOptions: [ { "text": "filter", "correct": true, "feedback": "Correto! A função embutida filter(predicado, iteravel) em Python seleciona apenas os elementos que retornam True." }, { "text": "map", "correct": false, "feedback": "Incorreto! map transformaria os elementos em booleanos." }, { "text": "sort", "correct": false, "feedback": "Incorreto! sort apenas ordena." }, { "text": "append", "correct": false, "feedback": "Incorreto! append adiciona um item." } ], 
+        pythonExplanation: "Em Python, filter(funcao_booleana, colecao) extrai os elementos que satisfazem o predicado.",
         title: "Fase 55 (Desafio): Funções de Alta Ordem - Filtragem (FILTER)",
         concept: "Seleção por Predicado Booleano",
         filename: "filtragem_segura.algo",
@@ -2642,6 +2865,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 56,
+        pythonFilename: "acumulador_reduce.py",
+        pythonCodeTemplate: "from functools import reduce\nprecos = [100, 250, 50]\ntotal = <span class=\"code-gap\">______</span>(lambda acc, x: acc + x, precos, 0) # 400",
+        pythonOptions: [ { "text": "reduce", "correct": true, "feedback": "Sensacional! A função reduce() do módulo functools em Python agrega todos os itens a um valor acumulado." }, { "text": "slice", "correct": false, "feedback": "Incorreto! slice fatoria listas." }, { "text": "join", "correct": false, "feedback": "Incorreto! join junta strings." }, { "text": "reverse", "correct": false, "feedback": "Incorreto! reverse inverte posições." } ], 
+        pythonExplanation: "Em Python, reduce(funcao, iteravel, inicial) está disponível no módulo padrão functools.",
         title: "Fase 56 (Desafio): Funções de Alta Ordem - Redução (REDUCE)",
         concept: "Agregação Acumulativa de Vetores",
         filename: "acumulador_reduce.algo",
@@ -2657,6 +2884,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 57,
+        pythonFilename: "tabela_hash_colisao.py",
+        pythonCodeTemplate: "# hash(\"chave_A\") % 10 == 3\n# hash(\"chave_B\") % 10 == 3 (Colisão!)\ntabela_hash[3] = <span class=\"code-gap\">___________________________________</span>",
+        pythonOptions: [ { "text": "Uma lista contendo ambos os pares chave-valor", "correct": true, "feedback": "Perfeito! No encadeamento em Python, o balde tabela_hash[3] armazena uma lista de tuplas [(chave, valor)]." }, { "text": "Sobrescreve a chave antiga", "correct": false, "feedback": "Incorreto! Perderia dados da chave anterior." }, { "text": "Trava o sistema", "correct": false, "feedback": "Incorreto! Colisões são tratadas normalmente." }, { "text": "Limpa a memória", "correct": false, "feedback": "Incorreto! Destruiria a tabela." } ], 
+        pythonExplanation: "Encadeamento separado armazena uma lista de pares [(k1, v1), (k2, v2)] para resolver colisões em tabelas Hash.",
         title: "Fase 57 (Desafio): Resolução de Colisões em Tabela Hash",
         concept: "Tratamento de Chaves Distintas com Mesmo Hash",
         filename: "tabela_hash_colisao.algo",
@@ -2672,6 +2903,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 58,
+        pythonFilename: "encontrar_impar_xor.py",
+        pythonCodeTemplate: "# lista = [5, 9, 3, 9, 5]\nunico = 0\nfor x in lista:\n    unico = unico ^ x\n# Resultado: unico == 3! Pois X ^ X = <span class=\"code-gap\">_</span> e X ^ 0 = <span class=\"code-gap\">_</span>",
+        pythonOptions: [ { "text": "0 e X", "correct": true, "feedback": "Brilhante! Em Python, X ^ X = 0 e X ^ 0 = X, cancelando todos os pares de números repetidos!" }, { "text": "1 e 0", "correct": false, "feedback": "Incorreto! X ^ X zera os bits." }, { "text": "X e 0", "correct": false, "feedback": "Incorreto! Ordem inversa." }, { "text": "Infinito e 1", "correct": false, "feedback": "Incorreto! Álgebra booleana discreta." } ], 
+        pythonExplanation: "O operador '^' (XOR) em Python zera bits idênticos, isolando o número ímpar que não possui par.",
         title: "Fase 58 (Desafio): Propriedade Matemática do XOR Bitwise (^)",
         concept: "Localização de Elemento Único em O(N) Tempo e O(1) Espaço",
         filename: "encontrar_impar_xor.algo",
@@ -2687,6 +2922,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 59,
+        pythonFilename: "memoizacao_cache.py",
+        pythonCodeTemplate: "def fibo_memo(n, cache):\n    if n <= 1: return n\n    if <span class=\"code-gap\">_________</span>:\n        return cache[n] # Reutiliza resultado de O(1)\n    cache[n] = fibo_memo(n - 1, cache) + fibo_memo(n - 2, cache)\n    return cache[n]",
+        pythonOptions: [ { "text": "n in cache", "correct": true, "feedback": "Excelente! Em Python, 'n in cache' verifica instantaneamente se o subproblema já foi calculado e salvo no dicionário!" }, { "text": "n == 100", "correct": false, "feedback": "Incorreto! Caso isolado." }, { "text": "len(cache) == 0", "correct": false, "feedback": "Incorreto! Se estiver vazio não tem o resultado." }, { "text": "n < 0", "correct": false, "feedback": "Incorreto! Tratado no caso base n <= 1." } ], 
+        pythonExplanation: "Em Python, 'n in cache' testa a presença de chaves em dicionários de forma eficiente em tempo O(1).",
         title: "Fase 59 (Desafio): Programação Dinâmica & Memoização",
         concept: "Armazenamento de Resoluções de Subproblemas Sobrepostos",
         filename: "memoizacao_cache.algo",
@@ -2702,6 +2941,10 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       },
       {
         id: 60,
+        pythonFilename: "ai_core_master_key.py",
+        pythonCodeTemplate: "def cifrar_caractere(indice_letra, chave):\n    return (indice_letra + chave) <span class=\"code-gap\">_</span> 26",
+        pythonOptions: [ { "text": "% (módulo)", "correct": true, "feedback": "MESTRE DO ALGORITMO! Em Python, o operador '%' realiza a rotação cíclica exata no alfabeto de 26 letras!" }, { "text": "/", "correct": false, "feedback": "Incorreto! '/' daria número com vírgula float." }, { "text": "*", "correct": false, "feedback": "Incorreto! Multiplicar daria números astronômicos." }, { "text": "-", "correct": false, "feedback": "Incorreto! Subtrair não faria a rotação circular." } ], 
+        pythonExplanation: "O operador % 26 garante a rotação modular do alfabeto (Cifra de César) em Python.",
         title: "Fase 60 (Desafio Épico Final): Decodificação Criptográfica",
         concept: "Cálculo Modular Cíclico para Rotação de Caracteres (Cifra de César)",
         filename: "ai_core_master_key.algo",
@@ -3047,8 +3290,8 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       document.getElementById('game-progress-bar').style.width = `${((index + 1) / STAGES.length) * 100}%`;
 
       document.getElementById('game-scenario-text').textContent = stage.scenario;
-      document.getElementById('terminal-filename').textContent = stage.filename;
-      document.getElementById('terminal-code').innerHTML = stage.codeTemplate;
+      document.getElementById('terminal-filename').textContent = filename;
+      document.getElementById('terminal-code').innerHTML = codeTemplate;
 
       // Hide feedback & next button
       const feedback = document.getElementById('feedback-banner');
@@ -3061,7 +3304,7 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
       optionsContainer.innerHTML = '';
 
       const letters = ['A', 'B', 'C', 'D'];
-      stage.options.forEach((opt, optIdx) => {
+      options.forEach((opt, optIdx) => {
         const btn = document.createElement('button');
         btn.className = 'option-btn';
         btn.id = `option-${optIdx}`;
@@ -3102,7 +3345,7 @@ CREATE POLICY "Public users" ON student_users FOR ALL USING (true) WITH CHECK (t
         document.getElementById('feedback-title').innerHTML = `<span>✅</span> RESPOSTA EXATA! (+${earnedPts} PTS)`;
         document.getElementById('feedback-explanation').innerHTML = `
           <strong>${selected.feedback}</strong><br>
-          <span style="opacity: 0.9; font-size: 13px;">${stage.explanation}</span>
+          <span style="opacity: 0.9; font-size: 13px;">${explanation}</span>
         `;
 
         state.stageResults.push({
