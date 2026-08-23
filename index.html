@@ -1968,11 +1968,6 @@
         return;
       }
 
-      if (state.autoAdvanceTimer) {
-        clearTimeout(state.autoAdvanceTimer);
-        state.autoAdvanceTimer = null;
-      }
-
       state.currentStageIndex = index;
       state.isAnswerLocked = false;
       const stage = stagesList[index];
@@ -2062,15 +2057,10 @@
         notifyStageProgress(true);
         saveLocalAttempt(`EM ANDAMENTO (Fase ${state.currentStageIndex + 1})`);
 
-        // Botão de Avanço com indicação de temporizador automático
+        // Exibir botão de avanço para o aluno ler a explicação com calma e avançar no seu próprio ritmo
         nextBtn.style.display = 'flex';
         const isFinal = (state.currentStageIndex === stagesList.length - 1);
-        nextBtn.textContent = isFinal ? 'VER RESULTADO FINAL ➔' : 'PRÓXIMA FASE ➔ (Avançando em 3s...)';
-
-        // Auto-avanço em 3.0 segundos após acerto para permitir a leitura da explicação
-        state.autoAdvanceTimer = setTimeout(() => {
-          onNextStageClicked();
-        }, 3000);
+        nextBtn.textContent = isFinal ? 'VER RESULTADO FINAL ➔' : 'PRÓXIMA FASE ➔';
 
       } else {
         selectedBtn.classList.add('wrong');
@@ -2100,10 +2090,6 @@
     }
 
     function onNextStageClicked() {
-      if (state.autoAdvanceTimer) {
-        clearTimeout(state.autoAdvanceTimer);
-        state.autoAdvanceTimer = null;
-      }
       sound.playBlip();
       loadStage(state.currentStageIndex + 1);
     }
