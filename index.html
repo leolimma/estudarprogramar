@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-  <!-- Carregamento do Banco de 60 Fases (Portugol e Python) -->
+  <!-- Carregamento do Banco de 60 Fases e Autenticação -->
   <script src="questions.js"></script>
   <script src="professor_auth.js"></script>
   <style>
@@ -53,9 +53,8 @@
       min-height: 100vh;
       overflow-x: hidden;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
-      justify-content: flex-start;
       position: relative;
     }
 
@@ -84,201 +83,283 @@
       z-index: 1;
     }
 
-    /* Main Container */
-    #app-root {
+    /* Layout Wrapper: Sidebar + Main Stage */
+    #app-layout {
       position: relative;
       z-index: 2;
       width: 100%;
-      max-width: 760px;
-      padding: 10px 14px 24px;
+      max-width: 1060px;
+      min-height: 92vh;
+      display: flex;
+      gap: 14px;
+      padding: 12px;
+      align-items: stretch;
+    }
+
+    /* =========================================================================
+       CYBER SIDEBAR (BARRA LATERAL DE HUD E CONTROLES)
+       ========================================================================= */
+    #cyber-sidebar {
+      width: 185px;
+      min-width: 185px;
+      background: rgba(12, 12, 14, 0.9);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      padding: 16px 12px;
       display: flex;
       flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
     }
 
-    /* Top HUD */
-    .hud-bar {
+    .sidebar-brand {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 8px 14px;
-      background: rgba(12, 12, 14, 0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--border-subtle);
-      border-radius: 14px;
-      margin-bottom: 10px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      gap: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-subtle);
     }
 
-    .hud-left, .hud-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    .sidebar-brand-icon {
+      font-size: 24px;
+      filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.6));
     }
 
-    .hud-score-box {
-      display: flex;
-      align-items: center;
-      gap: 6px;
+    .sidebar-brand-title {
       font-family: var(--font-display);
-      font-size: 14px;
-      font-weight: 700;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      color: var(--neon-cyan);
+      line-height: 1.15;
+      text-transform: uppercase;
+    }
+
+    /* Metric Box (Pontos) */
+    .sidebar-metric-box {
+      background: rgba(251, 191, 36, 0.06);
+      border: 1px solid rgba(251, 191, 36, 0.25);
+      border-radius: 12px;
+      padding: 8px 10px;
+      text-align: center;
+    }
+
+    .sidebar-metric-val {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 900;
       color: var(--neon-yellow);
-      background: rgba(251, 191, 36, 0.08);
-      border: 1px solid rgba(251, 191, 36, 0.2);
-      padding: 4px 10px;
-      border-radius: 10px;
+      line-height: 1.1;
+      text-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+    }
+
+    .sidebar-metric-lbl {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    /* Lives Box (Vidas) */
+    .sidebar-lives-box {
+      background: rgba(244, 63, 94, 0.06);
+      border: 1px solid rgba(244, 63, 94, 0.25);
+      border-radius: 12px;
+      padding: 8px 10px;
+      text-align: center;
+    }
+
+    .sidebar-lives-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
     }
 
     .hud-lives {
       display: flex;
-      gap: 4px;
+      justify-content: center;
+      gap: 6px;
     }
 
     .heart-icon {
-      font-size: 16px;
+      font-size: 18px;
       transition: all 0.3s;
       filter: drop-shadow(0 0 4px var(--neon-red));
     }
 
     .heart-lost {
-      filter: grayscale(1) opacity(0.25);
+      filter: grayscale(1) opacity(0.2);
     }
 
-    .hud-lang-pill {
+    .sidebar-divider {
+      height: 1px;
+      background: var(--border-subtle);
+      margin: 2px 0;
+    }
+
+    .sidebar-section-title {
       font-family: var(--font-display);
-      font-size: 11px;
+      font-size: 9.5px;
       font-weight: 700;
       color: var(--neon-cyan);
-      background: rgba(34, 211, 238, 0.1);
-      border: 1px solid rgba(34, 211, 238, 0.3);
-      padding: 4px 10px;
-      border-radius: 10px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.2s;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
     }
 
-    .hud-lang-pill:hover {
-      background: rgba(34, 211, 238, 0.25);
-      border-color: var(--neon-cyan);
-      box-shadow: 0 0 8px rgba(34, 211, 238, 0.4);
-    }
-
-    
-    .hud-teacher-btn {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      padding: 4px 10px;
-      border-radius: 10px;
-      font-family: var(--font-display);
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--neon-purple);
-      background: rgba(192, 132, 252, 0.1);
-      border: 1px solid rgba(192, 132, 252, 0.35);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .hud-teacher-btn:hover {
-      background: rgba(192, 132, 252, 0.25);
-      border-color: var(--neon-purple);
-      box-shadow: 0 0 10px rgba(192, 132, 252, 0.45);
-      transform: translateY(-1px);
-    }
-
-    .sound-toggle-btn {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-main);
-      font-size: 14px;
-      padding: 4px 8px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    /* Tab Switcher (Aluno vs Professor) */
-    .web-tab-bar {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-
-    .web-tab-btn {
-      flex: 1;
-      font-family: var(--font-display);
-      font-size: 11.5px;
-      font-weight: 700;
-      padding: 7px 12px;
+    /* Sidebar Action Buttons */
+    .sidebar-action-btn {
+      width: 100%;
+      padding: 8px 10px;
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: 10px;
-      color: var(--text-muted);
+      color: var(--text-main);
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 700;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
       transition: all 0.2s;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
 
-    .web-tab-btn.active {
-      color: var(--neon-cyan);
+    .sidebar-action-btn:hover {
       border-color: var(--neon-cyan);
+      background: var(--bg-surface-active);
+      box-shadow: 0 0 8px rgba(34, 211, 238, 0.25);
+    }
+
+    .sidebar-action-btn.lang-btn {
       background: rgba(34, 211, 238, 0.08);
-      box-shadow: 0 0 12px rgba(34, 211, 238, 0.2);
+      border-color: rgba(34, 211, 238, 0.3);
+      color: var(--neon-cyan);
+    }
+
+    .sidebar-action-btn.lang-btn:hover {
+      background: rgba(34, 211, 238, 0.2);
+      box-shadow: 0 0 10px rgba(34, 211, 238, 0.4);
+    }
+
+    .sidebar-spacer {
+      flex: 1;
+    }
+
+    .sidebar-teacher-btn {
+      width: 100%;
+      padding: 9px 10px;
+      background: rgba(192, 132, 252, 0.1);
+      border: 1px solid rgba(192, 132, 252, 0.35);
+      border-radius: 10px;
+      color: var(--neon-purple);
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .sidebar-teacher-btn:hover {
+      background: rgba(192, 132, 252, 0.25);
+      border-color: var(--neon-purple);
+      box-shadow: 0 0 12px rgba(192, 132, 252, 0.45);
+      transform: translateY(-1px);
+    }
+
+    /* Main App Area */
+    #app-root {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 0;
+    }
+
+    /* Responsive Mobile Mode */
+    @media (max-width: 768px) {
+      #app-layout {
+        flex-direction: column;
+        padding: 8px;
+        min-height: auto;
+      }
+      #cyber-sidebar {
+        width: 100%;
+        min-width: auto;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 12px;
+      }
+      .sidebar-brand {
+        display: none;
+      }
+      .sidebar-metric-box, .sidebar-lives-box {
+        padding: 4px 8px;
+      }
+      .sidebar-metric-val {
+        font-size: 16px;
+      }
+      .sidebar-action-btn, .sidebar-teacher-btn {
+        width: auto;
+        padding: 6px 8px;
+      }
+      .sidebar-spacer, .sidebar-divider, .sidebar-section-title {
+        display: none;
+      }
     }
 
     /* Screen Management */
     .screen {
       display: none;
+      flex-direction: column;
       width: 100%;
-      animation: fadeIn 0.25s ease-out;
     }
 
     .screen.active {
-      display: block;
+      display: flex;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Cyber Card */
+    /* Card System */
     .cyber-card {
       background: var(--bg-card);
       border: 1px solid var(--border-subtle);
       border-radius: 18px;
-      padding: 14px 18px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+      padding: 16px 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
       position: relative;
-      overflow: hidden;
     }
 
     .hero-title {
       font-family: var(--font-display);
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 900;
       text-align: center;
-      background: linear-gradient(135deg, #22d3ee 0%, #a855f7 50%, #f43f5e 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: 1px;
-      margin-bottom: 2px;
+      color: var(--neon-cyan);
       text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 2px;
     }
 
     .hero-subtitle {
       font-family: var(--font-body);
-      font-size: 12px;
+      font-size: 12.5px;
       font-weight: 600;
       text-align: center;
       color: var(--text-muted);
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     /* Auth Tab Row */
@@ -294,7 +375,7 @@
 
     .auth-tab-btn {
       flex: 1;
-      padding: 6px 10px;
+      padding: 7px 10px;
       font-family: var(--font-display);
       font-size: 11px;
       font-weight: 700;
@@ -317,7 +398,7 @@
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 8px;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     @media (max-width: 640px) {
@@ -336,7 +417,7 @@
       font-size: 10px;
       color: var(--neon-cyan);
       letter-spacing: 0.8px;
-      margin-bottom: 2px;
+      margin-bottom: 3px;
       text-transform: uppercase;
       font-weight: 700;
     }
@@ -346,7 +427,7 @@
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: 10px;
-      padding: 7px 9px;
+      padding: 8px 10px;
       color: var(--text-main);
       font-family: var(--font-body);
       font-size: 13px;
@@ -369,58 +450,65 @@
       background: rgba(0, 0, 0, 0.35);
       border: 1px solid var(--border-subtle);
       border-radius: 12px;
-      padding: 5px 10px;
-      margin-bottom: 8px;
+      padding: 6px 12px;
+      margin-bottom: 10px;
     }
 
-    .lang-btn {
+    .lang-btn-option {
       flex: 1;
-      padding: 6px 10px;
+      padding: 7px;
       font-family: var(--font-display);
-      font-size: 11.5px;
-      font-weight: 700;
-      background: var(--bg-surface);
+      font-size: 11px;
+      font-weight: 800;
+      background: transparent;
       border: 1px solid var(--border-subtle);
       border-radius: 8px;
       color: var(--text-muted);
       cursor: pointer;
-      transition: all 0.2s;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
+      transition: all 0.2s;
     }
 
-    .lang-btn.lang-active-btn {
-      color: #050505;
-      background: linear-gradient(135deg, #0891b2 0%, #22d3ee 100%);
+    .lang-btn-option.selected {
+      background: rgba(34, 211, 238, 0.15);
       border-color: var(--neon-cyan);
-      box-shadow: 0 0 10px rgba(34, 211, 238, 0.4);
+      color: var(--neon-cyan);
+      box-shadow: 0 0 8px rgba(34, 211, 238, 0.3);
     }
 
     /* Compact Avatar Grid */
-    .characters-grid-compact {
+    .char-selection-title {
+      font-family: var(--font-display);
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--neon-cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 6px;
+    }
+
+    .char-grid-compact {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-      margin-bottom: 6px;
+      gap: 8px;
+      margin-bottom: 12px;
     }
 
     .char-card-compact {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: 10px;
-      padding: 6px 4px;
+      padding: 8px 6px;
       text-align: center;
       cursor: pointer;
       transition: all 0.2s;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
     }
 
     .char-card-compact:hover {
-      border-color: rgba(34, 211, 238, 0.4);
+      border-color: var(--neon-cyan-dim);
       background: var(--bg-surface-active);
     }
 
@@ -431,14 +519,14 @@
     }
 
     .char-avatar-mini {
-      font-size: 20px;
+      font-size: 22px;
       line-height: 1;
       margin-bottom: 2px;
     }
 
     .char-name-mini {
       font-family: var(--font-display);
-      font-size: 10.5px;
+      font-size: 11px;
       font-weight: 700;
       color: var(--text-main);
     }
@@ -454,7 +542,7 @@
     /* Primary Action Buttons */
     .cyber-btn {
       width: 100%;
-      padding: 10px 16px;
+      padding: 11px 16px;
       font-family: var(--font-display);
       font-size: 13px;
       font-weight: 900;
@@ -497,7 +585,7 @@
 
     /* Gameplay Screen Layout */
     .mission-header {
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     .stage-badge {
@@ -514,7 +602,7 @@
 
     .stage-title {
       font-family: var(--font-display);
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 700;
       color: var(--text-main);
       margin: 4px 0 6px 0;
@@ -542,29 +630,30 @@
       background: rgba(0, 0, 0, 0.35);
       border: 1px solid var(--border-subtle);
       border-radius: 10px;
-      padding: 6px 10px;
-      margin-bottom: 8px;
-      font-size: 12.5px;
+      padding: 8px 12px;
+      margin-bottom: 10px;
+      font-size: 13px;
       color: #cbd5e1;
-      line-height: 1.35;
+      line-height: 1.4;
     }
 
     .scenario-icon {
-      font-size: 15px;
+      font-size: 16px;
       line-height: 1.2;
     }
 
-    /* Terminal Code Container */
+    /* Terminal Code Container - Espaçoso, Confortável e sem Cortes */
     .terminal-container {
       background: var(--code-bg);
       border: 1px solid var(--border-subtle);
       border-radius: 12px;
       overflow: hidden;
-      margin-bottom: 8px;
-      min-height: 130px;
-      max-height: 230px;
+      margin-bottom: 10px;
+      min-height: 150px;
+      max-height: 250px;
       display: flex;
       flex-direction: column;
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.7);
     }
 
     .terminal-header {
@@ -572,13 +661,13 @@
       justify-content: space-between;
       align-items: center;
       background: #09090b;
-      padding: 4px 10px;
+      padding: 5px 12px;
       border-bottom: 1px solid var(--border-subtle);
     }
 
     .terminal-dots {
       display: flex;
-      gap: 4px;
+      gap: 5px;
     }
 
     .dot {
@@ -593,16 +682,16 @@
 
     .terminal-file-name {
       font-family: var(--font-code);
-      font-size: 11px;
+      font-size: 11.5px;
       color: var(--neon-cyan);
       font-weight: 600;
     }
 
     .code-content {
-      padding: 10px 14px;
+      padding: 12px 14px;
       font-family: var(--font-code);
       font-size: 13.5px;
-      line-height: 1.5;
+      line-height: 1.55;
       color: #f8fafc;
       white-space: pre-wrap;
       overflow-y: auto;
@@ -631,8 +720,8 @@
     .options-list {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 6px;
-      margin-bottom: 8px;
+      gap: 8px;
+      margin-bottom: 10px;
     }
 
     @media (max-width: 500px) {
@@ -648,310 +737,88 @@
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: 10px;
-      padding: 8px 10px;
+      padding: 9px 12px;
       color: var(--text-main);
       font-family: var(--font-code);
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 13px;
       cursor: pointer;
       transition: all 0.2s;
       text-align: left;
     }
 
-    .option-btn:hover {
+    .option-btn:hover:not(:disabled) {
       border-color: var(--neon-cyan);
       background: var(--bg-surface-active);
-      transform: translateY(-1px);
+      box-shadow: 0 0 8px rgba(34, 211, 238, 0.2);
+    }
+
+    .option-btn.correct {
+      background: rgba(16, 185, 129, 0.2) !important;
+      border-color: var(--neon-green) !important;
+      color: #6ee7b7 !important;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.4) !important;
+    }
+
+    .option-btn.wrong {
+      background: rgba(244, 63, 94, 0.2) !important;
+      border-color: var(--neon-magenta) !important;
+      color: #fca5a5 !important;
+      box-shadow: 0 0 12px rgba(244, 63, 94, 0.4) !important;
     }
 
     .option-key {
       font-family: var(--font-display);
-      font-size: 10.5px;
+      font-size: 11px;
       font-weight: 800;
-      color: #050505;
-      background: var(--neon-cyan);
-      width: 20px;
-      height: 20px;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .option-btn.correct {
-      background: rgba(16, 185, 129, 0.2);
-      border-color: var(--neon-green);
-      color: #34d399;
-      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
-    }
-
-    .option-btn.correct .option-key {
-      background: var(--neon-green);
-    }
-
-    .option-btn.wrong {
-      background: rgba(244, 63, 94, 0.2);
-      border-color: var(--neon-magenta);
-      color: #fca5a5;
-      box-shadow: 0 0 10px rgba(244, 63, 94, 0.4);
-    }
-
-    .option-btn.wrong .option-key {
-      background: var(--neon-magenta);
+      color: var(--neon-cyan);
+      background: rgba(34, 211, 238, 0.1);
+      padding: 2px 6px;
+      border-radius: 5px;
     }
 
     /* Feedback Banner */
     .feedback-banner {
       display: none;
       border-radius: 10px;
-      padding: 8px 12px;
-      margin-bottom: 8px;
-      animation: fadeIn 0.2s ease-out;
+      padding: 9px 12px;
+      margin-bottom: 10px;
+      font-size: 13px;
+      line-height: 1.4;
     }
 
     .feedback-banner.success {
       background: rgba(16, 185, 129, 0.15);
       border: 1px solid rgba(16, 185, 129, 0.4);
-      color: #34d399;
+      color: #a7f3d0;
     }
 
     .feedback-banner.error {
       background: rgba(244, 63, 94, 0.15);
       border: 1px solid rgba(244, 63, 94, 0.4);
-      color: #fca5a5;
+      color: #fecdd3;
     }
 
     .feedback-title {
       font-family: var(--font-display);
       font-size: 12px;
       font-weight: 800;
-      margin-bottom: 2px;
       display: flex;
       align-items: center;
       gap: 6px;
-    }
-
-    .feedback-explanation {
-      font-size: 12px;
-      line-height: 1.35;
-      color: #e2e8f0;
-    }
-
-    /* Stats Grid */
-    .stats-summary-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .stat-box {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 10px;
-      padding: 8px;
-      text-align: center;
-    }
-
-    .stat-val {
-      font-family: var(--font-display);
-      font-size: 18px;
-      font-weight: 900;
-      color: var(--neon-yellow);
-    }
-
-    .stat-lbl {
-      font-size: 10.5px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      font-weight: 700;
-    }
-
-    .stage-results-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 8px;
-      margin-bottom: 12px;
-      font-size: 12px;
-    }
-
-    .stage-results-table th, .stage-results-table td {
-      padding: 6px 8px;
-      text-align: left;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-
-    .stage-results-table th {
-      font-family: var(--font-display);
-      font-size: 10.5px;
-      color: var(--neon-cyan);
-      text-transform: uppercase;
-    }
-
-    .logic-pedagogic-message {
-      background: rgba(34, 211, 238, 0.05);
-      border: 1px solid rgba(34, 211, 238, 0.2);
-      border-radius: 10px;
-      padding: 8px 12px;
-      margin-bottom: 12px;
-      font-size: 12px;
-      color: #cbd5e1;
-      line-height: 1.4;
-    }
-
-    .logic-pedagogic-message h4 {
-      font-family: var(--font-display);
-      color: var(--neon-cyan);
-      font-size: 11.5px;
-      margin-bottom: 4px;
-    }
-
-    /* Teacher Dashboard styles */
-    .teacher-metric-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-      margin-bottom: 12px;
-    }
-
-    @media (max-width: 600px) {
-      .teacher-metric-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    .teacher-metric-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 10px;
-      padding: 8px;
-      text-align: center;
-    }
-
-    .teacher-metric-val {
-      font-family: var(--font-display);
-      font-size: 18px;
-      font-weight: 900;
-    }
-
-    .teacher-metric-lbl {
-      font-size: 10px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      font-weight: 700;
-    }
-
-    .teacher-chips-row {
-      display: flex;
-      gap: 4px;
-      flex-wrap: wrap;
-      margin-bottom: 10px;
-    }
-
-    .teacher-chip {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 6px;
-      padding: 4px 8px;
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-muted);
-      cursor: pointer;
-    }
-
-    .teacher-chip.active {
-      background: rgba(34, 211, 238, 0.15);
-      border-color: var(--neon-cyan);
-      color: var(--neon-cyan);
-    }
-
-    .student-item-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 10px;
-      padding: 8px 12px;
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .student-item-card:hover {
-      border-color: var(--neon-cyan);
-      background: var(--bg-surface-active);
-    }
-
-    .student-avatar-badge {
-      font-size: 20px;
-      line-height: 1;
-    }
-
-    .student-info-col {
-      flex: 1;
-    }
-
-    .student-name-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .student-name-text {
-      font-weight: 700;
-      color: var(--text-main);
-      font-size: 13px;
-    }
-
-    .student-class-tag {
-      font-family: var(--font-display);
-      font-size: 9.5px;
-      font-weight: 800;
-      color: var(--neon-yellow);
-      background: rgba(251, 191, 36, 0.1);
-      border: 1px solid rgba(251, 191, 36, 0.3);
-      padding: 1px 5px;
-      border-radius: 4px;
-    }
-
-    .student-meta-row {
-      font-size: 11px;
-      color: var(--text-muted);
-      display: flex;
-      gap: 6px;
-    }
-
-    .student-score-num {
-      font-family: var(--font-display);
-      font-size: 14px;
-      font-weight: 800;
-      color: var(--neon-yellow);
-      text-align: right;
-    }
-
-    .teacher-btn-sm {
-      padding: 6px 10px;
-      font-family: var(--font-display);
-      font-size: 11px;
-      font-weight: 700;
-      border-radius: 8px;
-      cursor: pointer;
-      border: 1px solid var(--border-subtle);
+      margin-bottom: 3px;
     }
 
     /* Modals */
     .modal-overlay {
+      display: none;
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(5, 5, 8, 0.85);
       backdrop-filter: blur(8px);
-      display: none;
+      -webkit-backdrop-filter: blur(8px);
       align-items: center;
       justify-content: center;
       z-index: 99;
@@ -968,8 +835,61 @@
       border-radius: 16px;
       width: 100%;
       max-width: 520px;
-      padding: 18px;
+      padding: 20px;
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Teacher Dashboard Styles */
+    .teacher-metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .teacher-metric-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .teacher-metric-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 8px 10px;
+      text-align: center;
+    }
+
+    .teacher-metric-val {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .teacher-metric-lbl {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .teacher-btn-sm {
+      padding: 6px 10px;
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      cursor: pointer;
+      background: var(--bg-surface);
+      color: var(--text-main);
+      transition: all 0.2s;
+    }
+
+    .teacher-btn-sm:hover {
+      border-color: var(--neon-cyan);
+      background: var(--bg-surface-active);
     }
   </style>
 </head>
@@ -978,408 +898,382 @@
   <canvas id="bg-canvas"></canvas>
   <div class="scanlines"></div>
 
-  <main id="app-root">
-    <!-- Top HUD Bar -->
-        <!-- Top HUD Bar: Pontos & Vidas à Esquerda | Seletor, Som & Professor à Direita -->
-    <header class="hud-bar">
-      <div class="hud-left">
-        <div class="hud-score-box" title="Pontos Acumulados">
-          <span>⚡</span>
-          <span id="hud-score-val">0</span>
-          <span style="font-size: 10px; color: var(--text-muted);">PTS</span>
-        </div>
+  <!-- Layout Wrapper com Barra Lateral -->
+  <div id="app-layout">
+    <!-- CYBER SIDEBAR (BARRA LATERAL DE HUD E CONTROLES) -->
+    <aside id="cyber-sidebar">
+      <div class="sidebar-brand">
+        <span class="sidebar-brand-icon">⚡</span>
+        <span class="sidebar-brand-title">CYBER<br>RUNNER</span>
+      </div>
 
-        <div class="hud-lives" id="hud-lives-container" title="3 Vidas Disponíveis">
+      <!-- Pontos Acumulados -->
+      <div class="sidebar-metric-box" title="Pontos Acumulados">
+        <div class="sidebar-metric-val" id="hud-score-val">0</div>
+        <div class="sidebar-metric-lbl">PONTOS</div>
+      </div>
+
+      <!-- Vidas Disponíveis -->
+      <div class="sidebar-lives-box" title="3 Vidas Disponíveis">
+        <div class="sidebar-lives-title">VIDAS</div>
+        <div class="hud-lives" id="hud-lives-container">
           <span class="heart-icon" id="heart-1">❤️</span>
           <span class="heart-icon" id="heart-2">❤️</span>
           <span class="heart-icon" id="heart-3">❤️</span>
         </div>
       </div>
 
-      <div class="hud-right">
-        <!-- Interactive Language Selector Pill -->
-        <button type="button" class="hud-lang-pill" id="hud-lang-pill" onclick="toggleLanguageMode()" title="Clique para alternar entre Portugol e Python">
-          <span id="hud-lang-text">🇧🇷 Portugol</span>
-        </button>
+      <div class="sidebar-divider"></div>
 
-        <button type="button" class="sound-toggle-btn" id="btn-sound-toggle" title="Ligar/Desligar Efeitos Sonoros">
-          <span id="sound-icon">🔊</span>
-        </button>
+      <!-- Alternador de Linguagem -->
+      <div class="sidebar-section-title">LINGUAGEM</div>
+      <button type="button" class="sidebar-action-btn lang-btn" id="hud-lang-pill" onclick="toggleLanguageMode()" title="Clique para alternar entre Portugol e Python">
+        <span id="hud-lang-text">🇧🇷 Portugol</span>
+      </button>
 
-        <!-- Botão Painel do Professor -->
-        <button type="button" class="hud-teacher-btn" id="btn-teacher-hud" onclick="openTeacherDashboard()" title="Acesso Restrito ao Painel do Professor">
-          <span>🎓</span> Professor
-        </button>
-      </div>
-    </header>
+      <!-- Áudio / Efeitos Sonoros -->
+      <button type="button" class="sidebar-action-btn" id="btn-sound-toggle" title="Ligar/Desligar Efeitos Sonoros">
+        <span id="sound-icon">🔊</span> Som Ativo
+      </button>
 
-    
+      <div class="sidebar-spacer"></div>
 
-          <!-- Input customizado de Turma (caso selecione CUSTOM) -->
-          <input type="text" id="student-class-custom" class="cyber-input-compact" style="display: none; margin-bottom: 8px; text-transform: uppercase;" placeholder="Ex: 1TECA" maxlength="10" oninput="onCustomClassInput(this)" />
+      <!-- Botão Painel do Professor -->
+      <button type="button" class="sidebar-teacher-btn" id="btn-teacher-hud" onclick="openTeacherDashboard()" title="Acesso Restrito ao Painel do Professor">
+        <span>🎓</span> Professor
+      </button>
+    </aside>
 
-          <!-- Seleção da Linguagem dos Desafios (Portugol vs Python) -->
-          <div class="lang-selection-row">
-            <span class="form-label-compact" style="margin-bottom: 0; white-space: nowrap;">Linguagem do Jogo:</span>
-            <div style="display: flex; gap: 8px; flex: 1;">
-              <button type="button" id="lang-select-portugol" class="lang-btn lang-active-btn" onclick="setLanguageMode('portugol')">
+    <!-- MAIN GAME CONTAINER (ÁREA CENTRAL LIVRE) -->
+    <main id="app-root">
+      <!-- SCREEN 1: LOGIN & CADASTRO (100% INLINE - ZERO SCROLL) -->
+      <section class="screen active" id="screen-login">
+        <div class="cyber-card">
+          <h1 class="hero-title">Cyber Runner</h1>
+          <p class="hero-subtitle">O Resgate do Algoritmo // Treinamento de Lógica de Programação</p>
+
+          <!-- Auth Mode Switcher -->
+          <div class="auth-tabs-row">
+            <button type="button" class="auth-tab-btn active" id="tab-auth-register" onclick="switchAuthMode('register')">
+              <span>🌟</span> NOVO ALUNO / CADASTRAR
+            </button>
+            <button type="button" class="auth-tab-btn" id="tab-auth-login" onclick="switchAuthMode('login')">
+              <span>🔑</span> JÁ TENHO LOGIN
+            </button>
+          </div>
+
+          <!-- FORM 1: NOVO ALUNO / CADASTRAR (TUDO EM LINHA) -->
+          <form id="register-form" onsubmit="event.preventDefault(); handleStudentRegister();">
+            <!-- Linha com os 4 campos de preenchimento -->
+            <div class="inline-form-grid">
+              <div class="form-group-compact">
+                <label class="form-label-compact" for="student-first-name">Nome</label>
+                <input type="text" id="student-first-name" class="cyber-input-compact" placeholder="Ex: Gabriel" required autocomplete="given-name" oninput="autoGenerateLoginSuggestion(this.value)" />
+              </div>
+
+              <div class="form-group-compact">
+                <label class="form-label-compact" for="student-class-select">Turma</label>
+                <select id="student-class-select" class="cyber-select-compact" onchange="onClassSelectChanged(this.value)">
+                  <optgroup label="1º Ano">
+                    <option value="1TECA" selected>1TECA</option>
+                    <option value="1TECB">1TECB</option>
+                    <option value="1ADMA">1ADMA</option>
+                    <option value="1ADMB">1ADMB</option>
+                    <option value="1INFOA">1INFOA</option>
+                    <option value="1INFOB">1INFOB</option>
+                    <option value="1DSA">1DSA</option>
+                    <option value="1DSB">1DSB</option>
+                  </optgroup>
+                  <optgroup label="2º Ano">
+                    <option value="2TECA">2TECA</option>
+                    <option value="2TECB">2TECB</option>
+                    <option value="2ADMA">2ADMA</option>
+                    <option value="2ADMB">2ADMB</option>
+                    <option value="2INFOA">2INFOA</option>
+                    <option value="2INFOB">2INFOB</option>
+                    <option value="2DSA">2DSA</option>
+                    <option value="2DSB">2DSB</option>
+                  </optgroup>
+                  <optgroup label="3º Ano">
+                    <option value="3TECA">3TECA</option>
+                    <option value="3TECB">3TECB</option>
+                    <option value="3ADMA">3ADMA</option>
+                    <option value="3ADMB">3ADMB</option>
+                    <option value="3INFOA">3INFOA</option>
+                    <option value="3INFOB">3INFOB</option>
+                    <option value="3DSA">3DSA</option>
+                    <option value="3DSB">3DSB</option>
+                  </optgroup>
+                  <option value="__custom__">➕ Outra Turma...</option>
+                </select>
+              </div>
+
+              <div class="form-group-compact">
+                <label class="form-label-compact" for="student-reg-login">Login</label>
+                <input type="text" id="student-reg-login" class="cyber-input-compact" placeholder="gabriel123" required autocomplete="username" />
+              </div>
+
+              <div class="form-group-compact">
+                <label class="form-label-compact" for="student-reg-pass">Senha</label>
+                <input type="password" id="student-reg-pass" class="cyber-input-compact cyber-password-mask" placeholder="Criar senha" required autocomplete="new-password" />
+              </div>
+            </div>
+
+            <!-- Campo Personalizado de Turma (oculto por padrão) -->
+            <div class="form-group-compact" id="custom-class-wrapper" style="display: none; margin-bottom: 6px;">
+              <input type="text" id="custom-class-input" class="cyber-input-compact" placeholder="Digite o código da sua turma (ex: 1INFO-TARDE)" oninput="onCustomClassInput(this.value)" />
+            </div>
+
+            <!-- Linha de Seleção de Linguagem Inicial -->
+            <div class="lang-selection-row">
+              <span style="font-family: var(--font-display); font-size: 10.5px; font-weight: 700; color: var(--neon-cyan); white-space: nowrap;">
+                LINGUAGEM INICIAL:
+              </span>
+              <button type="button" class="lang-btn-option selected" id="btn-choice-portugol" onclick="setLanguageMode('portugol')">
+                🇧🇷 Portugol (Pseudocódigo)
+              </button>
+              <button type="button" class="lang-btn-option" id="btn-choice-python" onclick="setLanguageMode('python')">
+                🐍 Python (Sintaxe Real)
+              </button>
+            </div>
+
+            <!-- Seleção Compacta de Avatar -->
+            <div class="char-selection-title">ESCOLHA SEU AGENTE NEURAL:</div>
+            <div class="char-grid-compact" id="char-grid-compact-register">
+              <div class="char-card-compact selected" data-char="kai" onclick="selectCharacter('kai')">
+                <div class="char-avatar-mini">⚡</div>
+                <div class="char-name-mini">Kai</div>
+                <div class="char-specialty-mini">Sintaxe Rápida</div>
+              </div>
+              <div class="char-card-compact" data-char="ayla" onclick="selectCharacter('ayla')">
+                <div class="char-avatar-mini">🔮</div>
+                <div class="char-name-mini">Ayla</div>
+                <div class="char-specialty-mini">Lógica Pura</div>
+              </div>
+              <div class="char-card-compact" data-char="zeta" onclick="selectCharacter('zeta')">
+                <div class="char-avatar-mini">🤖</div>
+                <div class="char-name-mini">Zeta-09</div>
+                <div class="char-specialty-mini">Laços & Loops</div>
+              </div>
+              <div class="char-card-compact" data-char="lynx" onclick="selectCharacter('lynx')">
+                <div class="char-avatar-mini">🦊</div>
+                <div class="char-name-mini">Lynx</div>
+                <div class="char-specialty-mini">Vetores & Dados</div>
+              </div>
+            </div>
+
+            <button type="submit" class="cyber-btn" id="btn-start-mission">
+              <span>🚀</span> INICIAR MISSÃO (FASE 1)
+            </button>
+          </form>
+
+          <!-- FORM 2: LOGIN DO ALUNO (OCULTO POR PADRÃO) -->
+          <form id="login-form" style="display: none;" onsubmit="event.preventDefault(); handleStudentLogin();">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+              <div class="form-group-compact">
+                <label class="form-label-compact" for="student-login-input">Seu Login</label>
+                <input type="text" id="student-login-input" class="cyber-input-compact" placeholder="Digite seu login" required autocomplete="username" />
+              </div>
+              <div class="form-group-compact">
+                <label class="form-label-compact" for="student-login-pass">Sua Senha</label>
+                <input type="password" id="student-login-pass" class="cyber-input-compact cyber-password-mask" placeholder="Digite sua senha" required autocomplete="current-password" />
+              </div>
+            </div>
+
+            <!-- Linha de Seleção de Linguagem no Login -->
+            <div class="lang-selection-row">
+              <span style="font-family: var(--font-display); font-size: 10.5px; font-weight: 700; color: var(--neon-cyan); white-space: nowrap;">
+                MODO:
+              </span>
+              <button type="button" class="lang-btn-option selected" id="btn-login-portugol" onclick="setLanguageMode('portugol')">
                 🇧🇷 Portugol
               </button>
-              <button type="button" id="lang-select-python" class="lang-btn" onclick="setLanguageMode('python')">
+              <button type="button" class="lang-btn-option" id="btn-login-python" onclick="setLanguageMode('python')">
                 🐍 Python
               </button>
             </div>
-          </div>
 
-          <!-- Escolha de Avatar Compacta -->
-          <div class="form-group-compact">
-            <label class="form-label-compact">Escolha seu Avatar Cyberpunk</label>
-            <div class="characters-grid-compact" id="characters-container">
-              <!-- Rendered via JS -->
-            </div>
-          </div>
+            <div id="login-error-msg" style="display: none; color: var(--neon-magenta); font-size: 12px; margin-bottom: 8px; text-align: center;"></div>
 
-          <div style="margin-top: 8px;">
-            <button type="submit" class="cyber-btn" id="btn-start-class">
-              <span>🚀</span> INICIAR MISSÃO & SALVAR PROGRESSO
+            <button type="submit" class="cyber-btn" id="btn-do-login">
+              <span>🔓</span> ENTRAR & CONTINUAR PROGRESSO
             </button>
-          </div>
-        </form>
+          </form>
+        </div>
+      </section>
 
-        <!-- FORM 2: JÁ TENHO LOGIN / ENTRAR -->
-        <form id="login-existing-form" style="display: none;" onsubmit="event.preventDefault(); handleStudentLogin();">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-            <div class="form-group-compact">
-              <label class="form-label-compact" for="existing-login-input">Login de Aluno</label>
-              <input type="text" id="existing-login-input" class="cyber-input-compact" placeholder="Ex: gabriel.1teca" required autocomplete="username" />
+      <!-- SCREEN 2: GAMEPLAY (DESAFIO DAS FASES) -->
+      <section class="screen" id="screen-gameplay">
+        <div class="cyber-card">
+          <!-- Header da Missão -->
+          <div class="mission-header">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <span class="stage-badge" id="stage-badge-text">FASE 1 / 60</span>
+              <span style="font-size: 11px; color: var(--text-muted);" id="stage-concept-pill">Condicionais</span>
             </div>
-
-            <div class="form-group-compact">
-              <label class="form-label-compact" for="existing-password-input">Sua Senha</label>
-              <input type="text" id="existing-password-input" class="cyber-input-compact cyber-password-mask" placeholder="Digite sua senha" required autocomplete="off" spellcheck="false" />
-            </div>
-          </div>
-
-          <!-- Seleção da Linguagem dos Desafios para Login Existente -->
-          <div class="lang-selection-row">
-            <span class="form-label-compact" style="margin-bottom: 0; white-space: nowrap;">Linguagem do Jogo:</span>
-            <div style="display: flex; gap: 8px; flex: 1;">
-              <button type="button" id="lang-select-portugol-login" class="lang-btn lang-active-btn" onclick="setLanguageMode('portugol')">
-                🇧🇷 Portugol
-              </button>
-              <button type="button" id="lang-select-python-login" class="lang-btn" onclick="setLanguageMode('python')">
-                🐍 Python
-              </button>
+            <h2 class="stage-title" id="stage-title-text">Portão Neural: Autenticação de Acesso</h2>
+            <div class="progress-track">
+              <div class="progress-fill" id="progress-bar-fill"></div>
             </div>
           </div>
 
-          <div id="login-status-msg" style="display: none; font-size: 12px; margin-bottom: 8px; padding: 8px; border-radius: 8px;"></div>
-
-          <div style="margin-top: 8px;">
-            <button type="submit" class="cyber-btn">
-              <span>🔑</span> ENTRAR & RETOMAR MISSÃO
-            </button>
+          <!-- Cenário e Contexto -->
+          <div class="scenario-box">
+            <span class="scenario-icon">🎯</span>
+            <span id="scenario-text">O firewall da subestação está bloqueando o fluxo de dados. Complete o algoritmo para liberar a conexão.</span>
           </div>
-        </form>
-      </div>
-    </section>
 
-    <!-- SCREEN 2: GAMEPLAY (FASES 1 A 60) -->
-    <section class="screen" id="screen-gameplay">
-      <div class="cyber-card">
-        <!-- Stage Header & Progress -->
-        <div class="mission-header">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span class="stage-badge" id="game-stage-badge">FASE 1 / 60</span>
-            <span style="font-size: 12px; color: var(--neon-yellow); font-family: var(--font-display);" id="game-character-badge">Kai ⚡</span>
-          </div>
-          <h2 class="stage-title" id="game-stage-title">Condicionais Simples (SE / SENÃO)</h2>
-          <div class="progress-track">
-            <div class="progress-fill" id="game-progress-bar"></div>
-          </div>
-        </div>
-
-        <!-- Scenario Context -->
-        <div class="scenario-box">
-          <span class="scenario-icon">🎯</span>
-          <div id="game-scenario-text">
-            O Portão Neural da Megacity está bloqueado por uma chave criptográfica. Complete a estrutura lógica para abrir o portão se a chave for válida, ou soar o alarme no caso contrário.
-          </div>
-        </div>
-
-        <!-- Code Terminal -->
-        <div class="terminal-container">
-          <div class="terminal-header">
-            <div class="terminal-dots">
-              <span class="dot dot-red"></span>
-              <span class="dot dot-yellow"></span>
-              <span class="dot dot-green"></span>
+          <!-- Terminal de Código Espaçoso -->
+          <div class="terminal-container">
+            <div class="terminal-header">
+              <div class="terminal-dots">
+                <span class="dot dot-red"></span>
+                <span class="dot dot-yellow"></span>
+                <span class="dot dot-green"></span>
+              </div>
+              <span class="terminal-file-name" id="terminal-filename">firewall_auth.por</span>
+              <span style="font-size: 10px; color: var(--neon-cyan);" id="terminal-lang-tag">PORTUGOL</span>
             </div>
-            <span class="terminal-file-name" id="terminal-filename">modulo_portao.algo</span>
-            <span style="font-size: 10px; color: var(--neon-green); font-family: var(--font-code);">UTF-8</span>
+            <pre class="code-content" id="code-display"></pre>
           </div>
-          <div class="code-content" id="terminal-code">
-            <!-- Code populated by JS -->
-          </div>
-        </div>
 
-        <!-- Interactive Options -->
-        <div class="options-title">Selecione o comando correto para preencher a lacuna:</div>
-        <div class="options-list" id="options-container">
-          <!-- Options populated by JS -->
-        </div>
-
-        <!-- Immediate Feedback Banner -->
-        <div class="feedback-banner" id="feedback-banner">
-          <div class="feedback-title" id="feedback-title"></div>
-          <div class="feedback-explanation" id="feedback-explanation"></div>
-        </div>
-
-        <!-- Next / Action Button -->
-        <button class="cyber-btn" id="btn-next-action" style="display: none;" onclick="onNextStageClicked()">
-          PRÓXIMA FASE ➔
-        </button>
-      </div>
-    </section>
-
-    <!-- SCREEN 3: GAME OVER (LIVES EXHAUSTED) -->
-    <section class="screen" id="screen-gameover">
-      <div class="cyber-card" style="text-align: center;">
-        <div style="font-size: 40px; margin-bottom: 4px;">💀</div>
-        <h2 class="hero-title" style="background: linear-gradient(135deg, #ff007f 0%, #ff3366 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-          SISTEMA CORROMPIDO
-        </h2>
-        <p class="hero-subtitle">Suas vidas de energia foram esgotadas antes de concluir o algoritmo.</p>
-
-        <div class="stats-summary-grid">
-          <div class="stat-box">
-            <div class="stat-val" id="go-score">0</div>
-            <div class="stat-lbl">Pontuação Final</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-val" id="go-stages">0 / 60</div>
-            <div class="stat-lbl">Fases Alcançadas</div>
-          </div>
-        </div>
-
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
-          Seus dados de desempenho foram salvos no registro da aula. Não desista, programar é aprender com as iterações!
-        </p>
-
-        <button class="cyber-btn" onclick="restartGame()">
-          🔄 TENTAR NOVAMENTE
-        </button>
-      </div>
-    </section>
-
-    <!-- SCREEN 4: VICTORY & SUMMARY -->
-    <section class="screen" id="screen-victory">
-      <div class="cyber-card">
-        <div style="font-size: 36px; text-align: center; margin-bottom: 4px;">🏆</div>
-        <h2 class="hero-title">ALGORITMO RESGATADO!</h2>
-        <p class="hero-subtitle" id="victory-student-greeting">Parabéns! Você dominou a lógica do sistema.</p>
-
-        <div class="stats-summary-grid">
-          <div class="stat-box">
-            <div class="stat-val" id="victory-score">0</div>
-            <div class="stat-lbl">Pontos Conquistados</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-val" id="victory-accuracy">100%</div>
-            <div class="stat-lbl">Precisão de Acertos</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-val" id="victory-lives">3 / 3</div>
-            <div class="stat-lbl">Vidas Restantes</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-val" id="victory-time">00:45</div>
-            <div class="stat-lbl">Tempo de Missão</div>
-          </div>
-        </div>
-
-        <h3 style="font-family: var(--font-display); font-size: 13px; color: var(--neon-cyan); margin-top: 8px; text-transform: uppercase;">
-          Relatório de Desempenho por Conceito:
-        </h3>
-        <table class="stage-results-table">
-          <thead>
-            <tr>
-              <th>Fase / Conceito</th>
-              <th>Status</th>
-              <th>Pontos</th>
-            </tr>
-          </thead>
-          <tbody id="victory-breakdown-body">
+          <!-- Alternativas 2x2 Grid -->
+          <div class="options-title">SELECIONE A INSTRUÇÃO CORRETA:</div>
+          <div class="options-list" id="options-grid">
             <!-- Populated via JS -->
-          </tbody>
-        </table>
-
-        <div class="logic-pedagogic-message">
-          <h4>💡 A Importância da Lógica de Programação</h4>
-          <p>
-            A lógica de programação é muito mais do que escrever código: é a habilidade de decompor problemas complexos, estruturar o pensamento analítico e tomar decisões precisas com base em condições reais. Seja desenvolvendo jogos incríveis ou solucionando desafios da ciência, a base de todo avanço tecnológico nasce do raciocínio lógico que você praticou hoje!
-          </p>
-        </div>
-
-        <div style="display: flex; gap: 8px; flex-direction: column;">
-          <button class="cyber-btn" onclick="downloadCurrentSessionProof()">
-            <span>📥</span> BAIXAR COMPROVANTE DO ALUNO (.JSON / .CSV)
-          </button>
-          <button class="cyber-btn cyber-btn-secondary" onclick="restartGame()">
-            🎮 JOGAR NOVAMENTE
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- SCREEN 5: ANTI-CHEAT / SCREEN ABANDONED -->
-    <section class="screen" id="screen-abandoned">
-      <div class="cyber-card" style="text-align: center;">
-        <div style="font-size: 40px; margin-bottom: 6px;">🚨</div>
-        <h2 class="hero-title" style="color: var(--neon-magenta); -webkit-text-fill-color: var(--neon-magenta); font-size: 20px;">
-          VIOLAÇÃO DE FOCO DETECTADA!
-        </h2>
-        <p style="color: #fca5a5; font-size: 13px; line-height: 1.4; margin: 6px 0 12px 0;">
-          Atenção: A troca de tela, minimização de aba ou perda de foco foi detectada durante a missão em andamento. Conforme o regulamento escolar, a sessão foi travada e a pontuação enviada foi zerada.
-        </p>
-
-        <div style="background: rgba(0,0,0,0.5); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 12px; text-align: left; margin-bottom: 12px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 6px; margin-bottom: 6px;">
-            <span style="color: var(--text-muted); font-size: 11px;">ALUNO / TURMA</span>
-            <strong style="color: var(--neon-cyan); font-size: 12px;" id="ab-student-meta">Aluno (1TECA)</strong>
           </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 12px;">
-            <div>
-              <span style="color: var(--text-muted); font-size: 10px;">PROGRESSO:</span><br>
-              <strong style="color: var(--neon-yellow); font-size: 14px;" id="ab-progress-pct">0%</strong>
+
+          <!-- Banner de Feedback Didático -->
+          <div class="feedback-banner" id="feedback-banner">
+            <div class="feedback-title" id="feedback-title">
+              <span>✅</span> RESPOSTA EXATA! (+150 PTS)
             </div>
-            <div>
-              <span style="color: var(--text-muted); font-size: 10px;">PONTUAÇÃO:</span><br>
-              <strong style="color: var(--neon-magenta); font-size: 14px;">0 pts (Zerado)</strong>
-            </div>
-            <div>
-              <span style="color: var(--text-muted); font-size: 10px;">ACERTOS:</span><br>
-              <strong style="color: var(--neon-green);" id="ab-correct-val">0 vezes</strong>
-            </div>
-            <div>
-              <span style="color: var(--text-muted); font-size: 10px;">ERROS:</span><br>
-              <strong style="color: var(--neon-magenta);" id="ab-wrong-val">0 vezes</strong>
+            <div id="feedback-explanation" style="font-size: 12.5px; opacity: 0.95;">
+              A estrutura se/senao avalia a condição booleana.
             </div>
           </div>
-        </div>
 
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <button class="cyber-btn" onclick="downloadCurrentSessionProof()">
-            <span>📥</span> BAIXAR COMPROVANTE DESTE REGISTRO
-          </button>
-          <button class="cyber-btn cyber-btn-secondary" onclick="restartGame()">
-            🔄 REINICIAR NOVA TENTATIVA
+          <!-- Botão Próxima Fase (Avanço no Ritmo do Aluno) -->
+          <button type="button" class="cyber-btn" id="btn-next-action" style="display: none;" onclick="onNextStageClicked()">
+            PRÓXIMA FASE ➔
           </button>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- SCREEN 6: TEACHER DASHBOARD -->
-    <section class="screen" id="screen-teacher">
-      <div class="cyber-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
-          <div>
-            <h2 class="hero-title" style="text-align: left; font-size: 18px; margin-bottom: 2px;">PAINEL DO PROFESSOR</h2>
-            <p style="color: var(--text-muted); font-size: 12px;">Gestão de turmas (1TECA, 1ADMA, etc.), Supabase e SQLite.</p>
+      <!-- SCREEN 3: GAME OVER (VIDAS ESGOTADAS) -->
+      <section class="screen" id="screen-gameover">
+        <div class="cyber-card" style="text-align: center; border-color: rgba(244, 63, 94, 0.4);">
+          <div style="font-size: 40px; margin-bottom: 6px;">💀</div>
+          <h2 class="hero-title" style="color: var(--neon-magenta); margin-bottom: 4px;">SISTEMA CORROMPIDO</h2>
+          <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 14px;">Você perdeu todas as vidas disponíveis nesta sessão.</p>
+
+          <div style="background: rgba(244, 63, 94, 0.08); border: 1px solid rgba(244, 63, 94, 0.2); border-radius: 12px; padding: 12px; margin-bottom: 14px;">
+            <div style="font-size: 12px; color: var(--text-muted);">Pontuação Final Alcançada:</div>
+            <div style="font-family: var(--font-display); font-size: 24px; font-weight: 900; color: var(--neon-magenta);" id="gameover-score-val">0 PTS</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;" id="gameover-stages-val">Fases Concluídas: 0 / 60</div>
           </div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <button class="teacher-btn-sm" style="background: rgba(34, 211, 238, 0.15); color: var(--neon-cyan); border-color: rgba(34, 211, 238, 0.4);" onclick="returnToGameFromTeacher()">
-              ⬅️ Voltar ao Jogo
+
+          <button class="cyber-btn" onclick="restartGame()">
+            🔄 TENTAR NOVAMENTE
+          </button>
+        </div>
+      </section>
+
+      <!-- SCREEN 4: VITÓRIA / CONCLUSÃO DAS 60 FASES -->
+      <section class="screen" id="screen-victory">
+        <div class="cyber-card" style="text-align: center; border-color: rgba(16, 185, 129, 0.4);">
+          <div style="font-size: 44px; margin-bottom: 6px;">🏆</div>
+          <h2 class="hero-title" style="color: var(--neon-green); margin-bottom: 4px;">ALGORITMO RESTAURADO!</h2>
+          <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 14px;">Você completou com maestria todas as fases do Cyber Runner.</p>
+
+          <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
+            <div style="font-size: 12px; color: var(--text-muted);">Pontuação Total Obtida:</div>
+            <div style="font-family: var(--font-display); font-size: 26px; font-weight: 900; color: var(--neon-green);" id="victory-score-val">9000 PTS</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Parabéns! Seu registro acadêmico foi sincronizado com sucesso.</div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <button class="cyber-btn" onclick="downloadCurrentSessionProof()">
+              <span>📥</span> BAIXAR COMPROVANTE DESTE REGISTRO
             </button>
-            <div id="supabase-indicator-badge" style="font-size: 11px; padding: 4px 8px; border-radius: 8px; border: 1px solid rgba(34, 211, 238, 0.3); color: var(--neon-cyan); background: rgba(0,0,0,0.3);">
-            <span id="supabase-dot">🟢</span>
-            <span id="supabase-status-text">Modo Integrado</span>
-          </div>
-          </div>
-        </div>
-
-        <!-- 4 Metric Cards -->
-        <div class="teacher-metric-grid">
-          <div class="teacher-metric-card">
-            <div class="teacher-metric-val" id="t-metric-total" style="color: var(--neon-cyan);">0</div>
-            <div class="teacher-metric-lbl">Total Alunos</div>
-          </div>
-          <div class="teacher-metric-card">
-            <div class="teacher-metric-val" id="t-metric-avg" style="color: var(--neon-yellow);">0</div>
-            <div class="teacher-metric-lbl">Média Pontos</div>
-          </div>
-          <div class="teacher-metric-card">
-            <div class="teacher-metric-val" id="t-metric-rate" style="color: var(--neon-green);">0%</div>
-            <div class="teacher-metric-lbl">Conclusão</div>
-          </div>
-          <div class="teacher-metric-card">
-            <div class="teacher-metric-val" id="t-metric-abandoned" style="color: var(--neon-magenta);">0</div>
-            <div class="teacher-metric-lbl">Violações</div>
+            <button class="cyber-btn cyber-btn-secondary" onclick="restartGame()">
+              🔄 REINICIAR NOVA TENTATIVA
+            </button>
           </div>
         </div>
+      </section>
 
-        <!-- Filter Chips -->
-        <div class="teacher-chips-row" id="teacher-chips-list">
-          <!-- Populated via JS -->
+      <!-- SCREEN 5: TEACHER DASHBOARD -->
+      <section class="screen" id="screen-teacher">
+        <div class="cyber-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+            <div>
+              <h2 class="hero-title" style="text-align: left; font-size: 18px; margin-bottom: 2px;">PAINEL DO PROFESSOR</h2>
+              <p style="color: var(--text-muted); font-size: 12px;">Gestão de turmas (1TECA, 1ADMA, etc.), Supabase e SQLite.</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <button class="teacher-btn-sm" style="background: rgba(34, 211, 238, 0.15); color: var(--neon-cyan); border-color: rgba(34, 211, 238, 0.4);" onclick="returnToGameFromTeacher()">
+                ⬅️ Voltar ao Jogo
+              </button>
+              <div id="supabase-indicator-badge" style="font-size: 11px; padding: 4px 8px; border-radius: 8px; border: 1px solid rgba(34, 211, 238, 0.3); color: var(--neon-cyan); background: rgba(0,0,0,0.3);">
+                <span id="supabase-dot">🟢</span>
+                <span id="supabase-status-text">Modo Integrado</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4 Metric Cards -->
+          <div class="teacher-metric-grid">
+            <div class="teacher-metric-card">
+              <div class="teacher-metric-val" id="t-metric-total" style="color: var(--neon-cyan);">0</div>
+              <div class="teacher-metric-lbl">Total Alunos</div>
+            </div>
+            <div class="teacher-metric-card">
+              <div class="teacher-metric-val" id="t-metric-avg" style="color: var(--neon-yellow);">0</div>
+              <div class="teacher-metric-lbl">Média Pontos</div>
+            </div>
+            <div class="teacher-metric-card">
+              <div class="teacher-metric-val" id="t-metric-rate" style="color: var(--neon-green);">0%</div>
+              <div class="teacher-metric-lbl">Conclusão</div>
+            </div>
+            <div class="teacher-metric-card">
+              <div class="teacher-metric-val" id="t-metric-violations" style="color: var(--neon-magenta);">0</div>
+              <div class="teacher-metric-lbl">Violações</div>
+            </div>
+          </div>
+
+          <!-- Action Bar -->
+          <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;">
+            <input type="text" id="t-search-input" class="cyber-input-compact" style="flex: 1; min-width: 130px;" placeholder="Filtrar por nome ou turma..." oninput="handleTeacherSearch(this.value)" />
+            <button class="teacher-btn-sm" onclick="refreshTeacherData()">🔄 Atualizar</button>
+            <button class="teacher-btn-sm" onclick="downloadTeacherReportCsv()">📊 CSV</button>
+            <button class="teacher-btn-sm" onclick="downloadTeacherBackupJson()">💾 Backup</button>
+            <button class="teacher-btn-sm" onclick="openSupabaseConfigModal()">⚡ Supabase</button>
+          </div>
+
+          <!-- Table Container -->
+          <div style="max-height: 250px; overflow-y: auto; border: 1px solid var(--border-subtle); border-radius: 10px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
+              <thead style="background: #09090b; color: var(--neon-cyan); position: sticky; top: 0; font-family: var(--font-display); font-size: 10px;">
+                <tr>
+                  <th style="padding: 6px 8px;">Aluno</th>
+                  <th style="padding: 6px 8px;">Turma</th>
+                  <th style="padding: 6px 8px;">Pts</th>
+                  <th style="padding: 6px 8px;">Fases</th>
+                  <th style="padding: 6px 8px;">Status</th>
+                  <th style="padding: 6px 8px;">Ação</th>
+                </tr>
+              </thead>
+              <tbody id="teacher-tbody">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
         </div>
-
-        <!-- Search Bar -->
-        <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-          <input type="text" id="teacher-search-input" class="cyber-input-compact" placeholder="Buscar por aluno, turma ou status..." oninput="handleTeacherSearch(this.value)" />
-          <button class="teacher-btn-sm" style="background: rgba(34, 211, 238, 0.1); color: var(--neon-cyan); border-color: rgba(34, 211, 238, 0.3);" onclick="refreshTeacherData()">
-            🔄 Atualizar
-          </button>
-        </div>
-
-        <!-- Student Records Container -->
-        <div style="font-family: var(--font-display); font-size: 11px; color: var(--neon-cyan); margin-bottom: 6px; text-transform: uppercase;" id="teacher-records-count-lbl">
-          Registros dos Alunos (0)
-        </div>
-        <div id="teacher-records-container" style="max-height: 280px; overflow-y: auto; margin-bottom: 10px;">
-          <!-- Populated via JS -->
-        </div>
-
-        <!-- Export & Settings Actions -->
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
-          <button class="teacher-btn-sm" style="background: rgba(16, 185, 129, 0.15); color: var(--neon-green); border-color: rgba(16, 185, 129, 0.3);" onclick="downloadTeacherReportCsv()">
-            📥 CSV Excel
-          </button>
-          <button class="teacher-btn-sm" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; border-color: rgba(59, 130, 246, 0.3);" onclick="downloadTeacherBackupJson()">
-            💾 Backup JSON
-          </button>
-          <button class="teacher-btn-sm" style="background: rgba(168, 85, 247, 0.15); color: #c084fc; border-color: rgba(168, 85, 247, 0.3);" onclick="openSupabaseConfigModal()">
-            ⚙️ Supabase
-          </button>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- STUDENT DETAIL MODAL -->
-  <div class="modal-overlay" id="student-detail-modal">
-    <div class="modal-box">
-      <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; margin-bottom: 12px;">
-        <span id="modal-avatar" style="font-size: 28px;">⚡</span>
-        <div>
-          <h3 id="modal-name" style="font-family: var(--font-display); font-size: 16px; color: var(--neon-cyan);">Aluno</h3>
-          <p id="modal-class" style="font-size: 12px; color: var(--text-muted);">Turma</p>
-        </div>
-      </div>
-
-      <div id="modal-body" style="font-size: 13px; margin-bottom: 14px;">
-        <!-- Populated via JS -->
-      </div>
-
-      <div style="display: flex; gap: 8px;">
-        <button class="teacher-btn-sm" style="background: rgba(244, 63, 94, 0.15); color: var(--neon-magenta); border-color: rgba(244, 63, 94, 0.3);" onclick="deleteCurrentModalRecord()">
-          🗑️ Excluir
-        </button>
-        <button class="cyber-btn" style="margin-top: 0; flex: 1;" onclick="closeStudentDetailModal()">Fechar</button>
-      </div>
-    </div>
+      </section>
+    </main>
   </div>
 
-  
   <!-- PROFESSOR ACCESS AUTH MODAL (MODAL CYBERPUNK) -->
   <div class="modal-overlay" id="professor-auth-modal">
     <div class="modal-box" style="max-width: 420px; text-align: center;">
@@ -1407,6 +1301,29 @@
     </div>
   </div>
 
+  <!-- STUDENT DETAIL MODAL -->
+  <div class="modal-overlay" id="student-detail-modal">
+    <div class="modal-box">
+      <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; margin-bottom: 12px;">
+        <span id="modal-avatar" style="font-size: 28px;">⚡</span>
+        <div>
+          <h3 id="modal-name" style="font-family: var(--font-display); font-size: 16px; color: var(--neon-cyan);">Aluno</h3>
+          <p id="modal-class" style="font-size: 12px; color: var(--text-muted);">Turma</p>
+        </div>
+      </div>
+
+      <div id="modal-body" style="font-size: 13px; margin-bottom: 14px;">
+        <!-- Populated via JS -->
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <button class="teacher-btn-sm" style="background: rgba(244, 63, 94, 0.15); color: var(--neon-magenta); border-color: rgba(244, 63, 94, 0.3);" onclick="deleteCurrentModalRecord()">
+          🗑️ Excluir
+        </button>
+        <button class="cyber-btn" style="margin-top: 0; flex: 1;" onclick="closeStudentDetailModal()">Fechar</button>
+      </div>
+    </div>
+  </div>
 
   <!-- SUPABASE CONFIG MODAL -->
   <div class="modal-overlay" id="supabase-config-modal">
@@ -1455,9 +1372,6 @@
             this.ctx = new AudioContext();
           }
         }
-        if (this.ctx && this.ctx.state === 'suspended') {
-          this.ctx.resume();
-        }
       }
       playBlip() {
         if (!this.enabled || !this.ctx) return;
@@ -1466,7 +1380,6 @@
           const gain = this.ctx.createGain();
           osc.type = 'sine';
           osc.frequency.setValueAtTime(587.33, this.ctx.currentTime);
-          osc.frequency.exponentialRampToValueAtTime(880, this.ctx.currentTime + 0.08);
           gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
           gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
           osc.connect(gain);
@@ -1479,18 +1392,18 @@
         if (!this.enabled || !this.ctx) return;
         try {
           const now = this.ctx.currentTime;
-          [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(freq, now + i * 0.07);
-            gain.gain.setValueAtTime(0.15, now + i * 0.07);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.15);
-            osc.connect(gain);
-            gain.connect(this.ctx.destination);
-            osc.start(now + i * 0.07);
-            osc.stop(now + i * 0.07 + 0.16);
-          });
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.setValueAtTime(659.25, now + 0.08);
+          osc.frequency.setValueAtTime(783.99, now + 0.16);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(now + 0.28);
         } catch(e) {}
       }
       playError() {
@@ -1499,8 +1412,8 @@
           const osc = this.ctx.createOscillator();
           const gain = this.ctx.createGain();
           osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(180, this.ctx.currentTime);
-          osc.frequency.linearRampToValueAtTime(110, this.ctx.currentTime + 0.25);
+          osc.frequency.setValueAtTime(160, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(80, this.ctx.currentTime + 0.25);
           gain.gain.setValueAtTime(0.18, this.ctx.currentTime);
           gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.25);
           osc.connect(gain);
@@ -1531,6 +1444,13 @@
     }
 
     const sound = new CyberAudio();
+
+    // Toggle Sound Button handler
+    document.getElementById('btn-sound-toggle').addEventListener('click', () => {
+      sound.enabled = !sound.enabled;
+      document.getElementById('sound-icon').textContent = sound.enabled ? '🔊' : '🔇';
+      document.getElementById('btn-sound-toggle').lastChild.textContent = sound.enabled ? ' Som Ativo' : ' Silenciado';
+    });
 
     /* =========================================================================
        CHARACTERS DATABASE
@@ -1564,329 +1484,230 @@
         id: 'lynx',
         name: 'Lynx',
         avatar: '🦊',
-        specialty: 'Operadores Booleanos',
-        color: '#ffe600',
-        quote: 'Verdadeiro ou falso: tudo se resume a decisões.'
+        specialty: 'Vetores & Dados',
+        color: '#ff9900',
+        quote: 'Estruturas de dados são as pontes da rede.'
       }
     ];
 
     /* =========================================================================
-       GAME STATE MANAGEMENT & SESSION TRACKING
+       APPLICATION STATE
        ========================================================================= */
     const state = {
-      sessionId: 0,
+      languageMode: 'portugol', // 'portugol' | 'python'
       studentName: '',
-      studentClass: '',
+      studentClass: '1TECA',
       studentLogin: '',
       selectedCharacter: CHARACTERS[0],
-      languageMode: 'portugol', // 'portugol' | 'python'
-      autoAdvanceTimer: null,
       currentStageIndex: 0,
       score: 0,
       lives: 3,
       correctCount: 0,
       wrongCount: 0,
-      startTime: 0,
-      endTime: 0,
       isAnswerLocked: false,
-      stageResults: [],
       hasStartedClass: false,
       isFinished: false,
-      isLockedByScreenSwitch: false
+      isLockedByScreenSwitch: false,
+      sessionId: null,
+      stageResults: []
     };
 
     /* =========================================================================
-       LANGUAGE MODE CONTROLLER (PORTUGOL vs PYTHON)
+       LANGUAGE SELECTOR (PORTUGOL vs PYTHON)
        ========================================================================= */
     function setLanguageMode(mode) {
-      sound.init();
-      sound.playBlip();
       state.languageMode = mode;
 
-      const btnsPt = [document.getElementById('lang-select-portugol'), document.getElementById('lang-select-portugol-login')];
-      const btnsPy = [document.getElementById('lang-select-python'), document.getElementById('lang-select-python-login')];
+      const regPort = document.getElementById('btn-choice-portugol');
+      const regPy = document.getElementById('btn-choice-python');
+      if (regPort && regPy) {
+        regPort.classList.toggle('selected', mode === 'portugol');
+        regPy.classList.toggle('selected', mode === 'python');
+      }
 
-      btnsPt.forEach(b => { if (b) mode === 'portugol' ? b.classList.add('lang-active-btn') : b.classList.remove('lang-active-btn'); });
-      btnsPy.forEach(b => { if (b) mode === 'python' ? b.classList.add('lang-active-btn') : b.classList.remove('lang-active-btn'); });
+      const loginPort = document.getElementById('btn-login-portugol');
+      const loginPy = document.getElementById('btn-login-python');
+      if (loginPort && loginPy) {
+        loginPort.classList.toggle('selected', mode === 'portugol');
+        loginPy.classList.toggle('selected', mode === 'python');
+      }
 
       const hudText = document.getElementById('hud-lang-text');
       if (hudText) {
-        hudText.textContent = mode === 'python' ? '🐍 Python' : '🇧🇷 Portugol';
+        hudText.textContent = (mode === 'python') ? '🐍 Python' : '🇧🇷 Portugol';
       }
 
-      const gameplayScreen = document.getElementById('screen-gameplay');
-      if (gameplayScreen && gameplayScreen.classList.contains('active')) {
+      if (state.hasStartedClass && !state.isFinished && !state.isLockedByScreenSwitch) {
         loadStage(state.currentStageIndex);
       }
     }
 
     function toggleLanguageMode() {
-      const nextMode = state.languageMode === 'python' ? 'portugol' : 'python';
-      setLanguageMode(nextMode);
+      sound.playBlip();
+      const newMode = (state.languageMode === 'portugol') ? 'python' : 'portugol';
+      setLanguageMode(newMode);
     }
 
     /* =========================================================================
-       INITIALIZATION
+       SCREEN NAVIGATION
        ========================================================================= */
-    window.addEventListener('DOMContentLoaded', async () => {
-      initCanvasBackground();
-      renderCharacterOptions();
-      setupSoundControls();
-      setupExitAndAbandonmentDetection();
-      loadSupabaseSettingsToInputs();
-      updateSupabaseStatusIndicator();
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(screenId);
+      if (target) {
+        target.classList.add('active');
+      }
+    }
 
-      // Fallback para carregar questions.json se questions.js falhar
-      if (!window.STAGES || window.STAGES.length === 0) {
-        try {
-          const res = await fetch('questions.json');
-          if (res.ok) {
-            window.STAGES = await res.json();
-            console.log('Fases carregadas via questions.json:', window.STAGES.length);
-          }
-        } catch(e) {
-          console.warn('Carregamento via fetch questions.json falhou, usando STAGES existente:', e);
+    function updateHud() {
+      document.getElementById('hud-score-val').textContent = state.score;
+      for (let i = 1; i <= 3; i++) {
+        const heart = document.getElementById('heart-' + i);
+        if (heart) {
+          heart.classList.toggle('heart-lost', i > state.lives);
         }
       }
-    });
-
-    function setupSoundControls() {
-      const btn = document.getElementById('btn-sound-toggle');
-      const icon = document.getElementById('sound-icon');
-      if (!btn) return;
-      btn.addEventListener('click', () => {
-        sound.init();
-        sound.enabled = !sound.enabled;
-        icon.textContent = sound.enabled ? '🔊' : '🔇';
-        btn.style.opacity = sound.enabled ? '1' : '0.6';
-        if (sound.enabled) sound.playBlip();
-      });
-    }
-
-    function renderCharacterOptions() {
-      const container = document.getElementById('characters-container');
-      if (!container) return;
-      container.innerHTML = '';
-      CHARACTERS.forEach((char, idx) => {
-        const div = document.createElement('div');
-        div.className = `char-card-compact ${idx === 0 ? 'selected' : ''}`;
-        div.onclick = () => selectCharacter(char.id);
-        div.innerHTML = `
-          <div class="char-avatar-mini">${char.avatar}</div>
-          <div class="char-name-mini">${char.name}</div>
-          <div class="char-specialty-mini">${char.specialty}</div>
-        `;
-        div.id = `char-opt-${char.id}`;
-        container.appendChild(div);
-      });
-    }
-
-    function selectCharacter(charId) {
-      sound.init();
-      sound.playBlip();
-      const found = CHARACTERS.find(c => c.id === charId);
-      if (!found) return;
-      state.selectedCharacter = found;
-      document.querySelectorAll('.char-card-compact').forEach(el => el.classList.remove('selected'));
-      const activeEl = document.getElementById(`char-opt-${charId}`);
-      if (activeEl) activeEl.classList.add('selected');
     }
 
     /* =========================================================================
-       CLASS FORMAT & AUTH VALIDATION
+       REGISTRATION & AUTHENTICATION
        ========================================================================= */
-    function switchAuthMode(mode) {
-      sound.init();
+    function selectCharacter(charId) {
       sound.playBlip();
-      const tabReg = document.getElementById('tab-auth-register');
-      const tabLog = document.getElementById('tab-auth-login');
-      const formReg = document.getElementById('register-form');
-      const formLog = document.getElementById('login-existing-form');
+      const char = CHARACTERS.find(c => c.id === charId) || CHARACTERS[0];
+      state.selectedCharacter = char;
+
+      document.querySelectorAll('#char-grid-compact-register .char-card-compact').forEach(card => {
+        card.classList.toggle('selected', card.dataset.char === charId);
+      });
+    }
+
+    function switchAuthMode(mode) {
+      sound.playBlip();
+      const regTab = document.getElementById('tab-auth-register');
+      const loginTab = document.getElementById('tab-auth-login');
+      const regForm = document.getElementById('register-form');
+      const loginForm = document.getElementById('login-form');
 
       if (mode === 'register') {
-        tabReg.classList.add('active');
-        tabLog.classList.remove('active');
-        formReg.style.display = 'block';
-        formLog.style.display = 'none';
+        regTab.classList.add('active');
+        loginTab.classList.remove('active');
+        regForm.style.display = 'block';
+        loginForm.style.display = 'none';
       } else {
-        tabLog.classList.add('active');
-        tabReg.classList.remove('active');
-        formLog.style.display = 'block';
-        formLog.style.display = 'none';
+        loginTab.classList.add('active');
+        regTab.classList.remove('active');
+        loginForm.style.display = 'block';
+        regForm.style.display = 'none';
       }
     }
 
     function onClassSelectChanged(val) {
-      const customInput = document.getElementById('student-class-custom');
-      if (val === 'CUSTOM') {
-        customInput.style.display = 'block';
-        customInput.focus();
+      const customWrapper = document.getElementById('custom-class-wrapper');
+      if (val === '__custom__') {
+        customWrapper.style.display = 'block';
+        document.getElementById('custom-class-input').focus();
       } else {
-        customInput.style.display = 'none';
-      }
-      autoGenerateLoginSuggestion(document.getElementById('student-first-name').value);
-    }
-
-    function onCustomClassInput(input) {
-      input.value = input.value.toUpperCase().replace(/\s+/g, '');
-      autoGenerateLoginSuggestion(document.getElementById('student-first-name').value);
-    }
-
-    function getSelectedClass() {
-      const select = document.getElementById('student-class-select');
-      if (select.value === 'CUSTOM') {
-        return document.getElementById('student-class-custom').value.trim().toUpperCase();
-      }
-      return select.value;
-    }
-
-    function validateClassFormat(className) {
-      const regex = /^[1-9][A-Z0-9]{2,6}[A-Z]$/;
-      return regex.test(className);
-    }
-
-    function autoGenerateLoginSuggestion(firstName) {
-      const cleanFirst = firstName.trim().split(' ')[0].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-      const sClass = getSelectedClass().toLowerCase();
-      const loginInput = document.getElementById('student-login-input');
-      if (cleanFirst && loginInput && !loginInput.dataset.manual) {
-        loginInput.value = `${cleanFirst}.${sClass || '1teca'}`;
+        customWrapper.style.display = 'none';
+        state.studentClass = val;
       }
     }
 
-    /* =========================================================================
-       STUDENT REGISTRATION & LOGIN HANDLING
-       ========================================================================= */
+    function onCustomClassInput(val) {
+      state.studentClass = val.trim().toUpperCase() || 'TURMA';
+    }
+
+    function autoGenerateLoginSuggestion(name) {
+      const clean = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const loginInput = document.getElementById('student-reg-login');
+      if (loginInput && clean.length > 0 && !loginInput.dataset.userEdited) {
+        loginInput.value = clean + Math.floor(100 + Math.random() * 900);
+      }
+    }
+
     async function handleStudentRegister() {
       sound.init();
-      const firstNameInput = document.getElementById('student-first-name');
-      const loginInput = document.getElementById('student-login-input');
-      const passwordInput = document.getElementById('student-password-input');
+      sound.playBlip();
 
-      let firstName = firstNameInput.value.trim();
-      if (firstName.includes(' ')) {
-        firstName = firstName.split(' ')[0];
-        firstNameInput.value = firstName;
-      }
+      const name = document.getElementById('student-first-name').value.trim();
+      const login = document.getElementById('student-reg-login').value.trim();
+      const pass = document.getElementById('student-reg-pass').value.trim();
+      const classSelect = document.getElementById('student-class-select').value;
+      const finalClass = (classSelect === '__custom__')
+        ? (document.getElementById('custom-class-input').value.trim().toUpperCase() || 'TURMA')
+        : classSelect;
 
-      const sClass = getSelectedClass();
-      const login = loginInput.value.trim().toLowerCase();
-      const password = passwordInput.value;
-
-      if (!firstName) {
-        alert('Por favor, informe seu primeiro nome.');
+      if (!name || !login || !pass) {
+        alert('Por favor, preencha todos os campos!');
         return;
       }
 
-      if (!sClass || !validateClassFormat(sClass)) {
-        alert(`Formato de turma inválido ("${sClass}").\nUse o padrão [Ano][Curso][Turma], por exemplo: 1TECA, 1ADMA, 2TECB, 1INFOA.`);
+      state.studentName = name;
+      state.studentLogin = login;
+      state.studentClass = finalClass;
+
+      // Salvar conta no localStorage
+      const users = JSON.parse(localStorage.getItem('cyber_runner_users') || '[]');
+      const existing = users.find(u => u.login === login);
+      if (existing) {
+        alert('Este login já está em uso. Escolha outro ou acerte na aba "Já tenho login"!');
         return;
       }
 
-      if (!login || !password) {
-        alert('Por favor, preencha o login e a senha para salvar seu cadastro.');
-        return;
-      }
-
-      const userData = {
-        id: `usr_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-        firstName: firstName,
-        studentClass: sClass,
-        login: login,
-        password: password,
-        avatar: state.selectedCharacter.avatar,
-        characterName: state.selectedCharacter.name,
+      users.push({
+        id: 'usr_' + Date.now(),
+        name,
+        login,
+        pass,
+        studentClass: finalClass,
+        character: state.selectedCharacter.id,
+        languageMode: state.languageMode,
         createdAt: new Date().toISOString()
-      };
+      });
+      localStorage.setItem('cyber_runner_users', JSON.stringify(users));
 
-      try {
-        const users = JSON.parse(localStorage.getItem('cyber_runner_users') || '[]');
-        const existingIdx = users.findIndex(u => u.login === login);
-        if (existingIdx >= 0) {
-          users[existingIdx] = userData;
-        } else {
-          users.push(userData);
-        }
-        localStorage.setItem('cyber_runner_users', JSON.stringify(users));
-      } catch(e) {}
-
-      await SupabaseCloud.saveUser(userData);
-      await XamppSqlite.saveUser(userData);
-
-      initSessionData(firstName, sClass, login);
+      initSessionData();
+      showScreen('screen-gameplay');
+      loadStage(0);
     }
 
     async function handleStudentLogin() {
       sound.init();
-      const loginInput = document.getElementById('existing-login-input');
-      const passwordInput = document.getElementById('existing-password-input');
-      const statusMsg = document.getElementById('login-status-msg');
+      sound.playBlip();
 
-      const login = loginInput.value.trim().toLowerCase();
-      const password = passwordInput.value;
+      const login = document.getElementById('student-login-input').value.trim();
+      const pass = document.getElementById('student-login-pass').value.trim();
+      const errBox = document.getElementById('login-error-msg');
 
-      if (!login || !password) {
-        alert('Preencha seu login e senha.');
+      const users = JSON.parse(localStorage.getItem('cyber_runner_users') || '[]');
+      const user = users.find(u => u.login === login && u.pass === pass);
+
+      if (!user) {
+        errBox.style.display = 'block';
+        errBox.textContent = '❌ Login ou senha inválidos. Tente novamente.';
         return;
       }
 
-      statusMsg.style.display = 'block';
-      statusMsg.style.background = 'rgba(34, 211, 238, 0.1)';
-      statusMsg.style.color = 'var(--neon-cyan)';
-      statusMsg.textContent = 'Verificando credenciais...';
+      errBox.style.display = 'none';
+      state.studentName = user.name;
+      state.studentLogin = user.login;
+      state.studentClass = user.studentClass;
+      state.selectedCharacter = CHARACTERS.find(c => c.id === user.character) || CHARACTERS[0];
 
-      let users = [];
-      try {
-        users = JSON.parse(localStorage.getItem('cyber_runner_users') || '[]');
-      } catch(e) {}
-
-      let user = users.find(u => u.login === login && u.password === password);
-
-      if (!user) {
-        user = await SupabaseCloud.getUser(login, password);
-      }
-
-      if (!user) {
-        const sqliteUsers = await XamppSqlite.getUsers();
-        if (sqliteUsers) {
-          user = sqliteUsers.find(u => u.login.toLowerCase() === login && u.password === password);
-        }
-      }
-
-      if (user) {
-        statusMsg.style.background = 'rgba(34, 197, 94, 0.15)';
-        statusMsg.style.color = 'var(--neon-green)';
-        statusMsg.textContent = `✅ Bem-vindo de volta, ${user.firstName || user.first_name} (${user.studentClass || user.student_class})!`;
-
-        if (user.avatar) {
-          const char = CHARACTERS.find(c => c.avatar === user.avatar) || CHARACTERS[0];
-          state.selectedCharacter = char;
-        }
-
-        setTimeout(() => {
-          initSessionData(user.firstName || user.first_name, user.studentClass || user.student_class, login);
-        }, 600);
-      } else {
-        statusMsg.style.background = 'rgba(244, 63, 94, 0.15)';
-        statusMsg.style.color = 'var(--neon-magenta)';
-        statusMsg.textContent = '❌ Login ou senha incorretos. Se for seu primeiro acesso, cadastre-se na aba NOVO ALUNO.';
-      }
+      initSessionData();
+      showScreen('screen-gameplay');
+      loadStage(0);
     }
 
-    function initSessionData(studentName, studentClass, studentLogin) {
-      state.studentName = studentName;
-      state.studentClass = studentClass;
-      state.studentLogin = studentLogin || '';
+    function initSessionData() {
+      state.hasStartedClass = true;
       state.score = 0;
       state.lives = 3;
+      state.currentStageIndex = 0;
       state.correctCount = 0;
       state.wrongCount = 0;
-      state.currentStageIndex = 0;
       state.stageResults = [];
-      state.startTime = Date.now();
-      state.hasStartedClass = true;
       state.isFinished = false;
-      state.isLockedByScreenSwitch = false;
 
       updateHud();
 
@@ -1908,79 +1729,74 @@
         saveLocalAttempt('EM ANDAMENTO');
       }
 
-      sound.playCorrect();
-      showScreen('screen-gameplay');
-      loadStage(0);
+      setupExitAndAbandonmentDetection();
     }
 
     /* =========================================================================
-       LOAD STAGE & PROGRESSION (PORTUGOL vs PYTHON)
+       STAGE LOADER & LOGIC ENGINE
        ========================================================================= */
     function loadStage(index) {
       const stagesList = window.STAGES || [];
-      if (index >= stagesList.length) {
-        finishGameVictory();
+      if (index < 0 || index >= stagesList.length) {
+        handleVictory();
         return;
       }
 
       state.currentStageIndex = index;
       state.isAnswerLocked = false;
       const stage = stagesList[index];
-      const isPy = state.languageMode === 'python';
 
-      const filename = (isPy && stage.pythonFilename) ? stage.pythonFilename : (stage.filename || 'modulo.algo');
-      const scenario = (isPy && stage.pythonScenario) ? stage.pythonScenario : stage.scenario;
-      const codeTemplate = (isPy && stage.pythonCodeTemplate) ? stage.pythonCodeTemplate : stage.codeTemplate;
+      const isPy = (state.languageMode === 'python');
+      const filename = (isPy && stage.pythonFilename) ? stage.pythonFilename : stage.filename;
+      const langTag = isPy ? 'PYTHON' : 'PORTUGOL';
+      const codeTpl = (isPy && stage.pythonCodeTemplate) ? stage.pythonCodeTemplate : stage.codeTemplate;
       const options = (isPy && stage.pythonOptions) ? stage.pythonOptions : stage.options;
 
-      // Update badges & progress
-      document.getElementById('game-stage-badge').textContent = `FASE ${index + 1} / ${stagesList.length}`;
-      document.getElementById('game-stage-title').textContent = stage.title;
-      document.getElementById('game-character-badge').textContent = `${state.selectedCharacter.name} ${state.selectedCharacter.avatar}`;
-      document.getElementById('game-progress-bar').style.width = `${((index + 1) / stagesList.length) * 100}%`;
-
-      document.getElementById('game-scenario-text').textContent = scenario;
+      document.getElementById('stage-badge-text').textContent = 'FASE ' + (index + 1) + ' / ' + stagesList.length;
+      document.getElementById('stage-concept-pill').textContent = stage.concept;
+      document.getElementById('stage-title-text').textContent = stage.title;
+      document.getElementById('scenario-text').textContent = stage.scenario;
       document.getElementById('terminal-filename').textContent = filename;
-      document.getElementById('terminal-code').innerHTML = codeTemplate;
+      document.getElementById('terminal-lang-tag').textContent = langTag;
 
-      // Hide feedback & next button
-      const feedback = document.getElementById('feedback-banner');
-      feedback.className = 'feedback-banner';
-      feedback.style.display = 'none';
-      document.getElementById('btn-next-action').style.display = 'none';
+      const progressPct = ((index) / stagesList.length) * 100;
+      document.getElementById('progress-bar-fill').style.width = progressPct + '%';
 
-      // Render Options
-      const optionsContainer = document.getElementById('options-container');
-      optionsContainer.innerHTML = '';
+      const codeWithGap = codeTpl.replace('___GAP___', '<span class="code-gap">[ ? ]</span>');
+      document.getElementById('code-display').innerHTML = codeWithGap;
+
+      const optionsGrid = document.getElementById('options-grid');
+      optionsGrid.innerHTML = '';
 
       const letters = ['A', 'B', 'C', 'D'];
-      options.forEach((opt, optIdx) => {
+      options.forEach((opt, idx) => {
         const btn = document.createElement('button');
+        btn.type = 'button';
         btn.className = 'option-btn';
-        btn.id = `option-${optIdx}`;
-        btn.onclick = () => onSelectOption(optIdx);
-        btn.innerHTML = `
-          <span class="option-key">${letters[optIdx]}</span>
-          <span class="option-text">${opt.text}</span>
-        `;
-        optionsContainer.appendChild(btn);
+        btn.id = 'option-' + idx;
+        btn.onclick = () => onSelectOption(idx);
+        btn.innerHTML = '<span class="option-key">' + letters[idx] + '</span><span style="flex: 1; word-break: break-all;">' + opt.text + '</span>';
+        optionsGrid.appendChild(btn);
       });
+
+      const feedback = document.getElementById('feedback-banner');
+      feedback.style.display = 'none';
+      feedback.className = 'feedback-banner';
+
+      const nextBtn = document.getElementById('btn-next-action');
+      nextBtn.style.display = 'none';
     }
 
-    /* =========================================================================
-       HANDLE OPTION SELECTION & GAMIFICATION RULES
-       ========================================================================= */
     function onSelectOption(optionIndex) {
-      if (state.isAnswerLocked || state.isLockedByScreenSwitch) return;
-      sound.init();
+      if (state.isAnswerLocked) return;
 
       const stagesList = window.STAGES || [];
       const stage = stagesList[state.currentStageIndex];
-      const isPy = state.languageMode === 'python';
+      const isPy = (state.languageMode === 'python');
       const options = (isPy && stage.pythonOptions) ? stage.pythonOptions : stage.options;
       const explanation = (isPy && stage.pythonExplanation) ? stage.pythonExplanation : stage.explanation;
       const selected = options[optionIndex];
-      const selectedBtn = document.getElementById(`option-${optionIndex}`);
+      const selectedBtn = document.getElementById('option-' + optionIndex);
       const feedback = document.getElementById('feedback-banner');
       const nextBtn = document.getElementById('btn-next-action');
 
@@ -1996,11 +1812,8 @@
 
         feedback.className = 'feedback-banner success';
         feedback.style.display = 'block';
-        document.getElementById('feedback-title').innerHTML = `<span>✅</span> RESPOSTA EXATA! (+150 PTS)`;
-        document.getElementById('feedback-explanation').innerHTML = `
-          <strong>${selected.feedback}</strong><br>
-          <span style="opacity: 0.9; font-size: 12px;">${explanation}</span>
-        `;
+        document.getElementById('feedback-title').innerHTML = '<span>✅</span> RESPOSTA EXATA! (+150 PTS)';
+        document.getElementById('feedback-explanation').innerHTML = '<strong>' + selected.feedback + '</strong><br><span style="opacity: 0.9; font-size: 12.5px;">' + explanation + '</span>';
 
         state.stageResults.push({
           stageNum: state.currentStageIndex + 1,
@@ -2010,9 +1823,9 @@
         });
 
         notifyStageProgress(true);
-        saveLocalAttempt(`EM ANDAMENTO (Fase ${state.currentStageIndex + 1})`);
+        saveLocalAttempt('EM ANDAMENTO (Fase ' + (state.currentStageIndex + 1) + ')');
 
-        // Exibir botão de avanço para o aluno ler a explicação com calma e avançar no seu próprio ritmo
+        // Exibir botão de avanço manual para o aluno ler com calma e avançar no seu ritmo
         nextBtn.style.display = 'flex';
         const isFinal = (state.currentStageIndex === stagesList.length - 1);
         nextBtn.textContent = isFinal ? 'VER RESULTADO FINAL ➔' : 'PRÓXIMA FASE ➔';
@@ -2026,11 +1839,8 @@
 
         feedback.className = 'feedback-banner error';
         feedback.style.display = 'block';
-        document.getElementById('feedback-title').innerHTML = `<span>⚠️</span> SINTAXE INCORRETA! (-1 VIDA)`;
-        document.getElementById('feedback-explanation').innerHTML = `
-          <strong>${selected.feedback}</strong><br>
-          <span style="opacity: 0.9; font-size: 12px;">Analise o código com atenção e tente outra alternativa.</span>
-        `;
+        document.getElementById('feedback-title').innerHTML = '<span>⚠️</span> SINTAXE INCORRETA! (-1 VIDA)';
+        document.getElementById('feedback-explanation').innerHTML = '<strong>' + selected.feedback + '</strong><br><span style="opacity: 0.9; font-size: 12px;">Analise o código com atenção e tente outra alternativa.</span>';
 
         if (state.lives <= 0) {
           state.isAnswerLocked = true;
@@ -2039,7 +1849,7 @@
           }, 1200);
         } else {
           notifyStageProgress(false);
-          saveLocalAttempt(`EM ANDAMENTO (Fase ${state.currentStageIndex + 1} - Erro cometido)`);
+          saveLocalAttempt('EM ANDAMENTO (Fase ' + (state.currentStageIndex + 1) + ' - Erro cometido)');
         }
       }
     }
@@ -2050,427 +1860,73 @@
     }
 
     /* =========================================================================
-       GAME OVER
-       ========================================================================= */
-    function handleGameOver() {
-      state.isFinished = true;
-      const stagesList = window.STAGES || [];
-      document.getElementById('go-score').textContent = state.score;
-      document.getElementById('go-stages').textContent = `${state.currentStageIndex} / ${stagesList.length}`;
-
-      if (window.AndroidBridge && typeof window.AndroidBridge.onGameOver === 'function') {
-        try {
-          window.AndroidBridge.onGameOver(
-            state.sessionId,
-            state.score,
-            state.currentStageIndex,
-            state.correctCount,
-            state.wrongCount,
-            JSON.stringify(state.stageResults)
-          );
-        } catch(e) { console.error(e); }
-      } else {
-        saveLocalAttempt('REPROVADO (Sem Vidas)');
-      }
-
-      showScreen('screen-gameover');
-    }
-
-    /* =========================================================================
-       VICTORY & COMPLETION
-       ========================================================================= */
-    function finishGameVictory() {
-      state.isFinished = true;
-      state.endTime = Date.now();
-      const elapsedSec = Math.max(1, Math.round((state.endTime - state.startTime) / 1000));
-      const mins = Math.floor(elapsedSec / 60).toString().padStart(2, '0');
-      const secs = (elapsedSec % 60).toString().padStart(2, '0');
-      const timeFormatted = `${mins}:${secs}`;
-
-      const totalQuestions = state.correctCount + state.wrongCount;
-      const accuracy = totalQuestions > 0 ? Math.round((state.correctCount / totalQuestions) * 100) : 100;
-
-      document.getElementById('victory-student-greeting').textContent =
-        `Parabéns, ${state.studentName} (${state.studentClass})! O AI Core foi completamente restaurado com sucesso!`;
-      document.getElementById('victory-score').textContent = state.score;
-      document.getElementById('victory-accuracy').textContent = `${accuracy}%`;
-      document.getElementById('victory-lives').textContent = `${state.lives} / 3`;
-      document.getElementById('victory-time').textContent = timeFormatted;
-
-      const tbody = document.getElementById('victory-breakdown-body');
-      tbody.innerHTML = '';
-      state.stageResults.forEach(r => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><strong>Fase ${r.stageNum}:</strong> ${r.concept}</td>
-          <td style="color: var(--neon-green);">✅ Aprovado</td>
-          <td style="color: var(--neon-yellow); font-family: var(--font-display); font-weight: 700;">+${r.points}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      if (window.AndroidBridge && typeof window.AndroidBridge.onGameCompleted === 'function') {
-        try {
-          window.AndroidBridge.onGameCompleted(
-            state.sessionId,
-            state.score,
-            state.correctCount,
-            state.wrongCount,
-            state.lives,
-            JSON.stringify(state.stageResults)
-          );
-        } catch(e) { console.error('Error notifying completion:', e); }
-      } else {
-        saveLocalAttempt('CONCLUÍDO (100%)');
-      }
-
-      sound.playVictory();
-      showScreen('screen-victory');
-    }
-
-    /* =========================================================================
-       ANTI-CHEAT & SCREEN SWITCH DETECTION (REDUCES LIVES ON VIOLATION)
+       ANTI-CHEAT & LOSS OF FOCUS (GESTÃO DE VIDAS)
        ========================================================================= */
     function setupExitAndAbandonmentDetection() {
-      const handleFocusViolation = () => {
-        if (state.hasStartedClass && !state.isFinished && !state.isLockedByScreenSwitch) {
-          sound.playError();
-          state.wrongCount += 1;
-          state.lives -= 1;
-          updateHud();
+      let isHandlerActive = true;
 
-          const feedback = document.getElementById('feedback-banner');
-          if (feedback) {
-            feedback.className = 'feedback-banner error';
-            feedback.style.display = 'block';
-            document.getElementById('feedback-title').innerHTML = `<span>⚠️</span> VIOLAÇÃO DE TELA/ABA! (-1 VIDA)`;
-            document.getElementById('feedback-explanation').innerHTML = `
-              <strong>Troca de janela/aba detectada pelo sistema!</strong><br>
-              <span style="opacity: 0.9; font-size: 12px;">Mantenha a atenção total no jogo. Vidas restantes: ${state.lives} / 3.</span>
-            `;
-          }
+      const handleViolation = () => {
+        if (!isHandlerActive || !state.hasStartedClass || state.isFinished || state.isLockedByScreenSwitch) return;
 
-          if (state.lives <= 0) {
-            state.isAnswerLocked = true;
-            state.isFinished = true;
-            state.isLockedByScreenSwitch = true;
+        sound.playError();
+        state.lives -= 1;
+        updateHud();
 
-            const stagesList = window.STAGES || [];
-            const progressPct = Math.round((state.currentStageIndex / stagesList.length) * 100);
-            const violationStatus = `REPROVADO (Vidas Esgotadas por Violação de Foco na Fase ${state.currentStageIndex + 1} - ${progressPct}%)`;
+        const feedback = document.getElementById('feedback-banner');
+        if (feedback) {
+          feedback.className = 'feedback-banner error';
+          feedback.style.display = 'block';
+          document.getElementById('feedback-title').innerHTML = '<span>⚠️</span> VIOLAÇÃO DE TELA/ABA! (-1 VIDA)';
+          document.getElementById('feedback-explanation').innerHTML = '<strong>Mantenha o foco na missão!</strong><br>Trocar de janela ou aba durante a partida consome 1 vida. Vidas restantes: <strong>' + state.lives + '</strong>.';
+        }
 
-            saveLocalAttempt(violationStatus);
+        saveLocalAttempt('VIOLAÇÃO DE FOCO (Vidas: ' + state.lives + ')');
 
-            setTimeout(() => {
-              handleGameOver();
-            }, 1000);
-          } else {
-            saveLocalAttempt(`EM ANDAMENTO (Fase ${state.currentStageIndex + 1} - Violação de Tela: ${state.lives} vidas restantes)`);
-          }
+        if (state.lives <= 0) {
+          state.isLockedByScreenSwitch = true;
+          handleGameOver();
         }
       };
 
-      let blurTimeout = null;
-
       document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'hidden') {
-          handleFocusViolation();
-        }
+        if (document.hidden) handleViolation();
       });
 
-      window.addEventListener('blur', () => {
-        clearTimeout(blurTimeout);
-        blurTimeout = setTimeout(() => {
-          if (document.visibilityState === 'hidden' || !document.hasFocus()) {
-            handleFocusViolation();
-          }
-        }, 500);
-      });
-
-      window.addEventListener('focus', () => {
-        clearTimeout(blurTimeout);
-      });
-    }
-
-    function notifyStageProgress(isCorrect) {
-      if (window.AndroidBridge && typeof window.AndroidBridge.onStageAnswer === 'function') {
-        try {
-          window.AndroidBridge.onStageAnswer(
-            state.sessionId,
-            state.currentStageIndex + 1,
-            isCorrect,
-            state.score,
-            state.lives,
-            state.correctCount,
-            state.wrongCount,
-            JSON.stringify(state.stageResults)
-          );
-        } catch(e) {}
-      }
+      window.addEventListener('blur', handleViolation);
     }
 
     /* =========================================================================
-       SUPABASE CLIENT
+       VICTORY & GAME OVER
        ========================================================================= */
-    const SupabaseCloud = {
-      getConfig() {
-        return {
-          url: localStorage.getItem('cyber_runner_supabase_url') || '',
-          key: localStorage.getItem('cyber_runner_supabase_key') || ''
-        };
-      },
-      isConfigured() {
-        const conf = this.getConfig();
-        return conf.url.length > 5 && conf.key.length > 10;
-      },
-      async saveAttempt(record) {
-        if (!this.isConfigured()) return false;
-        const { url, key } = this.getConfig();
-        try {
-          const endpoint = `${url.replace(/\/+$/, '')}/rest/v1/student_attempts`;
-          const payload = {
-            id: String(record.id),
-            student_name: record.studentName,
-            student_class: record.studentClass,
-            student_login: record.studentLogin || '',
-            character_name: record.characterName,
-            character_avatar: record.characterAvatar,
-            score: record.score,
-            progress_percentage: record.progressPercentage || 0,
-            stages_completed: record.stagesCompleted || 0,
-            correct_answers: record.correctAnswers,
-            wrong_attempts: record.wrongAttempts,
-            lives_remaining: record.livesRemaining,
-            status: record.status,
-            stage_results: record.stageResults || []
-          };
+    function handleVictory() {
+      state.isFinished = true;
+      sound.playVictory();
+      saveLocalAttempt('CONCLUÍDO (60 FASES)');
 
-          const res = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-              'apikey': key,
-              'Authorization': `Bearer ${key}`,
-              'Content-Type': 'application/json',
-              'Prefer': 'resolution=merge-duplicates'
-            },
-            body: JSON.stringify(payload)
-          });
-          return res.ok;
-        } catch(e) {
-          return false;
-        }
-      },
-      async saveUser(user) {
-        if (!this.isConfigured()) return false;
-        const { url, key } = this.getConfig();
-        try {
-          const endpoint = `${url.replace(/\/+$/, '')}/rest/v1/student_users`;
-          const payload = {
-            id: user.id,
-            login: user.login,
-            password_hash: user.password,
-            first_name: user.firstName,
-            student_class: user.studentClass,
-            avatar: user.avatar
-          };
-          const res = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-              'apikey': key,
-              'Authorization': `Bearer ${key}`,
-              'Content-Type': 'application/json',
-              'Prefer': 'resolution=merge-duplicates'
-            },
-            body: JSON.stringify(payload)
-          });
-          return res.ok;
-        } catch(e) {
-          return false;
-        }
-      },
-      async getUser(login, password) {
-        if (!this.isConfigured()) return null;
-        const { url, key } = this.getConfig();
-        try {
-          const endpoint = `${url.replace(/\/+$/, '')}/rest/v1/student_users?login=eq.${encodeURIComponent(login)}&password_hash=eq.${encodeURIComponent(password)}&select=*`;
-          const res = await fetch(endpoint, {
-            headers: {
-              'apikey': key,
-              'Authorization': `Bearer ${key}`
-            }
-          });
-          if (res.ok) {
-            const data = await res.json();
-            return data && data.length > 0 ? data[0] : null;
-          }
-        } catch(e) {}
-        return null;
-      },
-      async fetchAllAttempts() {
-        if (!this.isConfigured()) return null;
-        const { url, key } = this.getConfig();
-        try {
-          const endpoint = `${url.replace(/\/+$/, '')}/rest/v1/student_attempts?select=*`;
-          const res = await fetch(endpoint, {
-            headers: {
-              'apikey': key,
-              'Authorization': `Bearer ${key}`
-            }
-          });
-          if (res.ok) {
-            return await res.json();
-          }
-        } catch(e) {}
-        return null;
-      },
-      async deleteAttempt(id) {
-        if (!this.isConfigured()) return false;
-        const { url, key } = this.getConfig();
-        try {
-          const endpoint = `${url.replace(/\/+$/, '')}/rest/v1/student_attempts?id=eq.${encodeURIComponent(id)}`;
-          const res = await fetch(endpoint, {
-            method: 'DELETE',
-            headers: {
-              'apikey': key,
-              'Authorization': `Bearer ${key}`
-            }
-          });
-          return res.ok;
-        } catch(e) {
-          return false;
-        }
-      },
-      async test() {
-        if (!this.isConfigured()) return { success: false, msg: 'Preencha a URL e a Chave do Supabase.' };
-        const { url, key } = this.getConfig();
-        try {
-          const endpoint = `${url.replace(/\/+$/, '')}/rest/v1/student_attempts?select=id&limit=1`;
-          const res = await fetch(endpoint, {
-            headers: {
-              'apikey': key,
-              'Authorization': `Bearer ${key}`
-            }
-          });
-          if (res.ok) {
-            return { success: true, msg: '✅ Conexão com o Supabase estabelecida com sucesso!' };
-          } else {
-            return { success: false, msg: `⚠️ Supabase retornou status ${res.status}: ${res.statusText}.` };
-          }
-        } catch(e) {
-          return { success: false, msg: `❌ Falha ao conectar: ${e.message}` };
-        }
-      }
-    };
+      document.getElementById('victory-score-val').textContent = state.score + ' PTS';
+      showScreen('screen-victory');
+    }
 
-    /* =========================================================================
-       XAMPP SQLITE CLIENT (PHP BACKEND)
-       ========================================================================= */
-    const XamppSqlite = {
-      apiEndpoint: 'api.php',
-      async saveAttempt(record) {
-        try {
-          const res = await fetch(this.apiEndpoint + '?action=save_attempt', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(record)
-          });
-          return res.ok;
-        } catch(e) { return false; }
-      },
-      async fetchAllAttempts() {
-        try {
-          const res = await fetch(this.apiEndpoint + '?action=get_attempts');
-          if (res.ok) {
-            const data = await res.json();
-            if (data.success && Array.isArray(data.attempts)) {
-              return data.attempts;
-            }
-          }
-        } catch(e) {}
-        return null;
-      },
-      async deleteAttempt(id) {
-        try {
-          const res = await fetch(this.apiEndpoint + '?action=delete_attempt&id=' + encodeURIComponent(id), {
-            method: 'DELETE'
-          });
-          return res.ok;
-        } catch(e) { return false; }
-      },
-      async saveUser(user) {
-        try {
-          const res = await fetch(this.apiEndpoint + '?action=save_user', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(user)
-          });
-          return res.ok;
-        } catch(e) { return false; }
-      },
-      async getUsers() {
-        try {
-          const res = await fetch(this.apiEndpoint + '?action=get_users');
-          if (res.ok) {
-            const data = await res.json();
-            if (data.success && Array.isArray(data.users)) {
-              return data.users;
-            }
-          }
-        } catch(e) {}
-        return null;
-      }
-    };
+    function handleGameOver() {
+      state.isFinished = true;
+      sound.playError();
+      saveLocalAttempt('GAME OVER');
 
-    /* =========================================================================
-       PERSISTENCE & ATTEMPTS STORAGE
-       ========================================================================= */
-    function saveLocalAttempt(status) {
-      try {
-        const history = JSON.parse(localStorage.getItem('cyber_runner_history') || '[]');
-        const stagesList = window.STAGES || [];
-        const progressPct = Math.round((state.currentStageIndex / stagesList.length) * 100);
-        const record = {
-          id: state.sessionId,
-          studentName: state.studentName,
-          studentClass: state.studentClass,
-          studentLogin: state.studentLogin,
-          characterName: state.selectedCharacter.name,
-          characterAvatar: state.selectedCharacter.avatar,
-          score: status.includes('ABANDONADO') || status.includes('ZERADO') ? 0 : state.score,
-          progressPercentage: progressPct,
-          stagesCompleted: state.currentStageIndex,
-          correctAnswers: state.correctCount,
-          wrongAttempts: state.wrongCount,
-          livesRemaining: state.lives,
-          status: status,
-          stageResults: state.stageResults,
-          timestamp: new Date().toLocaleString('pt-BR')
-        };
-        const existingIdx = history.findIndex(h => h.id === record.id);
-        if (existingIdx >= 0) {
-          history[existingIdx] = record;
-        } else {
-          history.unshift(record);
-        }
-        localStorage.setItem('cyber_runner_history', JSON.stringify(history));
+      document.getElementById('gameover-score-val').textContent = state.score + ' PTS';
+      document.getElementById('gameover-stages-val').textContent = 'Fases Concluídas: ' + state.correctCount + ' / 60';
+      showScreen('screen-gameover');
+    }
 
-        SupabaseCloud.saveAttempt(record);
-        XamppSqlite.saveAttempt(record);
-
-        if (document.getElementById('screen-teacher') && document.getElementById('screen-teacher').classList.contains('active')) {
-          refreshTeacherData();
-        }
-      } catch(e) {}
+    function restartGame() {
+      sound.playBlip();
+      initSessionData();
+      showScreen('screen-gameplay');
+      loadStage(0);
     }
 
     /* =========================================================================
-       TEACHER DASHBOARD & FILTERING
+       TEACHER DASHBOARD & AUTHENTICATION
        ========================================================================= */
-    let currentSelectedClass = 'TODAS';
-    let currentSearchTerm = '';
-    let currentModalRecordId = null;
-    let cachedXamppAttempts = [];
-
     async function getExpectedProfessorCode() {
       let expected = (window.PROFESSOR_AUTH && window.PROFESSOR_AUTH.codigoAcesso) ? window.PROFESSOR_AUTH.codigoAcesso : "PROF2026";
       try {
@@ -2519,7 +1975,7 @@
       }
     }
 
-        function openTeacherDashboard() {
+    function openTeacherDashboard() {
       if (state.isLockedByScreenSwitch) {
         alert('A sua sessão foi bloqueada devido à troca de tela.');
         return;
@@ -2551,182 +2007,131 @@
       }
     }
 
+    /* =========================================================================
+       DATA PERSISTENCE & TEACHER METRICS
+       ========================================================================= */
     function getLocalAttempts() {
-      try {
-        return JSON.parse(localStorage.getItem('cyber_runner_history') || '[]');
-      } catch(e) {
-        return [];
+      return JSON.parse(localStorage.getItem('cyber_runner_attempts') || '[]');
+    }
+
+    function saveLocalAttempt(status) {
+      const attempts = getLocalAttempts();
+      const existingIdx = attempts.findIndex(a => a.id === state.sessionId);
+
+      const record = {
+        id: state.sessionId,
+        studentName: state.studentName,
+        studentClass: state.studentClass,
+        studentLogin: state.studentLogin,
+        characterName: state.selectedCharacter.name,
+        characterAvatar: state.selectedCharacter.avatar,
+        languageMode: state.languageMode,
+        score: state.score,
+        stagesCompleted: state.correctCount,
+        correctAnswers: state.correctCount,
+        wrongAttempts: state.wrongCount,
+        livesRemaining: state.lives,
+        status: status,
+        progressPercentage: Math.round((state.correctCount / 60) * 100),
+        stageResults: state.stageResults,
+        createdAt: new Date().toISOString()
+      };
+
+      if (existingIdx >= 0) {
+        attempts[existingIdx] = record;
+      } else {
+        attempts.unshift(record);
+      }
+
+      localStorage.setItem('cyber_runner_attempts', JSON.stringify(attempts));
+    }
+
+    function notifyStageProgress(passed) {
+      if (window.AndroidBridge && typeof window.AndroidBridge.onStageCompleted === 'function') {
+        try {
+          window.AndroidBridge.onStageCompleted(
+            state.sessionId,
+            state.currentStageIndex + 1,
+            passed,
+            state.score,
+            state.lives
+          );
+        } catch(e) {}
       }
     }
 
-    async function refreshTeacherData() {
-      let remoteAttempts = null;
-      if (SupabaseCloud.isConfigured()) {
-        remoteAttempts = await SupabaseCloud.fetchAllAttempts();
-      }
-      let sqliteAttempts = await XamppSqlite.fetchAllAttempts();
-      let localAttempts = getLocalAttempts();
-
-      const map = new Map();
-      (remoteAttempts || []).forEach(a => map.set(String(a.id), a));
-      (sqliteAttempts || []).forEach(a => map.set(String(a.id), a));
-      localAttempts.forEach(a => {
-        if (!map.has(String(a.id))) {
-          map.set(String(a.id), a);
-        }
-      });
-      cachedXamppAttempts = Array.from(map.values());
-      renderTeacherDashboard();
+    function refreshTeacherData() {
+      const attempts = getLocalAttempts();
+      renderTeacherTable(attempts);
     }
 
-    function renderTeacherDashboard() {
-      const allAttempts = cachedXamppAttempts.length > 0 ? cachedXamppAttempts : getLocalAttempts();
-      
-      const totalCount = allAttempts.length;
-      const completedCount = allAttempts.filter(a => a.status && a.status.startsWith('CONCLUÍDO')).length;
-      const abandonedCount = allAttempts.filter(a => a.status && (a.status.includes('ABANDONADO') || a.status.includes('ZERADO') || a.status.includes('REPROVADO'))).length;
-      const avgScore = totalCount > 0 ? Math.round(allAttempts.reduce((acc, a) => acc + (Number(a.score) || 0), 0) / totalCount) : 0;
-      const compRate = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+    function renderTeacherTable(attempts) {
+      const tbody = document.getElementById('teacher-tbody');
+      tbody.innerHTML = '';
 
-      document.getElementById('t-metric-total').textContent = totalCount;
-      document.getElementById('t-metric-avg').textContent = avgScore;
-      document.getElementById('t-metric-rate').textContent = `${compRate}%`;
-      document.getElementById('t-metric-abandoned').textContent = abandonedCount;
+      let totalScore = 0;
+      let completedCount = 0;
+      let violationsCount = 0;
 
-      const classSet = new Set();
-      allAttempts.forEach(a => { if (a.studentClass) classSet.add(a.studentClass); });
-      const classesList = ['TODAS', ...Array.from(classSet)];
+      attempts.forEach(att => {
+        totalScore += (att.score || 0);
+        if (att.stagesCompleted >= 60 || att.status === 'CONCLUÍDO (60 FASES)') completedCount++;
+        if (att.livesRemaining < 3) violationsCount += (3 - att.livesRemaining);
 
-      const chipsContainer = document.getElementById('teacher-chips-list');
-      chipsContainer.innerHTML = '';
-      classesList.forEach(cls => {
-        const chip = document.createElement('button');
-        chip.className = `teacher-chip ${currentSelectedClass === cls ? 'active' : ''}`;
-        chip.textContent = cls;
-        chip.onclick = () => {
-          currentSelectedClass = cls;
-          renderTeacherDashboard();
-        };
-        chipsContainer.appendChild(chip);
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid var(--border-subtle)';
+        tr.innerHTML = '<td style="padding: 6px 8px; font-weight: 700;">' + (att.characterAvatar || '⚡') + ' ' + att.studentName + '</td><td style="padding: 6px 8px; color: var(--neon-cyan);">' + att.studentClass + '</td><td style="padding: 6px 8px; color: var(--neon-yellow);">' + att.score + '</td><td style="padding: 6px 8px;">' + att.stagesCompleted + '/60</td><td style="padding: 6px 8px; font-size: 11px;">' + att.status + '</td><td style="padding: 6px 8px;"><button class="teacher-btn-sm" onclick="showStudentDetail(\'' + att.id + '\')">Ver</button></td>';
+        tbody.appendChild(tr);
       });
 
-      const filtered = allAttempts.filter(a => {
-        const matchClass = currentSelectedClass === 'TODAS' || a.studentClass === currentSelectedClass;
-        const q = currentSearchTerm.toLowerCase();
-        const matchSearch = !q || 
-          (a.studentName && a.studentName.toLowerCase().includes(q)) ||
-          (a.studentClass && a.studentClass.toLowerCase().includes(q)) ||
-          (a.studentLogin && a.studentLogin.toLowerCase().includes(q)) ||
-          (a.status && a.status.toLowerCase().includes(q));
-        return matchClass && matchSearch;
-      });
-
-      document.getElementById('teacher-records-count-lbl').textContent = `Registros dos Alunos (${filtered.length})`;
-
-      const recordsContainer = document.getElementById('teacher-records-container');
-      recordsContainer.innerHTML = '';
-
-      if (filtered.length === 0) {
-        recordsContainer.innerHTML = `
-          <div style="text-align: center; padding: 24px 14px; background: var(--bg-surface); border-radius: 12px; border: 1px dashed var(--border-subtle);">
-            <div style="font-size: 28px; margin-bottom: 4px;">👾</div>
-            <div style="font-weight: 700; color: var(--text-main); font-size: 13px;">${totalCount === 0 ? 'Nenhum aluno jogou ainda.' : 'Nenhum registro encontrado.'}</div>
-          </div>
-        `;
-        return;
-      }
-
-      filtered.forEach(record => {
-        const isCompleted = record.status && record.status.startsWith('CONCLUÍDO');
-        const isAbandoned = record.status && (record.status.includes('ABANDONADO') || record.status.includes('ZERADO'));
-        const statusColor = isCompleted ? 'var(--neon-green)' : (isAbandoned ? 'var(--neon-magenta)' : 'var(--neon-yellow)');
-
-        const card = document.createElement('div');
-        card.className = 'student-item-card';
-        card.onclick = () => openStudentDetailModal(record);
-        card.innerHTML = `
-          <div class="student-avatar-badge">${record.characterAvatar || '⚡'}</div>
-          <div class="student-info-col">
-            <div class="student-name-row">
-              <span class="student-name-text">${record.studentName}</span>
-              <span class="student-class-tag">${record.studentClass}</span>
-            </div>
-            <div class="student-meta-row">
-              <span style="color: ${statusColor}; font-weight: 700;">${record.status}</span>
-              <span>•</span>
-              <span>${record.timestamp || ''}</span>
-            </div>
-          </div>
-          <div class="student-score-col">
-            <div class="student-score-num">${record.score} pts</div>
-            <div style="font-size: 10px; color: var(--text-muted); text-align: right;">${record.correctAnswers || 0} acertos | ${record.wrongAttempts || 0} erros</div>
-          </div>
-        `;
-        recordsContainer.appendChild(card);
-      });
+      document.getElementById('t-metric-total').textContent = attempts.length;
+      document.getElementById('t-metric-avg').textContent = attempts.length ? Math.round(totalScore / attempts.length) : 0;
+      document.getElementById('t-metric-rate').textContent = attempts.length ? (Math.round((completedCount / attempts.length) * 100) + '%') : '0%';
+      document.getElementById('t-metric-violations').textContent = violationsCount;
     }
 
-    function handleTeacherSearch(value) {
-      currentSearchTerm = value;
-      renderTeacherDashboard();
+    function handleTeacherSearch(query) {
+      const q = query.toLowerCase().trim();
+      const attempts = getLocalAttempts().filter(a =>
+        a.studentName.toLowerCase().includes(q) || a.studentClass.toLowerCase().includes(q)
+      );
+      renderTeacherTable(attempts);
     }
 
-    function openStudentDetailModal(record) {
-      currentModalRecordId = record.id;
-      document.getElementById('modal-avatar').textContent = record.characterAvatar || '⚡';
-      document.getElementById('modal-name').textContent = record.studentName;
-      document.getElementById('modal-class').textContent = `Turma: ${record.studentClass} • Login: ${record.studentLogin || 'N/A'}`;
+    let selectedStudentIdForModal = null;
+    function showStudentDetail(attemptId) {
+      const attempts = getLocalAttempts();
+      const att = attempts.find(a => a.id == attemptId);
+      if (!att) return;
 
-      const isCompleted = record.status && record.status.startsWith('CONCLUÍDO');
-      const isAbandoned = record.status && (record.status.includes('ABANDONADO') || record.status.includes('ZERADO'));
-      const statusColor = isCompleted ? 'var(--neon-green)' : (isAbandoned ? 'var(--neon-magenta)' : 'var(--neon-yellow)');
+      selectedStudentIdForModal = attemptId;
+      document.getElementById('modal-avatar').textContent = att.characterAvatar || '⚡';
+      document.getElementById('modal-name').textContent = att.studentName;
+      document.getElementById('modal-class').textContent = 'Turma: ' + att.studentClass + ' | Login: ' + (att.studentLogin || '-');
 
-      document.getElementById('modal-body').innerHTML = `
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
-          <div><span style="color: var(--text-muted); font-size: 10.5px;">STATUS</span><br><strong style="color: ${statusColor};">${record.status}</strong></div>
-          <div><span style="color: var(--text-muted); font-size: 10.5px;">PONTUAÇÃO</span><br><strong style="color: var(--neon-yellow);">${record.score} pts</strong></div>
-          <div><span style="color: var(--text-muted); font-size: 10.5px;">ACERTOS / ERROS</span><br><strong>${record.correctAnswers || 0} / ${record.wrongAttempts || 0}</strong></div>
-          <div><span style="color: var(--text-muted); font-size: 10.5px;">VIDAS RESTANTES</span><br><strong>${record.livesRemaining || 0} / 3 ❤️</strong></div>
-        </div>
-        <div><span style="color: var(--text-muted); font-size: 10.5px;">REGISTRADO EM</span><br><span>${record.timestamp || 'Hoje'}</span></div>
-      `;
+      document.getElementById('modal-body').innerHTML = '<div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 10px;"><div><strong>Pontuação Total:</strong> <span style="color: var(--neon-yellow);">' + att.score + ' PTS</span></div><div><strong>Fases Concluídas:</strong> ' + att.stagesCompleted + ' / 60 (' + (att.progressPercentage || 0) + '%)</div><div><strong>Modo Inicial:</strong> ' + (att.languageMode || 'Portugol') + '</div><div><strong>Vidas Restantes:</strong> ' + att.livesRemaining + ' / 3</div><div><strong>Status da Sessão:</strong> ' + att.status + '</div><div><strong>Data/Hora:</strong> ' + new Date(att.createdAt).toLocaleString('pt-BR') + '</div></div>';
+
       document.getElementById('student-detail-modal').classList.add('active');
     }
 
     function closeStudentDetailModal() {
       document.getElementById('student-detail-modal').classList.remove('active');
-      currentModalRecordId = null;
     }
 
-    async function deleteCurrentModalRecord() {
-      if (!currentModalRecordId) return;
-      const history = getLocalAttempts().filter(r => String(r.id) !== String(currentModalRecordId));
-      localStorage.setItem('cyber_runner_history', JSON.stringify(history));
-      if (SupabaseCloud.isConfigured()) {
-        await SupabaseCloud.deleteAttempt(currentModalRecordId);
-      }
-      await XamppSqlite.deleteAttempt(currentModalRecordId);
-      cachedXamppAttempts = cachedXamppAttempts.filter(a => String(a.id) !== String(currentModalRecordId));
+    function deleteCurrentModalRecord() {
+      if (!confirm('Deseja realmente excluir este registro do aluno?')) return;
+      const attempts = getLocalAttempts().filter(a => a.id != selectedStudentIdForModal);
+      localStorage.setItem('cyber_runner_attempts', JSON.stringify(attempts));
       closeStudentDetailModal();
-      renderTeacherDashboard();
+      refreshTeacherData();
     }
 
-    /* =========================================================================
-       SUPABASE CONFIG MODAL
-       ========================================================================= */
     function openSupabaseConfigModal() {
-      loadSupabaseSettingsToInputs();
       document.getElementById('supabase-config-modal').classList.add('active');
     }
 
     function closeSupabaseConfigModal() {
       document.getElementById('supabase-config-modal').classList.remove('active');
-      updateSupabaseStatusIndicator();
-    }
-
-    function loadSupabaseSettingsToInputs() {
-      document.getElementById('supabase-url-input').value = localStorage.getItem('cyber_runner_supabase_url') || '';
-      document.getElementById('supabase-key-input').value = localStorage.getItem('cyber_runner_supabase_key') || '';
     }
 
     function saveSupabaseSettings() {
@@ -2734,231 +2139,125 @@
       const key = document.getElementById('supabase-key-input').value.trim();
       localStorage.setItem('cyber_runner_supabase_url', url);
       localStorage.setItem('cyber_runner_supabase_key', key);
-
-      const feedback = document.getElementById('supabase-test-feedback');
-      feedback.style.display = 'block';
-      feedback.style.background = 'rgba(34, 197, 94, 0.15)';
-      feedback.style.color = 'var(--neon-green)';
-      feedback.textContent = 'Configurações salvas!';
-
-      updateSupabaseStatusIndicator();
+      alert('Configurações salvas!');
+      closeSupabaseConfigModal();
     }
 
     async function testSupabaseConnection() {
-      saveSupabaseSettings();
-      const feedback = document.getElementById('supabase-test-feedback');
-      feedback.style.display = 'block';
-      feedback.style.background = 'rgba(34, 211, 238, 0.1)';
-      feedback.style.color = 'var(--neon-cyan)';
-      feedback.textContent = 'Testando conexão...';
-
-      const result = await SupabaseCloud.test();
-      feedback.style.background = result.success ? 'rgba(34, 197, 94, 0.15)' : 'rgba(244, 63, 94, 0.15)';
-      feedback.style.color = result.success ? 'var(--neon-green)' : 'var(--neon-magenta)';
-      feedback.textContent = result.msg;
-    }
-
-    function updateSupabaseStatusIndicator() {
-      const isOnline = SupabaseCloud.isConfigured();
-      const badge = document.getElementById('supabase-indicator-badge');
-      const dot = document.getElementById('supabase-dot');
-      const txt = document.getElementById('supabase-status-text');
-      if (!badge) return;
-
-      if (isOnline) {
-        dot.textContent = '🟢';
-        txt.textContent = 'Supabase Conectado';
-        badge.style.color = 'var(--neon-green)';
-      } else {
-        dot.textContent = '⚪';
-        txt.textContent = 'Modo Local';
-        badge.style.color = 'var(--neon-cyan)';
+      const url = document.getElementById('supabase-url-input').value.trim();
+      const key = document.getElementById('supabase-key-input').value.trim();
+      const fb = document.getElementById('supabase-test-feedback');
+      fb.style.display = 'block';
+      fb.textContent = 'Testando conexão...';
+      try {
+        const endpoint = url.replace(/\/+$/, '') + '/rest/v1/student_attempts?select=id&limit=1';
+        const res = await fetch(endpoint, {
+          headers: { 'apikey': key, 'Authorization': 'Bearer ' + key }
+        });
+        if (res.ok) {
+          fb.style.color = 'var(--neon-green)';
+          fb.textContent = '✅ Conexão bem-sucedida com o Supabase Cloud!';
+        } else {
+          fb.style.color = 'var(--neon-magenta)';
+          fb.textContent = '⚠️ Supabase retornou status ' + res.status;
+        }
+      } catch(e) {
+        fb.style.color = 'var(--neon-magenta)';
+        fb.textContent = '❌ Falha ao conectar: ' + e.message;
       }
-    }
-
-    /* =========================================================================
-       EXPORTS (.JSON / .CSV)
-       ========================================================================= */
-    function downloadCurrentSessionProof() {
-      const stagesList = window.STAGES || [];
-      const progressPct = Math.round((state.currentStageIndex / stagesList.length) * 100);
-      const proofData = {
-        comprovante: "Cyber Runner - Lógica de Programação",
-        aluno: state.studentName,
-        turma: state.studentClass,
-        login: state.studentLogin || 'N/A',
-        linguagem: state.languageMode.toUpperCase(),
-        personagem: state.selectedCharacter.name,
-        pontuacao_final: state.score,
-        progresso_percentual: `${progressPct}%`,
-        fases_completadas: `${state.currentStageIndex} de ${stagesList.length}`,
-        acertos: state.correctCount,
-        erros: state.wrongCount,
-        vidas_finais: state.lives,
-        status: state.isLockedByScreenSwitch ? 'ABANDONADO / ZERADO' : (state.score > 0 ? 'CONCLUÍDO COM SUCESSO' : 'REPROVADO'),
-        timestamp: new Date().toLocaleString('pt-BR')
-      };
-
-      const jsonStr = JSON.stringify(proofData, null, 2);
-      const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute('download', `comprovante_${state.studentName.toLowerCase().replace(/\s+/g, '_')}_${state.studentClass}.json`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-
-    function generateCsvReportString() {
-      const records = getLocalAttempts();
-      const headers = ['ID', 'Aluno', 'Turma', 'Login', 'Personagem', 'Pontos', 'Progresso_%', 'Acertos', 'Erros', 'Vidas', 'Status', 'Data_Hora'];
-      const rows = records.map(r => [
-        `"${r.id || ''}"`,
-        `"${(r.studentName || '').replace(/"/g, '""')}"`,
-        `"${(r.studentClass || '').replace(/"/g, '""')}"`,
-        `"${(r.studentLogin || '').replace(/"/g, '""')}"`,
-        `"${r.characterName || ''}"`,
-        r.score || 0,
-        `"${r.progressPercentage || 0}%"`,
-        r.correctAnswers || 0,
-        r.wrongAttempts || 0,
-        r.livesRemaining || 0,
-        `"${r.status || ''}"`,
-        `"${r.timestamp || ''}"`
-      ]);
-      return [headers.join(';'), ...rows.map(e => e.join(';'))].join('\n');
     }
 
     function downloadTeacherReportCsv() {
-      const csv = generateCsvReportString();
-      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
+      const attempts = getLocalAttempts();
+      if (!attempts.length) {
+        alert('Nenhum dado encontrado para exportar.');
+        return;
+      }
+      let csv = 'Nome,Turma,Login,Pontos,FasesConcluidas,Vidas,Status,Data\n';
+      attempts.forEach(a => {
+        csv += '"' + a.studentName + '","' + a.studentClass + '","' + (a.studentLogin || '') + '",' + a.score + ',' + a.stagesCompleted + ',' + a.livesRemaining + ',"' + a.status + '","' + a.createdAt + '"\n';
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute('download', `relatorio_turmas_cyber_runner_${new Date().toISOString().slice(0, 10)}.csv`);
-      document.body.appendChild(link);
+      link.href = URL.createObjectURL(blob);
+      link.download = 'cyber_runner_relatorio_' + Date.now() + '.csv';
       link.click();
-      document.body.removeChild(link);
     }
 
     function downloadTeacherBackupJson() {
-      const data = {
-        attempts: getLocalAttempts(),
-        users: JSON.parse(localStorage.getItem('cyber_runner_users') || '[]'),
-        exportedAt: new Date().toISOString()
-      };
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
+      const attempts = getLocalAttempts();
+      const blob = new Blob([JSON.stringify(attempts, null, 2)], { type: 'application/json' });
       const link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute('download', `backup_cyber_runner_${new Date().toISOString().slice(0, 10)}.json`);
-      document.body.appendChild(link);
+      link.href = URL.createObjectURL(blob);
+      link.download = 'cyber_runner_backup_' + Date.now() + '.json';
       link.click();
-      document.body.removeChild(link);
     }
 
-    /* =========================================================================
-       UI HELPERS & HUD
-       ========================================================================= */
-    function updateHud() {
-      document.getElementById('hud-score-val').textContent = state.score;
-      for (let i = 1; i <= 3; i++) {
-        const el = document.getElementById(`heart-${i}`);
-        if (el) {
-          if (i <= state.lives) {
-            el.classList.remove('heart-lost');
-          } else {
-            el.classList.add('heart-lost');
-          }
-        }
-      }
-    }
-
-    function showScreen(screenId) {
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      const target = document.getElementById(screenId);
-      if (target) target.classList.add('active');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function restartGame() {
-      state.hasStartedClass = false;
-      state.isFinished = false;
-      state.isLockedByScreenSwitch = false;
-      showScreen('screen-login');
+    function downloadCurrentSessionProof() {
+      const proof = {
+        aluno: state.studentName,
+        turma: state.studentClass,
+        pontuacao: state.score,
+        fasesConcluidas: state.correctCount,
+        vidasRestantes: state.lives,
+        status: state.isFinished ? 'CONCLUÍDO' : 'EM ANDAMENTO',
+        data: new Date().toLocaleString('pt-BR')
+      };
+      const blob = new Blob([JSON.stringify(proof, null, 2)], { type: 'application/json' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'comprovante_' + state.studentName.replace(/\s+/g, '_') + '_' + Date.now() + '.json';
+      link.click();
     }
 
     /* =========================================================================
        CANVAS PARTICLES BACKGROUND
        ========================================================================= */
-    function initCanvasBackground() {
-      const canvas = document.getElementById('bg-canvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height, particles = [];
 
-      let w = (canvas.width = window.innerWidth);
-      let h = (canvas.height = window.innerHeight);
-
-      window.addEventListener('resize', () => {
-        w = canvas.width = window.innerWidth;
-        h = canvas.height = window.innerHeight;
-      });
-
-      const particles = [];
-      const particleCount = Math.min(35, Math.floor(w / 25));
-
-      for (let i = 0; i < particleCount; i++) {
-        particles.push({
-          x: Math.random() * w,
-          y: Math.random() * h,
-          vx: (Math.random() - 0.5) * 0.5,
-          vy: Math.random() * 0.6 + 0.2,
-          size: Math.random() * 2 + 1,
-          color: Math.random() > 0.5 ? '#00f5ff' : '#ff007f',
-          alpha: Math.random() * 0.5 + 0.2
-        });
-      }
-
-      function draw() {
-        ctx.clearRect(0, 0, w, h);
-        ctx.strokeStyle = 'rgba(0, 245, 255, 0.03)';
-        ctx.lineWidth = 1;
-        const gridSize = 45;
-        for (let x = 0; x < w; x += gridSize) {
-          ctx.beginPath();
-          ctx.moveTo(x, 0);
-          ctx.lineTo(x, h);
-          ctx.stroke();
-        }
-        for (let y = 0; y < h; y += gridSize) {
-          ctx.beginPath();
-          ctx.moveTo(0, y);
-          ctx.lineTo(w, y);
-          ctx.stroke();
-        }
-
-        particles.forEach(p => {
-          ctx.save();
-          ctx.globalAlpha = p.alpha;
-          ctx.fillStyle = p.color;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-
-          p.x += p.vx;
-          p.y += p.vy;
-
-          if (p.y > h) { p.y = 0; p.x = Math.random() * w; }
-          if (p.x < 0) p.x = w;
-          if (p.x > w) p.x = 0;
-        });
-
-        requestAnimationFrame(draw);
-      }
-      draw();
+    function resizeCanvas() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
     }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    for (let i = 0; i < 30; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        size: Math.random() * 2 + 1,
+        color: Math.random() > 0.5 ? '#22d3ee' : '#c084fc'
+      });
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, width, height);
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
+
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    // Iniciar na tela de login por padrão
+    document.addEventListener('DOMContentLoaded', () => {
+      showScreen('screen-login');
+    });
   </script>
 </body>
 </html>
