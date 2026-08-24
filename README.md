@@ -14,9 +14,9 @@ Plataforma educacional gamificada para treinamento prático de **Lógica de Prog
    - Formulário de cadastro em linha de 4 colunas (**Nome**, **Turma**, **Login**, **Senha**).
    - Grade 2x2 para alternativas de resposta.
 
-3. **Avanço no Ritmo do Aluno & Sistema de Vidas**:
+3. **Avanço no Ritmo do Aluno & Sistema de Energias**:
    - Ao acertar uma questão, o aluno visualiza o feedback positivo e a explicação pedagógica completa, avançando para a próxima fase no seu próprio ritmo ao clicar no botão **PRÓXIMA FASE ➔**.
-   - **Sistema de Foco e Vidas**: Trocas de janela ou aba durante a partida resultam na dedução de **1 vida** (de 3 vidas disponíveis), com alerta sonoro e visual.
+   - **Sistema de Foco e Vidas**: Trocas de janela ou aba durante a partida resultam na dedução de **1 energia** (de 3 energias disponíveis), com alerta sonoro e visual.
 
 4. **Painel do Professor & Monitor em Tempo Real**:
    - Visualização de desempenho por turma (1TECA, 1ADMA, 1INFOA, etc.), taxa de conclusão, média de notas e violações.

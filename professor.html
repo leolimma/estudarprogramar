@@ -1108,7 +1108,7 @@ ALTER TABLE student_users DISABLE ROW LEVEL SECURITY;</pre>
           <div><span style="color: var(--text-muted); font-size: 11px;">STATUS ATUAL:</span><br><strong style="font-size: 13px;">${student.status}</strong></div>
           <div><span style="color: var(--text-muted); font-size: 11px;">ACERTOS:</span><br><strong style="color: var(--neon-green);">${student.correctAnswers || 0}</strong></div>
           <div><span style="color: var(--text-muted); font-size: 11px;">ERROS / TENTATIVAS:</span><br><strong style="color: var(--neon-magenta);">${student.wrongAttempts || 0}</strong></div>
-          <div><span style="color: var(--text-muted); font-size: 11px;">VIDAS RESTANTES:</span><br><strong>${student.livesRemaining || 0} / 3</strong></div>
+          <div><span style="color: var(--text-muted); font-size: 11px;">ENERGIAS RESTANTES:</span><br><strong>${student.livesRemaining || 0} / 3</strong></div>
           <div><span style="color: var(--text-muted); font-size: 11px;">DATA / HORA:</span><br><span style="font-size: 12px;">${student.timestamp || 'Hoje'}</span></div>
         </div>
         ${resultsHtml}
@@ -1156,7 +1156,7 @@ ALTER TABLE student_users DISABLE ROW LEVEL SECURITY;</pre>
         return;
       }
 
-      const headers = ['Turma', 'Nome do Aluno', 'Login', 'Pontuacao', 'Progresso (%)', 'Fases Concluidas', 'Acertos', 'Erros', 'Vidas', 'Status', 'Data_Hora'];
+      const headers = ['Turma', 'Nome do Aluno', 'Login', 'Pontuacao', 'Progresso (%)', 'Fases Concluidas', 'Acertos', 'Erros', 'Energias', 'Status', 'Data_Hora'];
       const rows = all.map(a => [
         `"${a.studentClass || ''}"`,
         `"${a.studentName || ''}"`,

@@ -164,8 +164,8 @@
       margin-top: 2px;
     }
 
-    /* Lives Box (Vidas) */
-    .sidebar-lives-box {
+    /* Energy Box (Energias) */
+    .sidebar-energy-box {
       background: rgba(244, 63, 94, 0.06);
       border: 1px solid rgba(244, 63, 94, 0.25);
       border-radius: 12px;
@@ -173,7 +173,7 @@
       text-align: center;
     }
 
-    .sidebar-lives-title {
+    .sidebar-energy-title {
       font-size: 10px;
       font-weight: 700;
       color: var(--text-muted);
@@ -914,12 +914,12 @@
       </div>
 
       <!-- Vidas Disponíveis -->
-      <div class="sidebar-lives-box" title="3 Vidas Disponíveis">
-        <div class="sidebar-lives-title">VIDAS</div>
-        <div class="hud-lives" id="hud-lives-container">
-          <span class="heart-icon" id="heart-1">❤️</span>
-          <span class="heart-icon" id="heart-2">❤️</span>
-          <span class="heart-icon" id="heart-3">❤️</span>
+      <div class="sidebar-energy-box" title="3 Energias Disponíveis">
+        <div class="sidebar-energy-title">ENERGIA</div>
+        <div class="hud-lives" id="hud-lives-container" title="3 Células de Energia">
+          <span class="heart-icon" id="heart-1">⚡</span>
+          <span class="heart-icon" id="heart-2">⚡</span>
+          <span class="heart-icon" id="heart-3">⚡</span>
         </div>
       </div>
 
@@ -1063,7 +1063,7 @@
             </div>
 
             <button type="submit" class="cyber-btn" id="btn-start-mission">
-              <span>🚀</span> INICIAR MISSÃO (FASE 1)
+              <span>🚀</span> INICIAR MISSÃO (DESAFIO 1)
             </button>
           </form>
 
@@ -1108,7 +1108,7 @@
           <!-- Header da Missão -->
           <div class="mission-header">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <span class="stage-badge" id="stage-badge-text">FASE 1 / 60</span>
+              <span class="stage-badge" id="stage-badge-text">DESAFIO 1 / 60</span>
               <span style="font-size: 11px; color: var(--text-muted);" id="stage-concept-pill">Condicionais</span>
             </div>
             <h2 class="stage-title" id="stage-title-text">Portão Neural: Autenticação de Acesso</h2>
@@ -1153,28 +1153,28 @@
             </div>
           </div>
 
-          <!-- Botão Próxima Fase (Avanço no Ritmo do Aluno) -->
+          <!-- Botão de Avanço (No Ritmo do Aluno) -->
           <button type="button" class="cyber-btn" id="btn-next-action" style="display: none;" onclick="onNextStageClicked()">
-            PRÓXIMA FASE ➔
+            AVANÇAR ➔
           </button>
         </div>
       </section>
 
-      <!-- SCREEN 3: GAME OVER (VIDAS ESGOTADAS) -->
+      <!-- SCREEN 3: GAME OVER (VIDAS ESGOTADAS - AMIGÁVEL) -->
       <section class="screen" id="screen-gameover">
-        <div class="cyber-card" style="text-align: center; border-color: rgba(244, 63, 94, 0.4);">
-          <div style="font-size: 40px; margin-bottom: 6px;">💀</div>
-          <h2 class="hero-title" style="color: var(--neon-magenta); margin-bottom: 4px;">SISTEMA CORROMPIDO</h2>
-          <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 14px;">Você perdeu todas as vidas disponíveis nesta sessão.</p>
+        <div class="cyber-card" style="text-align: center; border-color: rgba(251, 191, 36, 0.4);">
+          <div style="font-size: 44px; margin-bottom: 6px;">🔋⚡</div>
+          <h2 class="hero-title" style="color: var(--neon-yellow); margin-bottom: 4px;">ENERGIA ESGOTADA</h2>
+          <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 14px;">As energias do seu agente neural se esgotaram nesta tentativa. Hora de recarregar e tentar de novo!</p>
 
-          <div style="background: rgba(244, 63, 94, 0.08); border: 1px solid rgba(244, 63, 94, 0.2); border-radius: 12px; padding: 12px; margin-bottom: 14px;">
+          <div style="background: rgba(251, 191, 36, 0.08); border: 1px solid rgba(251, 191, 36, 0.25); border-radius: 12px; padding: 12px; margin-bottom: 14px;">
             <div style="font-size: 12px; color: var(--text-muted);">Pontuação Final Alcançada:</div>
-            <div style="font-family: var(--font-display); font-size: 24px; font-weight: 900; color: var(--neon-magenta);" id="gameover-score-val">0 PTS</div>
-            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;" id="gameover-stages-val">Fases Concluídas: 0 / 60</div>
+            <div style="font-family: var(--font-display); font-size: 24px; font-weight: 900; color: var(--neon-yellow);" id="gameover-score-val">0 PTS</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;" id="gameover-stages-val">Desafios Concluídos: 0 / 60</div>
           </div>
 
           <button class="cyber-btn" onclick="restartGame()">
-            🔄 TENTAR NOVAMENTE
+            🔄 REINICIAR E TENTAR NOVAMENTE
           </button>
         </div>
       </section>
@@ -1184,7 +1184,7 @@
         <div class="cyber-card" style="text-align: center; border-color: rgba(16, 185, 129, 0.4);">
           <div style="font-size: 44px; margin-bottom: 6px;">🏆</div>
           <h2 class="hero-title" style="color: var(--neon-green); margin-bottom: 4px;">ALGORITMO RESTAURADO!</h2>
-          <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 14px;">Você completou com maestria todas as fases do Cyber Runner.</p>
+          <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 14px;">Você completou com maestria todos os 60 desafios do Cyber Runner.</p>
 
           <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
             <div style="font-size: 12px; color: var(--text-muted);">Pontuação Total Obtida:</div>
@@ -1259,7 +1259,7 @@
                   <th style="padding: 6px 8px;">Aluno</th>
                   <th style="padding: 6px 8px;">Turma</th>
                   <th style="padding: 6px 8px;">Pts</th>
-                  <th style="padding: 6px 8px;">Fases</th>
+                  <th style="padding: 6px 8px;">Desafios</th>
                   <th style="padding: 6px 8px;">Status</th>
                   <th style="padding: 6px 8px;">Ação</th>
                 </tr>
@@ -1752,7 +1752,7 @@
       const codeTpl = (isPy && stage.pythonCodeTemplate) ? stage.pythonCodeTemplate : stage.codeTemplate;
       const options = (isPy && stage.pythonOptions) ? stage.pythonOptions : stage.options;
 
-      document.getElementById('stage-badge-text').textContent = 'FASE ' + (index + 1) + ' / ' + stagesList.length;
+      document.getElementById('stage-badge-text').textContent = 'DESAFIO ' + (index + 1) + ' / ' + stagesList.length;
       document.getElementById('stage-concept-pill').textContent = stage.concept;
       document.getElementById('stage-title-text').textContent = stage.title;
       document.getElementById('scenario-text').textContent = stage.scenario;
@@ -1823,12 +1823,12 @@
         });
 
         notifyStageProgress(true);
-        saveLocalAttempt('EM ANDAMENTO (Fase ' + (state.currentStageIndex + 1) + ')');
+        saveLocalAttempt('EM ANDAMENTO (Desafio ' + (state.currentStageIndex + 1) + ')');
 
         // Exibir botão de avanço manual para o aluno ler com calma e avançar no seu ritmo
         nextBtn.style.display = 'flex';
         const isFinal = (state.currentStageIndex === stagesList.length - 1);
-        nextBtn.textContent = isFinal ? 'VER RESULTADO FINAL ➔' : 'PRÓXIMA FASE ➔';
+        nextBtn.textContent = isFinal ? 'CONCLUIR MISSÃO FINAL ➔' : 'AVANÇAR ➔';
 
       } else {
         selectedBtn.classList.add('wrong');
@@ -1839,7 +1839,7 @@
 
         feedback.className = 'feedback-banner error';
         feedback.style.display = 'block';
-        document.getElementById('feedback-title').innerHTML = '<span>⚠️</span> SINTAXE INCORRETA! (-1 VIDA)';
+        document.getElementById('feedback-title').innerHTML = '<span>⚠️</span> SINTAXE INCORRETA! (-1 ENERGIA)';
         document.getElementById('feedback-explanation').innerHTML = '<strong>' + selected.feedback + '</strong><br><span style="opacity: 0.9; font-size: 12px;">Analise o código com atenção e tente outra alternativa.</span>';
 
         if (state.lives <= 0) {
@@ -1849,7 +1849,7 @@
           }, 1200);
         } else {
           notifyStageProgress(false);
-          saveLocalAttempt('EM ANDAMENTO (Fase ' + (state.currentStageIndex + 1) + ' - Erro cometido)');
+          saveLocalAttempt('EM ANDAMENTO (Desafio ' + (state.currentStageIndex + 1) + ' - Erro cometido)');
         }
       }
     }
@@ -1860,7 +1860,7 @@
     }
 
     /* =========================================================================
-       ANTI-CHEAT & LOSS OF FOCUS (GESTÃO DE VIDAS)
+       ANTI-CHEAT & LOSS OF FOCUS (GESTÃO DE ENERGIAS)
        ========================================================================= */
     function setupExitAndAbandonmentDetection() {
       let isHandlerActive = true;
@@ -1876,11 +1876,11 @@
         if (feedback) {
           feedback.className = 'feedback-banner error';
           feedback.style.display = 'block';
-          document.getElementById('feedback-title').innerHTML = '<span>⚠️</span> VIOLAÇÃO DE TELA/ABA! (-1 VIDA)';
-          document.getElementById('feedback-explanation').innerHTML = '<strong>Mantenha o foco na missão!</strong><br>Trocar de janela ou aba durante a partida consome 1 vida. Vidas restantes: <strong>' + state.lives + '</strong>.';
+          document.getElementById('feedback-title').innerHTML = '<span>⚠️</span> VIOLAÇÃO DE FOCO! (-1 ENERGIA)';
+          document.getElementById('feedback-explanation').innerHTML = '<strong>Mantenha o foco na missão!</strong><br>Trocar de janela ou aba durante a partida consome 1 energia. Energias restantes: <strong>' + state.lives + '</strong>.';
         }
 
-        saveLocalAttempt('VIOLAÇÃO DE FOCO (Vidas: ' + state.lives + ')');
+        saveLocalAttempt('VIOLAÇÃO DE FOCO (Energias: ' + state.lives + ')');
 
         if (state.lives <= 0) {
           state.isLockedByScreenSwitch = true;
@@ -1901,7 +1901,7 @@
     function handleVictory() {
       state.isFinished = true;
       sound.playVictory();
-      saveLocalAttempt('CONCLUÍDO (60 FASES)');
+      saveLocalAttempt('CONCLUÍDO (60 DESAFIOS)');
 
       document.getElementById('victory-score-val').textContent = state.score + ' PTS';
       showScreen('screen-victory');
@@ -1913,7 +1913,7 @@
       saveLocalAttempt('GAME OVER');
 
       document.getElementById('gameover-score-val').textContent = state.score + ' PTS';
-      document.getElementById('gameover-stages-val').textContent = 'Fases Concluídas: ' + state.correctCount + ' / 60';
+      document.getElementById('gameover-stages-val').textContent = 'Desafios Superados: ' + state.correctCount + ' / 60';
       showScreen('screen-gameover');
     }
 
@@ -2075,7 +2075,7 @@
 
       attempts.forEach(att => {
         totalScore += (att.score || 0);
-        if (att.stagesCompleted >= 60 || att.status === 'CONCLUÍDO (60 FASES)') completedCount++;
+        if (att.stagesCompleted >= 60 || att.status === 'CONCLUÍDO (60 DESAFIOS)' || att.status === 'CONCLUÍDO (60 FASES)') completedCount++;
         if (att.livesRemaining < 3) violationsCount += (3 - att.livesRemaining);
 
         const tr = document.createElement('tr');
@@ -2109,7 +2109,7 @@
       document.getElementById('modal-name').textContent = att.studentName;
       document.getElementById('modal-class').textContent = 'Turma: ' + att.studentClass + ' | Login: ' + (att.studentLogin || '-');
 
-      document.getElementById('modal-body').innerHTML = '<div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 10px;"><div><strong>Pontuação Total:</strong> <span style="color: var(--neon-yellow);">' + att.score + ' PTS</span></div><div><strong>Fases Concluídas:</strong> ' + att.stagesCompleted + ' / 60 (' + (att.progressPercentage || 0) + '%)</div><div><strong>Modo Inicial:</strong> ' + (att.languageMode || 'Portugol') + '</div><div><strong>Vidas Restantes:</strong> ' + att.livesRemaining + ' / 3</div><div><strong>Status da Sessão:</strong> ' + att.status + '</div><div><strong>Data/Hora:</strong> ' + new Date(att.createdAt).toLocaleString('pt-BR') + '</div></div>';
+      document.getElementById('modal-body').innerHTML = '<div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 10px;"><div><strong>Pontuação Total:</strong> <span style="color: var(--neon-yellow);">' + att.score + ' PTS</span></div><div><strong>Desafios Concluídos:</strong> ' + att.stagesCompleted + ' / 60 (' + (att.progressPercentage || 0) + '%)</div><div><strong>Modo Inicial:</strong> ' + (att.languageMode || 'Portugol') + '</div><div><strong>Energias Restantes:</strong> ' + att.livesRemaining + ' / 3</div><div><strong>Status da Sessão:</strong> ' + att.status + '</div><div><strong>Data/Hora:</strong> ' + new Date(att.createdAt).toLocaleString('pt-BR') + '</div></div>';
 
       document.getElementById('student-detail-modal').classList.add('active');
     }
@@ -2173,7 +2173,7 @@
         alert('Nenhum dado encontrado para exportar.');
         return;
       }
-      let csv = 'Nome,Turma,Login,Pontos,FasesConcluidas,Vidas,Status,Data\n';
+      let csv = 'Nome,Turma,Login,Pontos,DesafiosConcluidos,Energias,Status,Data\n';
       attempts.forEach(a => {
         csv += '"' + a.studentName + '","' + a.studentClass + '","' + (a.studentLogin || '') + '",' + a.score + ',' + a.stagesCompleted + ',' + a.livesRemaining + ',"' + a.status + '","' + a.createdAt + '"\n';
       });
@@ -2198,8 +2198,8 @@
         aluno: state.studentName,
         turma: state.studentClass,
         pontuacao: state.score,
-        fasesConcluidas: state.correctCount,
-        vidasRestantes: state.lives,
+        desafiosConcluidos: state.correctCount,
+        energiasRestantes: state.lives,
         status: state.isFinished ? 'CONCLUÍDO' : 'EM ANDAMENTO',
         data: new Date().toLocaleString('pt-BR')
       };
