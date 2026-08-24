@@ -10,9 +10,9 @@ Plataforma educacional gamificada para treinamento prático de **Lógica de Prog
    - Os alunos podem optar por responder os desafios em **Portugol** ou **Python** diretamente no cadastro ou alternar a qualquer momento durante a missão.
    - **60 fases progressivas**: Do básico (condicionais, laços, vetores) aos algoritmos avançados (busca binária, ordenação, recursão, tabelas hash, programação dinâmica e criptografia modular).
 
-2. **Interface Sem Scroll (0 Scroll)**:
+2. **Interface Sem Scroll (0 Scroll) & Alternativas Randomizadas**:
    - Formulário de cadastro em linha de 4 colunas (**Nome**, **Turma**, **Login**, **Senha**).
-   - Grade 2x2 para alternativas de resposta.
+   - Grade 2x2 para alternativas de resposta com **embaralhamento dinâmico (Fisher-Yates)** a cada tentativa/fase, evitando memorização posicional e cópia entre computadores vizinhos.
 
 3. **Avanço no Ritmo do Aluno & Sistema de Energias**:
    - Ao acertar uma questão, o aluno visualiza o feedback positivo e a explicação pedagógica completa, avançando para a próxima fase no seu próprio ritmo ao clicar no botão **PRÓXIMA FASE ➔**.
