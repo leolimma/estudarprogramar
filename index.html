@@ -1509,7 +1509,8 @@
       isFinished: false,
       isLockedByScreenSwitch: false,
       sessionId: null,
-      stageResults: []
+      stageResults: [],
+      currentShuffledOptions: []
     };
 
     /* =========================================================================
@@ -1750,7 +1751,17 @@
       const filename = (isPy && stage.pythonFilename) ? stage.pythonFilename : stage.filename;
       const langTag = isPy ? 'PYTHON' : 'PORTUGOL';
       const codeTpl = (isPy && stage.pythonCodeTemplate) ? stage.pythonCodeTemplate : stage.codeTemplate;
-      const options = (isPy && stage.pythonOptions) ? stage.pythonOptions : stage.options;
+      const rawOptions = (isPy && stage.pythonOptions) ? stage.pythonOptions : stage.options;
+
+      // Embaralhar as alternativas aleatoriamente (Fisher-Yates) para que a resposta correta mude de posição
+      const options = rawOptions.map(opt => ({ ...opt }));
+      for (let i = options.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = options[i];
+        options[i] = options[j];
+        options[j] = temp;
+      }
+      state.currentShuffledOptions = options;
 
       document.getElementById('stage-badge-text').textContent = 'DESAFIO ' + (index + 1) + ' / ' + stagesList.length;
       document.getElementById('stage-concept-pill').textContent = stage.concept;
@@ -1793,7 +1804,7 @@
       const stagesList = window.STAGES || [];
       const stage = stagesList[state.currentStageIndex];
       const isPy = (state.languageMode === 'python');
-      const options = (isPy && stage.pythonOptions) ? stage.pythonOptions : stage.options;
+      const options = state.currentShuffledOptions || ((isPy && stage.pythonOptions) ? stage.pythonOptions : stage.options);
       const explanation = (isPy && stage.pythonExplanation) ? stage.pythonExplanation : stage.explanation;
       const selected = options[optionIndex];
       const selectedBtn = document.getElementById('option-' + optionIndex);
