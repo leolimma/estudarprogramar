@@ -167,6 +167,30 @@
       box-shadow: 0 0 8px rgba(34, 211, 238, 0.4);
     }
 
+    
+    .hud-teacher-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 10px;
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--neon-purple);
+      background: rgba(192, 132, 252, 0.1);
+      border: 1px solid rgba(192, 132, 252, 0.35);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .hud-teacher-btn:hover {
+      background: rgba(192, 132, 252, 0.25);
+      border-color: var(--neon-purple);
+      box-shadow: 0 0 10px rgba(192, 132, 252, 0.45);
+      transform: translateY(-1px);
+    }
+
     .sound-toggle-btn {
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border-subtle);
@@ -537,7 +561,8 @@
       border-radius: 12px;
       overflow: hidden;
       margin-bottom: 8px;
-      max-height: 155px;
+      min-height: 130px;
+      max-height: 230px;
       display: flex;
       flex-direction: column;
     }
@@ -574,10 +599,10 @@
     }
 
     .code-content {
-      padding: 8px 12px;
+      padding: 10px 14px;
       font-family: var(--font-code);
-      font-size: 12.5px;
-      line-height: 1.45;
+      font-size: 13.5px;
+      line-height: 1.5;
       color: #f8fafc;
       white-space: pre-wrap;
       overflow-y: auto;
@@ -955,15 +980,16 @@
 
   <main id="app-root">
     <!-- Top HUD Bar -->
+        <!-- Top HUD Bar: Pontos & Vidas à Esquerda | Seletor, Som & Professor à Direita -->
     <header class="hud-bar">
       <div class="hud-left">
-        <div class="hud-score-box">
+        <div class="hud-score-box" title="Pontos Acumulados">
           <span>⚡</span>
           <span id="hud-score-val">0</span>
           <span style="font-size: 10px; color: var(--text-muted);">PTS</span>
         </div>
 
-        <div class="hud-lives" id="hud-lives-container">
+        <div class="hud-lives" id="hud-lives-container" title="3 Vidas Disponíveis">
           <span class="heart-icon" id="heart-1">❤️</span>
           <span class="heart-icon" id="heart-2">❤️</span>
           <span class="heart-icon" id="heart-3">❤️</span>
@@ -979,91 +1005,15 @@
         <button type="button" class="sound-toggle-btn" id="btn-sound-toggle" title="Ligar/Desligar Efeitos Sonoros">
           <span id="sound-icon">🔊</span>
         </button>
+
+        <!-- Botão Painel do Professor -->
+        <button type="button" class="hud-teacher-btn" id="btn-teacher-hud" onclick="openTeacherDashboard()" title="Acesso Restrito ao Painel do Professor">
+          <span>🎓</span> Professor
+        </button>
       </div>
     </header>
 
-    <!-- Top Web Tabs (Aluno vs Professor) -->
-    <div class="web-tab-bar">
-      <button class="web-tab-btn active" id="tab-btn-game" onclick="switchWebTab('game')">
-        🎮 Área do Aluno (Fases)
-      </button>
-      <button class="web-tab-btn" id="tab-btn-teacher" onclick="switchWebTab('teacher')">
-        📊 Painel do Professor
-      </button>
-    </div>
-
-    <!-- SCREEN 1: LOGIN & CADASTRO (100% INLINE - ZERO SCROLL) -->
-    <section class="screen active" id="screen-login">
-      <div class="cyber-card">
-        <h1 class="hero-title">Cyber Runner</h1>
-        <p class="hero-subtitle">O Resgate do Algoritmo // Treinamento de Lógica de Programação</p>
-
-        <!-- Auth Mode Switcher -->
-        <div class="auth-tabs-row">
-          <button type="button" class="auth-tab-btn active" id="tab-auth-register" onclick="switchAuthMode('register')">
-            <span>🌟</span> NOVO ALUNO / CADASTRAR
-          </button>
-          <button type="button" class="auth-tab-btn" id="tab-auth-login" onclick="switchAuthMode('login')">
-            <span>🔑</span> JÁ TENHO LOGIN
-          </button>
-        </div>
-
-        <!-- FORM 1: NOVO ALUNO / CADASTRAR (TUDO EM LINHA) -->
-        <form id="register-form" onsubmit="event.preventDefault(); handleStudentRegister();">
-          <!-- Linha com os 4 campos de preenchimento -->
-          <div class="inline-form-grid">
-            <div class="form-group-compact">
-              <label class="form-label-compact" for="student-first-name">Nome</label>
-              <input type="text" id="student-first-name" class="cyber-input-compact" placeholder="Ex: Gabriel" required autocomplete="given-name" oninput="autoGenerateLoginSuggestion(this.value)" />
-            </div>
-
-            <div class="form-group-compact">
-              <label class="form-label-compact" for="student-class-select">Turma</label>
-              <select id="student-class-select" class="cyber-select-compact" onchange="onClassSelectChanged(this.value)">
-                <optgroup label="1º Ano">
-                  <option value="1TECA" selected>1TECA</option>
-                  <option value="1TECB">1TECB</option>
-                  <option value="1ADMA">1ADMA</option>
-                  <option value="1ADMB">1ADMB</option>
-                  <option value="1INFOA">1INFOA</option>
-                  <option value="1INFOB">1INFOB</option>
-                  <option value="1DSA">1DSA</option>
-                  <option value="1DSB">1DSB</option>
-                </optgroup>
-                <optgroup label="2º Ano">
-                  <option value="2TECA">2TECA</option>
-                  <option value="2TECB">2TECB</option>
-                  <option value="2ADMA">2ADMA</option>
-                  <option value="2ADMB">2ADMB</option>
-                  <option value="2INFOA">2INFOA</option>
-                  <option value="2INFOB">2INFOB</option>
-                  <option value="2DSA">2DSA</option>
-                  <option value="2DSB">2DSB</option>
-                </optgroup>
-                <optgroup label="3º Ano">
-                  <option value="3TECA">3TECA</option>
-                  <option value="3TECB">3TECB</option>
-                  <option value="3ADMA">3ADMA</option>
-                  <option value="3ADMB">3ADMB</option>
-                  <option value="3INFOA">3INFOA</option>
-                  <option value="3INFOB">3INFOB</option>
-                  <option value="3DSA">3DSA</option>
-                  <option value="3DSB">3DSB</option>
-                </optgroup>
-                <option value="CUSTOM">✏️ Outra...</option>
-              </select>
-            </div>
-
-            <div class="form-group-compact">
-              <label class="form-label-compact" for="student-login-input">Login</label>
-              <input type="text" id="student-login-input" class="cyber-input-compact" placeholder="gabriel.1teca" required autocomplete="username" />
-            </div>
-
-            <div class="form-group-compact">
-              <label class="form-label-compact" for="student-password-input">Senha</label>
-              <input type="text" id="student-password-input" class="cyber-input-compact cyber-password-mask" placeholder="Sua senha" required autocomplete="off" spellcheck="false" />
-            </div>
-          </div>
+    
 
           <!-- Input customizado de Turma (caso selecione CUSTOM) -->
           <input type="text" id="student-class-custom" class="cyber-input-compact" style="display: none; margin-bottom: 8px; text-transform: uppercase;" placeholder="Ex: 1TECA" maxlength="10" oninput="onCustomClassInput(this)" />
@@ -1337,9 +1287,14 @@
             <h2 class="hero-title" style="text-align: left; font-size: 18px; margin-bottom: 2px;">PAINEL DO PROFESSOR</h2>
             <p style="color: var(--text-muted); font-size: 12px;">Gestão de turmas (1TECA, 1ADMA, etc.), Supabase e SQLite.</p>
           </div>
-          <div id="supabase-indicator-badge" style="font-size: 11px; padding: 4px 8px; border-radius: 8px; border: 1px solid rgba(34, 211, 238, 0.3); color: var(--neon-cyan); background: rgba(0,0,0,0.3);">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button class="teacher-btn-sm" style="background: rgba(34, 211, 238, 0.15); color: var(--neon-cyan); border-color: rgba(34, 211, 238, 0.4);" onclick="returnToGameFromTeacher()">
+              ⬅️ Voltar ao Jogo
+            </button>
+            <div id="supabase-indicator-badge" style="font-size: 11px; padding: 4px 8px; border-radius: 8px; border: 1px solid rgba(34, 211, 238, 0.3); color: var(--neon-cyan); background: rgba(0,0,0,0.3);">
             <span id="supabase-dot">🟢</span>
             <span id="supabase-status-text">Modo Integrado</span>
+          </div>
           </div>
         </div>
 
@@ -2554,8 +2509,6 @@
       if (entered === expected.trim()) {
         sessionStorage.setItem('cyber_runner_professor_auth', 'true');
         closeProfessorAuthModal();
-        document.getElementById('tab-btn-game').classList.remove('active');
-        document.getElementById('tab-btn-teacher').classList.add('active');
         refreshTeacherData();
         showScreen('screen-teacher');
       } else {
@@ -2566,33 +2519,35 @@
       }
     }
 
-    async function switchWebTab(tabName) {
+        function openTeacherDashboard() {
       if (state.isLockedByScreenSwitch) {
         alert('A sua sessão foi bloqueada devido à troca de tela.');
         return;
       }
+      const isAuth = sessionStorage.getItem('cyber_runner_professor_auth');
+      if (isAuth !== 'true') {
+        openProfessorAuthModal();
+        return;
+      }
+      refreshTeacherData();
+      showScreen('screen-teacher');
+    }
 
-      if (tabName === 'teacher') {
-        const isAuth = sessionStorage.getItem('cyber_runner_professor_auth');
-        if (isAuth !== 'true') {
-          openProfessorAuthModal();
-          return;
-        }
-
-        document.getElementById('tab-btn-game').classList.remove('active');
-        document.getElementById('tab-btn-teacher').classList.add('active');
-        refreshTeacherData();
-        showScreen('screen-teacher');
+    function returnToGameFromTeacher() {
+      if (state.isFinished) {
+        showScreen('screen-victory');
+      } else if (state.hasStartedClass) {
+        showScreen('screen-gameplay');
       } else {
-        document.getElementById('tab-btn-teacher').classList.remove('active');
-        document.getElementById('tab-btn-game').classList.add('active');
-        if (state.isFinished) {
-          showScreen('screen-victory');
-        } else if (state.hasStartedClass) {
-          showScreen('screen-gameplay');
-        } else {
-          showScreen('screen-login');
-        }
+        showScreen('screen-login');
+      }
+    }
+
+    function switchWebTab(tabName) {
+      if (tabName === 'teacher') {
+        openTeacherDashboard();
+      } else {
+        returnToGameFromTeacher();
       }
     }
 
