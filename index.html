@@ -6,33 +6,43 @@
   <title>Cyber Runner: O Resgate do Algoritmo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
   <!-- Carregamento do Banco de 60 Fases e Autenticação -->
   <script src="questions.js"></script>
   <script src="professor_auth.js"></script>
   <style>
     :root {
-      --bg-dark: #050505;
-      --bg-card: #0c0c0e;
-      --bg-card-hover: #111114;
-      --bg-surface: #111114;
-      --bg-surface-active: #1a1a20;
-      --border-subtle: #1e293b;
+      --bg-dark: #04040a;
+      --bg-card: #0b0b10;
+      --bg-card-hover: #10101a;
+      --bg-surface: #10101a;
+      --bg-surface-active: #181824;
+      --border-subtle: #1e2a3a;
       --border-glow: #22d3ee;
       --neon-cyan: #22d3ee;
       --neon-cyan-dim: #0891b2;
+      --neon-cyan-bright: #67e8f9;
       --neon-magenta: #f43f5e;
       --neon-yellow: #fbbf24;
+      --neon-yellow-bright: #fde68a;
       --neon-green: #10b981;
+      --neon-green-bright: #6ee7b7;
       --neon-red: #f43f5e;
       --neon-purple: #c084fc;
       --text-main: #f1f5f9;
       --text-muted: #94a3b8;
       --text-dark: #64748b;
-      --code-bg: #030304;
+      --code-bg: #020206;
       --font-display: 'Orbitron', -apple-system, sans-serif;
-      --font-body: 'Rajdhani', -apple-system, sans-serif;
+      --font-body: 'Inter', 'Rajdhani', -apple-system, sans-serif;
+      --font-ui: 'Rajdhani', -apple-system, sans-serif;
       --font-code: 'Fira Code', monospace;
+      /* Animações */
+      --anim-fast: 0.15s;
+      --anim-mid: 0.3s;
+      --anim-slow: 0.5s;
+      --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     * {
@@ -48,8 +58,8 @@
       background-color: var(--bg-dark);
       color: var(--text-main);
       font-family: var(--font-body);
-      font-size: 15px;
-      line-height: 1.35;
+      font-size: 16px;
+      line-height: 1.5;
       min-height: 100vh;
       overflow-x: hidden;
       display: flex;
@@ -139,20 +149,25 @@
 
     /* Metric Box (Pontos) */
     .sidebar-metric-box {
-      background: rgba(251, 191, 36, 0.06);
-      border: 1px solid rgba(251, 191, 36, 0.25);
-      border-radius: 12px;
-      padding: 8px 10px;
+      background: linear-gradient(135deg, rgba(251, 191, 36, 0.08) 0%, rgba(251,191,36,0.03) 100%);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      border-radius: 14px;
+      padding: 10px 10px;
       text-align: center;
     }
 
     .sidebar-metric-val {
       font-family: var(--font-display);
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 900;
       color: var(--neon-yellow);
       line-height: 1.1;
-      text-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+      text-shadow: 0 0 12px rgba(251, 191, 36, 0.4);
+      transition: transform 0.2s var(--ease-bounce);
+    }
+
+    .sidebar-metric-val.bump {
+      animation: bounce-in 0.35s var(--ease-bounce);
     }
 
     .sidebar-metric-lbl {
@@ -162,15 +177,21 @@
       letter-spacing: 0.8px;
       text-transform: uppercase;
       margin-top: 2px;
+      font-family: var(--font-ui);
     }
 
     /* Energy Box (Energias) */
     .sidebar-energy-box {
-      background: rgba(244, 63, 94, 0.06);
-      border: 1px solid rgba(244, 63, 94, 0.25);
-      border-radius: 12px;
-      padding: 8px 10px;
+      background: linear-gradient(135deg, rgba(244, 63, 94, 0.08) 0%, rgba(244,63,94,0.03) 100%);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      border-radius: 14px;
+      padding: 10px 10px;
       text-align: center;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .sidebar-energy-box.critical {
+      animation: energy-critical 1s ease-in-out infinite;
     }
 
     .sidebar-energy-title {
@@ -179,23 +200,71 @@
       color: var(--text-muted);
       letter-spacing: 0.8px;
       text-transform: uppercase;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
+      font-family: var(--font-ui);
     }
 
     .hud-lives {
       display: flex;
       justify-content: center;
-      gap: 6px;
+      gap: 5px;
     }
 
     .heart-icon {
-      font-size: 18px;
+      font-size: 24px;
       transition: all 0.3s;
-      filter: drop-shadow(0 0 4px var(--neon-red));
+      filter: drop-shadow(0 0 5px var(--neon-red));
+    }
+
+    .heart-icon.alive {
+      animation: energy-pulse 2.5s ease-in-out infinite;
     }
 
     .heart-lost {
-      filter: grayscale(1) opacity(0.2);
+      filter: grayscale(1) opacity(0.18);
+      animation: none !important;
+      transform: scale(0.8);
+    }
+
+    /* Barra de Combo (acertos para recuperar energia) */
+    .sidebar-combo-box {
+      background: rgba(34, 211, 238, 0.05);
+      border: 1px solid rgba(34, 211, 238, 0.15);
+      border-radius: 10px;
+      padding: 6px 8px;
+      text-align: center;
+    }
+
+    .sidebar-combo-label {
+      font-family: var(--font-ui);
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .sidebar-combo-track {
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .combo-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--border-subtle);
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: all 0.25s var(--ease-bounce);
+    }
+
+    .combo-dot.filled {
+      background: var(--neon-cyan);
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 6px rgba(34,211,238,0.6);
     }
 
     .sidebar-divider {
@@ -336,30 +405,92 @@
     .cyber-card {
       background: var(--bg-card);
       border: 1px solid var(--border-subtle);
-      border-radius: 18px;
-      padding: 16px 20px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+      border-radius: 20px;
+      padding: 20px 24px;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255,255,255,0.04);
       position: relative;
+      transition: box-shadow 0.3s var(--ease-smooth);
+    }
+
+    /* Keyframes de animação pedagógica */
+    @keyframes bounce-in {
+      0%   { transform: scale(1); }
+      30%  { transform: scale(1.06); }
+      60%  { transform: scale(0.97); }
+      80%  { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+    @keyframes shake-x {
+      0%, 100% { transform: translateX(0); }
+      15%  { transform: translateX(-6px); }
+      30%  { transform: translateX(6px); }
+      45%  { transform: translateX(-5px); }
+      60%  { transform: translateX(5px); }
+      75%  { transform: translateX(-3px); }
+      90%  { transform: translateX(3px); }
+    }
+    @keyframes slide-up-in {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+      0%   { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 8px rgba(34,211,238,0.4); }
+      50%       { box-shadow: 0 0 20px rgba(34,211,238,0.9); }
+    }
+    @keyframes energy-critical {
+      0%, 100% { border-color: rgba(244,63,94,0.35); }
+      50%       { border-color: rgba(244,63,94,0.85); box-shadow: 0 0 14px rgba(244,63,94,0.5); }
+    }
+    @keyframes energy-pulse {
+      0%, 100% { transform: scale(1); }
+      50%       { transform: scale(1.12); }
+    }
+    @keyframes phase-fade-in {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes checkpoint-pop {
+      0%   { transform: scale(0.5) rotate(-8deg); opacity: 0; }
+      60%  { transform: scale(1.15) rotate(3deg); opacity: 1; }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
     }
 
     .hero-title {
       font-family: var(--font-display);
-      font-size: 22px;
+      font-size: 23px;
       font-weight: 900;
       text-align: center;
       color: var(--neon-cyan);
       text-transform: uppercase;
-      letter-spacing: 1.5px;
-      margin-bottom: 2px;
+      letter-spacing: 2px;
+      margin-bottom: 3px;
+      text-shadow: 0 0 20px rgba(34,211,238,0.35);
     }
 
     .hero-subtitle {
       font-family: var(--font-body);
-      font-size: 12.5px;
-      font-weight: 600;
+      font-size: 13px;
+      font-weight: 500;
       text-align: center;
       color: var(--text-muted);
-      margin-bottom: 12px;
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    /* Tagline pedagógica */
+    .hero-tagline {
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 500;
+      text-align: center;
+      color: rgba(34,211,238,0.6);
+      margin-top: -10px;
+      margin-bottom: 14px;
+      letter-spacing: 0.3px;
     }
 
     /* Auth Tab Row */
@@ -542,39 +673,46 @@
     /* Primary Action Buttons */
     .cyber-btn {
       width: 100%;
-      padding: 11px 16px;
-      font-family: var(--font-display);
-      font-size: 13px;
+      padding: 13px 18px;
+      font-family: var(--font-ui);
+      font-size: 14px;
       font-weight: 900;
-      color: #050505;
-      background: linear-gradient(135deg, #0891b2 0%, #22d3ee 50%, #38bdf8 100%);
+      color: #020208;
+      background: linear-gradient(135deg, #0891b2 0%, #22d3ee 45%, #38bdf8 80%, #7dd3fc 100%);
       border: none;
-      border-radius: 12px;
+      border-radius: 14px;
       cursor: pointer;
-      transition: all 0.2s;
-      letter-spacing: 0.8px;
+      transition: filter 0.2s, transform 0.2s var(--ease-bounce), box-shadow 0.2s;
+      letter-spacing: 1px;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      box-shadow: 0 4px 15px rgba(34, 211, 238, 0.3);
+      box-shadow: 0 4px 18px rgba(34, 211, 238, 0.35), inset 0 1px 0 rgba(255,255,255,0.2);
+      text-transform: uppercase;
     }
 
     .cyber-btn:hover {
-      filter: brightness(1.15);
-      box-shadow: 0 0 20px rgba(34, 211, 238, 0.5);
-      transform: translateY(-1px);
+      filter: brightness(1.12);
+      box-shadow: 0 0 28px rgba(34, 211, 238, 0.6);
+      transform: translateY(-2px);
+    }
+
+    .cyber-btn:active {
+      transform: translateY(0px) scale(0.98);
     }
 
     .cyber-btn-secondary {
       background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
+      border: 1.5px solid var(--border-subtle);
       color: var(--text-main);
+      box-shadow: none;
     }
 
     .cyber-btn-secondary:hover {
       background: var(--bg-surface-active);
       border-color: var(--neon-cyan);
+      box-shadow: 0 0 10px rgba(34,211,238,0.2);
     }
 
     /* Password Mask */
@@ -602,44 +740,91 @@
 
     .stage-title {
       font-family: var(--font-display);
-      font-size: 15px;
-      font-weight: 700;
+      font-size: 17px;
+      font-weight: 900;
       color: var(--text-main);
-      margin: 4px 0 6px 0;
+      margin: 6px 0 8px 0;
+      line-height: 1.3;
+      letter-spacing: 0.3px;
+      animation: phase-fade-in 0.4s var(--ease-smooth);
+    }
+
+    /* Barra de Progresso com Checkpoints */
+    .progress-wrapper {
+      position: relative;
+      width: 100%;
+      margin-bottom: 2px;
     }
 
     .progress-track {
       width: 100%;
-      height: 4px;
+      height: 10px;
       background: rgba(255, 255, 255, 0.05);
-      border-radius: 4px;
-      overflow: hidden;
+      border-radius: 8px;
+      overflow: visible;
+      position: relative;
     }
 
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, #22d3ee, #10b981);
+      background: linear-gradient(90deg, #0891b2 0%, #22d3ee 40%, #10b981 75%, #6ee7b7 100%);
+      background-size: 200% auto;
       width: 0%;
-      transition: width 0.3s ease;
+      border-radius: 8px;
+      transition: width 0.6s var(--ease-bounce);
+      box-shadow: 0 0 10px rgba(34,211,238,0.5);
+      animation: shimmer 3s linear infinite;
+    }
+
+    /* Marcadores de checkpoint na barra */
+    .progress-checkpoints {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .progress-cp-marker {
+      position: absolute;
+      top: -3px;
+      width: 2px;
+      height: 16px;
+      background: rgba(251,191,36,0.6);
+      border-radius: 2px;
+      transform: translateX(-50%);
+    }
+
+    .progress-cp-marker::after {
+      content: '🏁';
+      position: absolute;
+      top: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      opacity: 0.65;
     }
 
     .scenario-box {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       align-items: flex-start;
-      background: rgba(0, 0, 0, 0.35);
-      border: 1px solid var(--border-subtle);
-      border-radius: 10px;
-      padding: 8px 12px;
-      margin-bottom: 10px;
-      font-size: 13px;
-      color: #cbd5e1;
-      line-height: 1.4;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(34,211,238,0.12);
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      font-family: var(--font-body);
+      color: #d1d5db;
+      line-height: 1.6;
     }
 
     .scenario-icon {
-      font-size: 16px;
+      font-size: 18px;
       line-height: 1.2;
+      flex-shrink: 0;
     }
 
     /* Terminal Code Container - Espaçoso, Confortável e sem Cortes */
@@ -688,40 +873,43 @@
     }
 
     .code-content {
-      padding: 12px 14px;
+      padding: 14px 16px;
       font-family: var(--font-code);
-      font-size: 13.5px;
-      line-height: 1.55;
-      color: #f8fafc;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #e2e8f0;
       white-space: pre-wrap;
       overflow-y: auto;
+      letter-spacing: 0.02em;
     }
 
     .code-gap {
-      background: rgba(34, 211, 238, 0.2);
+      background: rgba(34, 211, 238, 0.18);
       border-bottom: 2px dashed var(--neon-cyan);
-      color: var(--neon-cyan);
-      padding: 0 4px;
-      border-radius: 4px;
+      color: var(--neon-cyan-bright);
+      padding: 1px 6px;
+      border-radius: 5px;
       font-weight: 700;
+      animation: pulse-glow 2s ease-in-out infinite;
+      display: inline-block;
     }
 
     /* Options 2x2 Grid */
     .options-title {
-      font-family: var(--font-display);
-      font-size: 11px;
+      font-family: var(--font-ui);
+      font-size: 11.5px;
       font-weight: 700;
-      color: var(--neon-cyan);
+      color: rgba(34,211,238,0.7);
       text-transform: uppercase;
-      letter-spacing: 0.6px;
-      margin-bottom: 6px;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
     }
 
     .options-list {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      margin-bottom: 10px;
+      gap: 10px;
+      margin-bottom: 12px;
     }
 
     @media (max-width: 500px) {
@@ -733,79 +921,102 @@
     .option-btn {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 10px;
-      padding: 9px 12px;
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 11px 14px;
       color: var(--text-main);
-      font-family: var(--font-code);
-      font-size: 13px;
+      font-family: var(--font-body);
+      font-size: 14.5px;
+      font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: transform 0.15s var(--ease-bounce), border-color 0.2s, background 0.2s, box-shadow 0.2s;
       text-align: left;
+      line-height: 1.5;
+      min-height: 52px;
     }
 
     .option-btn:hover:not(:disabled) {
       border-color: var(--neon-cyan);
       background: var(--bg-surface-active);
-      box-shadow: 0 0 8px rgba(34, 211, 238, 0.2);
+      box-shadow: 0 0 12px rgba(34, 211, 238, 0.25);
+      transform: scale(1.02) translateY(-1px);
     }
 
     .option-btn.correct {
-      background: rgba(16, 185, 129, 0.2) !important;
+      background: rgba(16, 185, 129, 0.18) !important;
       border-color: var(--neon-green) !important;
       color: #6ee7b7 !important;
-      box-shadow: 0 0 12px rgba(16, 185, 129, 0.4) !important;
+      box-shadow: 0 0 18px rgba(16, 185, 129, 0.5) !important;
+      animation: bounce-in 0.45s var(--ease-bounce);
     }
 
     .option-btn.wrong {
-      background: rgba(244, 63, 94, 0.2) !important;
+      background: rgba(244, 63, 94, 0.18) !important;
       border-color: var(--neon-magenta) !important;
       color: #fca5a5 !important;
-      box-shadow: 0 0 12px rgba(244, 63, 94, 0.4) !important;
+      box-shadow: 0 0 18px rgba(244, 63, 94, 0.5) !important;
+      animation: shake-x 0.5s ease;
     }
 
     .option-key {
-      font-family: var(--font-display);
-      font-size: 11px;
-      font-weight: 800;
+      font-family: var(--font-ui);
+      font-size: 12px;
+      font-weight: 900;
       color: var(--neon-cyan);
-      background: rgba(34, 211, 238, 0.1);
-      padding: 2px 6px;
-      border-radius: 5px;
+      background: rgba(34, 211, 238, 0.12);
+      border: 1px solid rgba(34,211,238,0.3);
+      padding: 3px 8px;
+      border-radius: 6px;
+      min-width: 26px;
+      text-align: center;
+      flex-shrink: 0;
+      transition: background 0.2s;
     }
 
     /* Feedback Banner */
     .feedback-banner {
       display: none;
-      border-radius: 10px;
-      padding: 9px 12px;
-      margin-bottom: 10px;
-      font-size: 13px;
-      line-height: 1.4;
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      font-family: var(--font-body);
+      line-height: 1.55;
+      animation: slide-up-in 0.35s var(--ease-smooth);
     }
 
     .feedback-banner.success {
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.4);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6,95,70,0.25) 100%);
+      border: 1.5px solid rgba(16, 185, 129, 0.5);
       color: #a7f3d0;
+      box-shadow: 0 4px 20px rgba(16,185,129,0.2);
     }
 
     .feedback-banner.error {
-      background: rgba(244, 63, 94, 0.15);
-      border: 1px solid rgba(244, 63, 94, 0.4);
+      background: linear-gradient(135deg, rgba(244, 63, 94, 0.15) 0%, rgba(127,29,29,0.25) 100%);
+      border: 1.5px solid rgba(244, 63, 94, 0.5);
       color: #fecdd3;
+      box-shadow: 0 4px 20px rgba(244,63,94,0.2);
     }
 
     .feedback-title {
-      font-family: var(--font-display);
-      font-size: 12px;
+      font-family: var(--font-ui);
+      font-size: 13.5px;
       font-weight: 800;
       display: flex;
       align-items: center;
-      gap: 6px;
-      margin-bottom: 3px;
+      gap: 8px;
+      margin-bottom: 6px;
+      letter-spacing: 0.3px;
+    }
+
+    #feedback-explanation {
+      font-size: 13.5px;
+      font-weight: 400;
+      line-height: 1.6;
+      opacity: 0.95;
     }
 
     /* Modals */
@@ -891,6 +1102,510 @@
       border-color: var(--neon-cyan);
       background: var(--bg-surface-active);
     }
+
+    /* =========================================================================
+       ACESSIBILIDADE & MODOS DE TEMA (WCAG 2.1 AA / e-MAG)
+       ========================================================================= */
+    .access-btn-mini {
+      flex: 1;
+      padding: 4px 2px;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: var(--font-display);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      color: var(--text-main);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .access-btn-mini.active, .access-btn-mini:hover {
+      border-color: var(--neon-cyan);
+      background: var(--bg-surface-active);
+      color: var(--neon-cyan);
+    }
+
+    /* 1. ESCALA DE FONTES ROBUSTA E PROPORCIONAL */
+    html[data-font-size="small"] body,
+    html[data-font-size="small"] #app-layout {
+      font-size: 12.5px !important;
+    }
+    html[data-font-size="small"] .hero-title { font-size: 19px !important; }
+    html[data-font-size="small"] .hero-subtitle { font-size: 11px !important; }
+    html[data-font-size="small"] .stage-title { font-size: 14px !important; }
+    html[data-font-size="small"] .scenario-box { font-size: 11.5px !important; }
+    html[data-font-size="small"] .code-content { font-size: 11.5px !important; line-height: 1.4 !important; }
+    html[data-font-size="small"] .option-btn { font-size: 11.5px !important; padding: 7px 10px !important; min-height: 38px !important; }
+    html[data-font-size="small"] .feedback-banner { font-size: 11.5px !important; padding: 7px 10px !important; }
+    html[data-font-size="small"] .cyber-input-compact, 
+    html[data-font-size="small"] .cyber-select-compact { font-size: 11.5px !important; }
+
+    html[data-font-size="large"] body,
+    html[data-font-size="large"] #app-layout {
+      font-size: 17px !important;
+    }
+    html[data-font-size="large"] .hero-title { font-size: 26px !important; }
+    html[data-font-size="large"] .hero-subtitle { font-size: 14.5px !important; }
+    html[data-font-size="large"] .stage-title { font-size: 19px !important; }
+    html[data-font-size="large"] .stage-badge { font-size: 13px !important; }
+    html[data-font-size="large"] .scenario-box { font-size: 15px !important; line-height: 1.5 !important; }
+    html[data-font-size="large"] .code-content { font-size: 16px !important; line-height: 1.65 !important; }
+    html[data-font-size="large"] .terminal-file-name { font-size: 14px !important; }
+    html[data-font-size="large"] .option-btn { font-size: 15.5px !important; padding: 13px 16px !important; min-height: 52px !important; }
+    html[data-font-size="large"] .option-key { font-size: 13px !important; }
+    html[data-font-size="large"] .feedback-banner { font-size: 15px !important; }
+    html[data-font-size="large"] .feedback-title { font-size: 14.5px !important; }
+    html[data-font-size="large"] .cyber-input-compact, 
+    html[data-font-size="large"] .cyber-select-compact { font-size: 15px !important; padding: 10px 12px !important; }
+    html[data-font-size="large"] .form-label-compact { font-size: 12.5px !important; }
+    html[data-font-size="large"] .cyber-btn { font-size: 15px !important; padding: 13px 18px !important; }
+    html[data-font-size="large"] .auth-tab-btn { font-size: 13px !important; }
+    html[data-font-size="large"] .sidebar-metric-val { font-size: 24px !important; }
+    html[data-font-size="large"] .sidebar-action-btn { font-size: 12.5px !important; }
+
+    /* 2. LAYOUT RESPONSIVO COM VLIBRAS ABERTO */
+    div[vw] {
+      z-index: 99999 !important;
+    }
+    div[vw] [vw-access-button] {
+      position: fixed !important;
+      top: 16px !important;
+      right: 16px !important;
+      z-index: 99999 !important;
+    }
+    div[vw] [vw-plugin-wrapper] {
+      z-index: 99999 !important;
+      right: 12px !important;
+      top: 65px !important;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45) !important;
+      border-radius: 12px !important;
+      max-width: 330px !important;
+    }
+
+    /* Reduz a largura do quadro principal quando o VLibras estiver ativo */
+    body.vlibras-active #app-layout {
+      max-width: calc(100vw - 360px) !important;
+      margin-left: 12px !important;
+      margin-right: 348px !important;
+    }
+
+    @media (max-width: 1200px) {
+      body.vlibras-active #cyber-sidebar {
+        width: 160px;
+        min-width: 160px;
+      }
+      body.vlibras-active .inline-form-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 900px) {
+      body.vlibras-active #app-layout {
+        max-width: 100% !important;
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+      }
+      div[vw] [vw-plugin-wrapper] {
+        max-width: 270px !important;
+        transform: scale(0.9);
+        transform-origin: top right;
+      }
+    }
+
+    /* 3. TEMA CLARO DE ALTO CONTRASTE (MODO BRANCO COMPLETO - ZERO TEXTOS CLAROS) */
+    body.theme-light {
+      --bg-dark: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f1f5f9;
+      --bg-surface: #ffffff;
+      --bg-surface-active: #e2e8f0;
+      --border-subtle: #cbd5e1;
+      --border-glow: #0284c7;
+      --neon-cyan: #0284c7;
+      --neon-cyan-dim: #0369a1;
+      --neon-magenta: #e11d48;
+      --neon-yellow: #b45309;
+      --neon-green: #047857;
+      --neon-red: #dc2626;
+      --neon-purple: #6d28d9;
+      --text-main: #0f172a;
+      --text-muted: #334155;
+      --text-dark: #1e293b;
+      --code-bg: #f8fafc;
+      background-color: #f1f5f9 !important;
+      color: #0f172a !important;
+    }
+    body.theme-light .scanlines {
+      opacity: 0.02;
+    }
+
+    /* Força texto escuro em todos os elementos genéricos no Tema Claro */
+    body.theme-light p,
+    body.theme-light span:not(.heart-icon):not(.opt-key):not(.dot),
+    body.theme-light label,
+    body.theme-light input,
+    body.theme-light select,
+    body.theme-light h1,
+    body.theme-light h2,
+    body.theme-light h3,
+    body.theme-light h4 {
+      color: #0f172a;
+    }
+
+    /* Sidebar no Tema Claro */
+    body.theme-light #cyber-sidebar {
+      background: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      box-shadow: 2px 0 20px rgba(0, 0, 0, 0.06) !important;
+    }
+    body.theme-light .sidebar-brand-title {
+      color: #0284c7 !important;
+    }
+    body.theme-light .sidebar-metric-box,
+    body.theme-light .sidebar-energy-box {
+      background: #f8fafc !important;
+      border-color: #cbd5e1 !important;
+    }
+    body.theme-light .sidebar-metric-val {
+      color: #b45309 !important;
+      text-shadow: none !important;
+    }
+    body.theme-light .sidebar-metric-lbl,
+    body.theme-light .sidebar-energy-title,
+    body.theme-light .sidebar-section-title {
+      color: #334155 !important;
+      font-weight: 800 !important;
+    }
+    body.theme-light #hud-streak-lbl {
+      color: #b45309 !important;
+    }
+    body.theme-light #hud-checkpoint-badge {
+      background: #ecfdf5 !important;
+      border-color: #10b981 !important;
+      color: #047857 !important;
+    }
+    body.theme-light .sidebar-action-btn,
+    body.theme-light .access-btn-mini {
+      background: #f8fafc !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+    }
+    body.theme-light .sidebar-action-btn:hover,
+    body.theme-light .access-btn-mini:hover,
+    body.theme-light .access-btn-mini.active {
+      background: #e0f2fe !important;
+      border-color: #0284c7 !important;
+      color: #0369a1 !important;
+    }
+    body.theme-light .sidebar-action-btn.lang-btn {
+      background: #e0f2fe !important;
+      border-color: #7dd3fc !important;
+      color: #0369a1 !important;
+    }
+    body.theme-light .sidebar-teacher-btn {
+      background: #f3e8ff !important;
+      border-color: #d8b4fe !important;
+      color: #6d28d9 !important;
+    }
+
+    /* Cards e Telas no Tema Claro */
+    body.theme-light .cyber-card {
+      background: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+    }
+    body.theme-light .hero-title,
+    body.theme-light .stage-title,
+    body.theme-light .char-name-mini {
+      color: #0f172a !important;
+    }
+    body.theme-light .hero-subtitle,
+    body.theme-light .char-specialty-mini,
+    body.theme-light .options-title {
+      color: #334155 !important;
+      font-weight: 700 !important;
+    }
+
+    /* Formulários e Autenticação no Tema Claro */
+    body.theme-light .auth-tabs-row,
+    body.theme-light .lang-selection-row {
+      background: #f1f5f9 !important;
+      border-color: #cbd5e1 !important;
+    }
+    body.theme-light .auth-tab-btn {
+      color: #475569 !important;
+    }
+    body.theme-light .auth-tab-btn.active {
+      background: #e0f2fe !important;
+      color: #0284c7 !important;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.2) !important;
+    }
+    body.theme-light .form-label-compact,
+    body.theme-light .char-selection-title {
+      color: #0369a1 !important;
+      font-weight: 800 !important;
+    }
+    body.theme-light .cyber-input,
+    body.theme-light .cyber-input-compact,
+    body.theme-light .cyber-select-compact {
+      background: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+    }
+    body.theme-light .cyber-input::placeholder,
+    body.theme-light .cyber-input-compact::placeholder {
+      color: #64748b !important;
+    }
+    body.theme-light .char-card-compact {
+      background: #ffffff !important;
+      border-color: #cbd5e1 !important;
+    }
+    body.theme-light .char-card-compact:hover {
+      background: #f1f5f9 !important;
+      border-color: #0284c7 !important;
+    }
+    body.theme-light .char-card-compact.selected {
+      background: #e0f2fe !important;
+      border-color: #0284c7 !important;
+      box-shadow: 0 0 10px rgba(2, 132, 199, 0.25) !important;
+    }
+
+    /* Cenário e Código no Tema Claro */
+    body.theme-light .stage-badge {
+      background: #e0f2fe !important;
+      border-color: #0284c7 !important;
+      color: #0369a1 !important;
+    }
+    body.theme-light #stage-concept-pill {
+      color: #334155 !important;
+      font-weight: 700 !important;
+    }
+    body.theme-light .scenario-box {
+      background: #f8fafc !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+    }
+    body.theme-light #scenario-text {
+      color: #0f172a !important;
+    }
+    body.theme-light .terminal-container {
+      background: #f8fafc !important;
+      border-color: #cbd5e1 !important;
+      box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.05) !important;
+    }
+    body.theme-light .terminal-header {
+      background: #e2e8f0 !important;
+      border-bottom-color: #cbd5e1 !important;
+    }
+    body.theme-light .terminal-file-name {
+      color: #0369a1 !important;
+    }
+    body.theme-light #terminal-lang-tag {
+      color: #0284c7 !important;
+    }
+    body.theme-light .code-content {
+      background: #f8fafc !important;
+      color: #0f172a !important;
+    }
+    body.theme-light .code-gap {
+      background: #e0f2fe !important;
+      color: #0369a1 !important;
+      border-bottom-color: #0284c7 !important;
+    }
+
+    /* Alternativas de Resposta no Tema Claro */
+    body.theme-light .option-btn {
+      background: #ffffff !important;
+      color: #0f172a !important;
+      border-color: #cbd5e1 !important;
+    }
+    body.theme-light .option-btn span {
+      color: #0f172a !important;
+    }
+    body.theme-light .option-btn:hover:not(:disabled) {
+      background: #f0f9ff !important;
+      border-color: #0284c7 !important;
+    }
+    body.theme-light .option-key {
+      background: #f1f5f9 !important;
+      color: #0284c7 !important;
+      border: 1px solid #cbd5e1 !important;
+    }
+    body.theme-light .option-btn.correct {
+      background: #ecfdf5 !important;
+      border-color: #059669 !important;
+      color: #065f46 !important;
+      box-shadow: 0 0 10px rgba(5, 150, 105, 0.25) !important;
+    }
+    body.theme-light .option-btn.correct span {
+      color: #065f46 !important;
+      font-weight: 700 !important;
+    }
+    body.theme-light .option-btn.wrong {
+      background: #fff1f2 !important;
+      border-color: #e11d48 !important;
+      color: #9f1239 !important;
+      box-shadow: 0 0 10px rgba(225, 29, 72, 0.25) !important;
+    }
+    body.theme-light .option-btn.wrong span {
+      color: #9f1239 !important;
+      font-weight: 700 !important;
+    }
+
+    /* Feedback Banners no Tema Claro */
+    body.theme-light .feedback-banner {
+      background: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+    }
+    body.theme-light .feedback-banner.success {
+      background: #ecfdf5 !important;
+      border-color: #059669 !important;
+      color: #065f46 !important;
+    }
+    body.theme-light .feedback-banner.error {
+      background: #fff1f2 !important;
+      border-color: #e11d48 !important;
+      color: #9f1239 !important;
+    }
+    body.theme-light #feedback-explanation {
+      color: #1e293b !important;
+      font-weight: 500 !important;
+    }
+
+    /* Game Over e Checkpoint no Tema Claro */
+    body.theme-light #screen-gameover .cyber-card {
+      border-color: #f59e0b !important;
+    }
+    body.theme-light #gameover-checkpoint-box {
+      background: #ecfdf5 !important;
+      border-color: #10b981 !important;
+    }
+    body.theme-light #gameover-checkpoint-text {
+      color: #065f46 !important;
+      font-weight: 600 !important;
+    }
+    body.theme-light #gameover-stages-val,
+    body.theme-light #gameover-score-val {
+      color: #0f172a !important;
+    }
+
+    /* Modais no Tema Claro */
+    body.theme-light .custom-modal-content,
+    body.theme-light .modal-box {
+      background: #ffffff !important;
+      color: #0f172a !important;
+      border-color: #cbd5e1 !important;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15) !important;
+    }
+    body.theme-light #quiz-preview-box {
+      background: #f8fafc !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+    }
+
+    /* Novos Componentes no Tema Claro */
+    body.theme-light .sidebar-combo-box {
+      background: #f0f9ff !important;
+      border-color: #bae6fd !important;
+    }
+    body.theme-light .sidebar-combo-label {
+      color: #0369a1 !important;
+    }
+    body.theme-light .combo-dot {
+      background: #cbd5e1 !important;
+      border-color: #94a3b8 !important;
+    }
+    body.theme-light .combo-dot.filled {
+      background: #0284c7 !important;
+      border-color: #0284c7 !important;
+      box-shadow: 0 0 4px rgba(2,132,199,0.5) !important;
+    }
+    body.theme-light .hero-tagline {
+      color: rgba(2,132,199,0.75) !important;
+    }
+    body.theme-light .progress-cp-marker {
+      background: rgba(180, 83, 9, 0.7) !important;
+    }
+    body.theme-light .progress-cp-marker::after {
+      opacity: 0.8;
+    }
+
+    /* Print Styles para Computação Desplugada (Show do Milhão) */
+    #print-quiz-container {
+      display: none;
+    }
+    @media print {
+      body * {
+        visibility: hidden !important;
+      }
+      #print-quiz-container, #print-quiz-container * {
+        visibility: visible !important;
+      }
+      #print-quiz-container {
+        display: block !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 8mm;
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      .quiz-page {
+        page-break-after: always;
+        break-after: page;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8mm;
+        margin-bottom: 8mm;
+      }
+      .quiz-card {
+        border: 2px dashed #333333;
+        border-radius: 8px;
+        padding: 12px;
+        background: #ffffff;
+        color: #111111;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        box-sizing: border-box;
+      }
+      .quiz-card-header {
+        border-bottom: 2px solid #222;
+        padding-bottom: 4px;
+        margin-bottom: 6px;
+        display: flex;
+        justify-content: space-between;
+        font-weight: bold;
+        font-size: 13px;
+      }
+      .quiz-card-code {
+        background: #f4f4f4;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 8px;
+        font-family: 'Courier New', monospace;
+        font-size: 11px;
+        margin: 6px 0;
+        white-space: pre-wrap;
+      }
+      .quiz-card-option {
+        margin: 4px 0;
+        padding: 4px 6px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 11.5px;
+      }
+      .quiz-card-answer {
+        background: #e6f7ed;
+        border: 2px solid #059669;
+        border-radius: 6px;
+        padding: 8px;
+        margin-top: 6px;
+        font-size: 12px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -913,14 +1628,27 @@
         <div class="sidebar-metric-lbl">PONTOS</div>
       </div>
 
-      <!-- Vidas Disponíveis -->
-      <div class="sidebar-energy-box" title="3 Energias Disponíveis">
-        <div class="sidebar-energy-title">ENERGIA</div>
-        <div class="hud-lives" id="hud-lives-container" title="3 Células de Energia">
-          <span class="heart-icon" id="heart-1">⚡</span>
-          <span class="heart-icon" id="heart-2">⚡</span>
-          <span class="heart-icon" id="heart-3">⚡</span>
+      <!-- Vidas Disponíveis (4 Energias + Recuperação a cada 3 acertos) -->
+      <div class="sidebar-energy-box" id="hud-energy-box" title="4 Energias Disponíveis (Recupere 1 a cada 3 acertos seguidos)">
+        <div class="sidebar-energy-title">ENERGIA NEURAL</div>
+        <div class="hud-lives" id="hud-lives-container" title="Células de Energia">
+          <span class="heart-icon alive" id="heart-1">⚡</span>
+          <span class="heart-icon alive" id="heart-2">⚡</span>
+          <span class="heart-icon alive" id="heart-3">⚡</span>
+          <span class="heart-icon alive" id="heart-4">⚡</span>
         </div>
+        <div id="hud-checkpoint-badge" style="font-size: 9.5px; color: var(--neon-green); background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); border-radius: 6px; padding: 2px 4px; margin-top: 6px; text-align: center; display: none;">🚩 Salvo: Fase 10</div>
+      </div>
+
+      <!-- Barra de Combo de Acertos -->
+      <div class="sidebar-combo-box" id="hud-combo-box" title="Acerte 3 seguidos para recuperar 1 energia">
+        <div class="sidebar-combo-label">🔥 COMBO DE ACERTOS</div>
+        <div class="sidebar-combo-track" id="combo-dots-track">
+          <span class="combo-dot" id="combo-dot-1"></span>
+          <span class="combo-dot" id="combo-dot-2"></span>
+          <span class="combo-dot" id="combo-dot-3"></span>
+        </div>
+        <div style="font-size: 9px; color: var(--text-dark); margin-top: 3px; font-family: var(--font-ui);">3 acertos → +1 ⚡</div>
       </div>
 
       <div class="sidebar-divider"></div>
@@ -934,6 +1662,25 @@
       <!-- Áudio / Efeitos Sonoros -->
       <button type="button" class="sidebar-action-btn" id="btn-sound-toggle" title="Ligar/Desligar Efeitos Sonoros">
         <span id="sound-icon">🔊</span> Som Ativo
+      </button>
+
+      <div class="sidebar-divider"></div>
+
+      <!-- ACESSIBILIDADE (WCAG / e-MAG) -->
+      <div class="sidebar-section-title">ACESSIBILIDADE</div>
+      <div style="display: flex; gap: 4px;" title="Ajustar Tamanho do Texto">
+        <button type="button" class="access-btn-mini" id="btn-font-sm" onclick="setFontScale('small')">A-</button>
+        <button type="button" class="access-btn-mini active" id="btn-font-md" onclick="setFontScale('normal')">A</button>
+        <button type="button" class="access-btn-mini" id="btn-font-lg" onclick="setFontScale('large')">A+</button>
+      </div>
+
+      <button type="button" class="sidebar-action-btn" id="btn-theme-toggle" onclick="toggleTheme()" title="Alternar entre Modo Escuro e Modo Claro de Alto Contraste">
+        <span id="theme-icon">☀️</span> Modo Claro
+      </button>
+
+      <!-- Computação Desplugada (Show do Milhão) -->
+      <button type="button" class="sidebar-action-btn" onclick="openUnpluggedQuizModal()" style="color: var(--neon-yellow); border-color: rgba(251, 191, 36, 0.35); background: rgba(251, 191, 36, 0.08);" title="Gerar e Imprimir Cartões de Pergunta e Gabarito para Sala de Aula">
+        <span>🖨️</span> Quiz Desplugado
       </button>
 
       <div class="sidebar-spacer"></div>
@@ -950,7 +1697,8 @@
       <section class="screen active" id="screen-login">
         <div class="cyber-card">
           <h1 class="hero-title">Cyber Runner</h1>
-          <p class="hero-subtitle">O Resgate do Algoritmo // Treinamento de Lógica de Programação</p>
+          <p class="hero-subtitle">O Resgate do Algoritmo</p>
+          <p class="hero-tagline">🎓 Treinamento de Lógica de Programação e Algoritmos · 60 Desafios · Modo Progressivo</p>
 
           <!-- Auth Mode Switcher -->
           <div class="auth-tabs-row">
@@ -1107,13 +1855,19 @@
         <div class="cyber-card">
           <!-- Header da Missão -->
           <div class="mission-header">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
               <span class="stage-badge" id="stage-badge-text">DESAFIO 1 / 60</span>
-              <span style="font-size: 11px; color: var(--text-muted);" id="stage-concept-pill">Condicionais</span>
+              <span style="font-family: var(--font-ui); font-size: 11.5px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.3px;" id="stage-concept-pill">Condicionais</span>
             </div>
             <h2 class="stage-title" id="stage-title-text">Portão Neural: Autenticação de Acesso</h2>
-            <div class="progress-track">
-              <div class="progress-fill" id="progress-bar-fill"></div>
+            <!-- Barra de Progresso com Marcadores de Checkpoint -->
+            <div class="progress-wrapper">
+              <div class="progress-track">
+                <div class="progress-fill" id="progress-bar-fill"></div>
+              </div>
+              <div class="progress-checkpoints" id="progress-checkpoints-bar">
+                <!-- Marcadores gerados por JS -->
+              </div>
             </div>
           </div>
 
@@ -1160,22 +1914,33 @@
         </div>
       </section>
 
-      <!-- SCREEN 3: GAME OVER (VIDAS ESGOTADAS - AMIGÁVEL) -->
+      <!-- SCREEN 3: GAME OVER (VIDAS ESGOTADAS - AMIGÁVEL COM CHECKPOINT) -->
       <section class="screen" id="screen-gameover">
         <div class="cyber-card" style="text-align: center; border-color: rgba(251, 191, 36, 0.4);">
           <div style="font-size: 44px; margin-bottom: 6px;">🔋⚡</div>
           <h2 class="hero-title" style="color: var(--neon-yellow); margin-bottom: 4px;">ENERGIA ESGOTADA</h2>
-          <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 14px;">As energias do seu agente neural se esgotaram nesta tentativa. Hora de recarregar e tentar de novo!</p>
+          <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 14px;">As energias do seu agente neural se esgotaram nesta tentativa. Recarregue e continue sua jornada!</p>
 
-          <div style="background: rgba(251, 191, 36, 0.08); border: 1px solid rgba(251, 191, 36, 0.25); border-radius: 12px; padding: 12px; margin-bottom: 14px;">
-            <div style="font-size: 12px; color: var(--text-muted);">Pontuação Final Alcançada:</div>
+          <div style="background: rgba(251, 191, 36, 0.08); border: 1px solid rgba(251, 191, 36, 0.25); border-radius: 12px; padding: 12px; margin-bottom: 12px;">
+            <div style="font-size: 12px; color: var(--text-muted);">Pontuação da Sessão:</div>
             <div style="font-family: var(--font-display); font-size: 24px; font-weight: 900; color: var(--neon-yellow);" id="gameover-score-val">0 PTS</div>
-            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;" id="gameover-stages-val">Desafios Concluídos: 0 / 60</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;" id="gameover-stages-val">Desafios Superados: 0 / 60</div>
           </div>
 
-          <button class="cyber-btn" onclick="restartGame()">
-            🔄 REINICIAR E TENTAR NOVAMENTE
-          </button>
+          <!-- Checkpoint Box (se o aluno atingiu um checkpoint) -->
+          <div id="gameover-checkpoint-box" style="display: none; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 12px; padding: 10px; margin-bottom: 12px;">
+            <div style="font-size: 11px; color: var(--neon-green); font-weight: 700;">🚩 PONTO DE RESTAURAÇÃO DISPONÍVEL!</div>
+            <div style="font-size: 12.5px; color: #cbd5e1; margin-top: 2px;" id="gameover-checkpoint-text">Você pode recomeçar do seu último Checkpoint com 4 energias restauradas.</div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <button class="cyber-btn" id="btn-resume-checkpoint" style="display: none; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #ffffff;" onclick="restartFromCheckpoint()">
+              🚩 RETOMAR DO CHECKPOINT (<span id="resume-checkpoint-stage">FASE 11</span>)
+            </button>
+            <button class="cyber-btn cyber-btn-secondary" onclick="restartGame()">
+              🔄 REINICIAR DO COMEÇO (FASE 1)
+            </button>
+          </div>
         </div>
       </section>
 
@@ -1248,6 +2013,7 @@
             <button class="teacher-btn-sm" onclick="refreshTeacherData()">🔄 Atualizar</button>
             <button class="teacher-btn-sm" onclick="downloadTeacherReportCsv()">📊 CSV</button>
             <button class="teacher-btn-sm" onclick="downloadTeacherBackupJson()">💾 Backup</button>
+            <button class="teacher-btn-sm" onclick="openUnpluggedQuizModal()">🖨️ Quiz Desplugado</button>
             <button class="teacher-btn-sm" onclick="openSupabaseConfigModal()">⚡ Supabase</button>
           </div>
 
@@ -1325,6 +2091,69 @@
     </div>
   </div>
 
+  <!-- UNPLUGGED QUIZ MODAL (COMPUTAÇÃO DESPLUGADA / SHOW DO MILHÃO) -->
+  <div class="modal-overlay" id="unplugged-quiz-modal">
+    <div class="modal-box" style="max-width: 650px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 24px;">🖨️</span>
+          <div>
+            <h3 style="font-family: var(--font-display); font-size: 16px; color: var(--neon-yellow);">Computação Desplugada: Quiz Show</h3>
+            <p style="font-size: 11.5px; color: var(--text-muted);">Cartões imprimíveis para atividades em sala de aula (Pergunta vs Gabarito)</p>
+          </div>
+        </div>
+        <button class="teacher-btn-sm" onclick="closeUnpluggedQuizModal()">✕</button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+        <div class="form-group-compact">
+          <label class="form-label-compact" for="quiz-block-select">Bloco de Fases</label>
+          <select id="quiz-block-select" class="cyber-select-compact" onchange="updateQuizPreview()">
+            <option value="1-10">Fases 1 a 10 (Condicionais & Sintaxe)</option>
+            <option value="11-20">Fases 11 a 20 (Laços & Repetição)</option>
+            <option value="21-30">Fases 21 a 30 (Vetores & Matrizes)</option>
+            <option value="31-40">Fases 31 a 40 (Funções & Modularização)</option>
+            <option value="41-50">Fases 41 a 50 (Busca & Ordenação)</option>
+            <option value="51-60">Fases 51 a 60 (Algoritmos Avançados)</option>
+            <option value="all" selected>Todas as 60 Fases (Completo)</option>
+          </select>
+        </div>
+
+        <div class="form-group-compact">
+          <label class="form-label-compact" for="quiz-lang-select">Linguagem do Cartão</label>
+          <select id="quiz-lang-select" class="cyber-select-compact" onchange="updateQuizPreview()">
+            <option value="portugol" selected>🇧🇷 Portugol (Pseudocódigo)</option>
+            <option value="python">🐍 Python</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 8px; margin-bottom: 10px;">
+        <div class="form-group-compact">
+          <label class="form-label-compact" for="quiz-layout-select">Formato dos Cartões</label>
+          <select id="quiz-layout-select" class="cyber-select-compact" onchange="updateQuizPreview()">
+            <option value="both" selected>🗂️ Par Duplo: Pergunta (Aluno A) + Gabarito (Aluno B)</option>
+            <option value="questions_only">❓ Apenas Perguntas (Sem Gabarito)</option>
+            <option value="answers_only">💡 Apenas Gabaritos & Explicações (Juiz)</option>
+          </select>
+        </div>
+        <div style="display: flex; align-items: flex-end;">
+          <button type="button" class="cyber-btn" style="margin-top: 0; background: linear-gradient(135deg, #d97706 0%, #fbbf24 100%); color: #000; font-weight: 800; padding: 7px 10px; font-size: 11.5px;" onclick="triggerQuizPrint()">
+            🖨️ IMPRIMIR / PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- Preview Box -->
+      <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 10px; max-height: 200px; overflow-y: auto;" id="quiz-preview-box">
+        <!-- Preview gerado via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTAINER DE IMPRESSÃO (OCULTO NA TELA, VISÍVEL NO PRINT) -->
+  <div id="print-quiz-container"></div>
+
   <!-- SUPABASE CONFIG MODAL -->
   <div class="modal-overlay" id="supabase-config-modal">
     <div class="modal-box">
@@ -1355,6 +2184,24 @@
       <button class="cyber-btn cyber-btn-secondary" onclick="closeSupabaseConfigModal()">Fechar</button>
     </div>
   </div>
+
+  <!-- VLIBRAS WIDGET OFICIAL (ACESSIBILIDADE EM LIBRAS) -->
+  <div vw class="enabled">
+    <div vw-access-button class="active"></div>
+    <div vw-plugin-wrapper>
+      <div class="vw-plugin-top-wrapper"></div>
+    </div>
+  </div>
+  <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+  <script>
+    window.addEventListener('load', () => {
+      try {
+        if (typeof window.VLibras !== 'undefined') {
+          new window.VLibras.Widget('https://vlibras.gov.br/app');
+        }
+      } catch(e) {}
+    });
+  </script>
 
   <script>
     /* =========================================================================
@@ -1441,6 +2288,44 @@
           });
         } catch(e) {}
       }
+      playPowerup() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const notes = [523.25, 659.25, 783.99, 1046.50];
+          notes.forEach((f, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(f, now + idx * 0.07);
+            gain.gain.setValueAtTime(0.18, now + idx * 0.07);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.22);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now + idx * 0.07);
+            osc.stop(now + idx * 0.07 + 0.23);
+          });
+        } catch(e) {}
+      }
+      playCheckpoint() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const notes = [392.00, 523.25, 659.25, 783.99, 1046.50];
+          notes.forEach((f, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(f, now + idx * 0.08);
+            gain.gain.setValueAtTime(0.2, now + idx * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.3);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now + idx * 0.08);
+            osc.stop(now + idx * 0.08 + 0.31);
+          });
+        } catch(e) {}
+      }
     }
 
     const sound = new CyberAudio();
@@ -1451,6 +2336,59 @@
       document.getElementById('sound-icon').textContent = sound.enabled ? '🔊' : '🔇';
       document.getElementById('btn-sound-toggle').lastChild.textContent = sound.enabled ? ' Som Ativo' : ' Silenciado';
     });
+
+    /* =========================================================================
+       ACESSIBILIDADE: CONTROLE DE TEMA, FONTES E OBSERVAÇÃO DO VLIBRAS
+       ========================================================================= */
+    function setFontScale(scale) {
+      document.documentElement.setAttribute('data-font-size', scale);
+      localStorage.setItem('cyber_runner_font_scale', scale);
+      document.querySelectorAll('.access-btn-mini').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById('btn-font-' + (scale === 'small' ? 'sm' : (scale === 'large' ? 'lg' : 'md')));
+      if (activeBtn) activeBtn.classList.add('active');
+    }
+
+    function toggleTheme() {
+      const isLight = document.body.classList.toggle('theme-light');
+      localStorage.setItem('cyber_runner_theme', isLight ? 'light' : 'dark');
+      const btn = document.getElementById('btn-theme-toggle');
+      if (btn) {
+        btn.innerHTML = `<span id="theme-icon">${isLight ? '🌙' : '☀️'}</span> ${isLight ? 'Modo Escuro' : 'Modo Claro'}`;
+      }
+    }
+
+    function initVLibrasObserver() {
+      const checkVLibrasState = () => {
+        const wrapper = document.querySelector('[vw-plugin-wrapper]');
+        if (wrapper) {
+          const isOpened = wrapper.classList.contains('active') ||
+                           wrapper.getAttribute('active') === 'true' ||
+                           (wrapper.offsetWidth > 60 && window.getComputedStyle(wrapper).display !== 'none');
+          if (isOpened) {
+            document.body.classList.add('vlibras-active');
+          } else {
+            document.body.classList.remove('vlibras-active');
+          }
+        }
+      };
+
+      try {
+        const observer = new MutationObserver(checkVLibrasState);
+        observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+        setInterval(checkVLibrasState, 600);
+      } catch(e) {}
+    }
+
+    // Carrega preferências de acessibilidade
+    const savedTheme = localStorage.getItem('cyber_runner_theme');
+    if (savedTheme === 'light') {
+      document.body.classList.add('theme-light');
+      const btn = document.getElementById('btn-theme-toggle');
+      if (btn) btn.innerHTML = '<span id="theme-icon">🌙</span> Modo Escuro';
+    }
+    const savedFontScale = localStorage.getItem('cyber_runner_font_scale') || 'normal';
+    setFontScale(savedFontScale);
+    initVLibrasObserver();
 
     /* =========================================================================
        CHARACTERS DATABASE
@@ -1491,7 +2429,7 @@
     ];
 
     /* =========================================================================
-       APPLICATION STATE
+       APPLICATION STATE (4 ENERGIAS + STREAK + CHECKPOINTS)
        ========================================================================= */
     const state = {
       languageMode: 'portugol', // 'portugol' | 'python'
@@ -1501,7 +2439,10 @@
       selectedCharacter: CHARACTERS[0],
       currentStageIndex: 0,
       score: 0,
-      lives: 3,
+      lives: 4, // Capacidade de 4 energias
+      maxLives: 4,
+      consecutiveCorrectCount: 0, // Streak de acertos (a cada 3 recupera 1 energia)
+      highestCheckpoint: 0, // Checkpoint alcançado (10, 20, 30, 40, 50)
       correctCount: 0,
       wrongCount: 0,
       isAnswerLocked: false,
@@ -1561,13 +2502,70 @@
     }
 
     function updateHud() {
-      document.getElementById('hud-score-val').textContent = state.score;
-      for (let i = 1; i <= 3; i++) {
-        const heart = document.getElementById('heart-' + i);
-        if (heart) {
-          heart.classList.toggle('heart-lost', i > state.lives);
+      // Pontuação com animação bump
+      const scoreVal = document.getElementById('hud-score-val');
+      if (scoreVal) {
+        const prevScore = parseInt(scoreVal.textContent || '0', 10);
+        scoreVal.textContent = state.score;
+        if (state.score > prevScore) {
+          scoreVal.classList.remove('bump');
+          void scoreVal.offsetWidth; // Trigger reflow
+          scoreVal.classList.add('bump');
+          setTimeout(() => scoreVal.classList.remove('bump'), 400);
         }
       }
+
+      // Corações com classes alive/heart-lost e alerta crítico
+      for (let i = 1; i <= 4; i++) {
+        const heart = document.getElementById('heart-' + i);
+        if (heart) {
+          const isAlive = i <= state.lives;
+          heart.classList.toggle('heart-lost', !isAlive);
+          heart.classList.toggle('alive', isAlive);
+        }
+      }
+
+      // Alerta crítico na caixa de energia
+      const energyBox = document.getElementById('hud-energy-box');
+      if (energyBox) {
+        energyBox.classList.toggle('critical', state.lives <= 1);
+      }
+
+      // Barra de combo (pontos preenchidos)
+      for (let d = 1; d <= 3; d++) {
+        const dot = document.getElementById('combo-dot-' + d);
+        if (dot) {
+          dot.classList.toggle('filled', d <= state.consecutiveCorrectCount);
+        }
+      }
+
+      // Atualiza badge de checkpoint salvo
+      const cpBadge = document.getElementById('hud-checkpoint-badge');
+      if (cpBadge) {
+        if (state.highestCheckpoint > 0) {
+          cpBadge.style.display = 'block';
+          cpBadge.textContent = `🚩 Salvo: Fase ${state.highestCheckpoint}`;
+        } else {
+          cpBadge.style.display = 'none';
+        }
+      }
+    }
+
+    function initProgressCheckpoints() {
+      const bar = document.getElementById('progress-checkpoints-bar');
+      const total = (window.STAGES || []).length || 60;
+      if (!bar) return;
+      bar.innerHTML = '';
+      [10, 20, 30, 40, 50].forEach(cp => {
+        if (cp < total) {
+          const pct = (cp / total) * 100;
+          const marker = document.createElement('div');
+          marker.className = 'progress-cp-marker';
+          marker.style.left = pct + '%';
+          marker.title = `Checkpoint Fase ${cp}`;
+          bar.appendChild(marker);
+        }
+      });
     }
 
     /* =========================================================================
@@ -1703,16 +2701,27 @@
     function initSessionData() {
       state.hasStartedClass = true;
       state.score = 0;
-      state.lives = 3;
+      state.lives = 4; // Capacidade padrão de 4 energias
+      state.consecutiveCorrectCount = 0;
       state.currentStageIndex = 0;
       state.correctCount = 0;
       state.wrongCount = 0;
       state.stageResults = [];
       state.isFinished = false;
 
+      // Restaura o checkpoint salvo do aluno se existir
+      const savedCp = localStorage.getItem('cyber_runner_checkpoint_' + state.studentLogin);
+      if (savedCp) {
+        state.highestCheckpoint = parseInt(savedCp, 10) || 0;
+      } else {
+        state.highestCheckpoint = 0;
+      }
+
       updateHud();
+      initProgressCheckpoints();
 
       const stagesList = window.STAGES || [];
+
 
       if (window.AndroidBridge && typeof window.AndroidBridge.onSessionStarted === 'function') {
         try {
@@ -1819,11 +2828,46 @@
         const earnedPts = 150;
         state.score += earnedPts;
         state.correctCount += 1;
+        state.consecutiveCorrectCount += 1;
+
+        // Recuperação de Energia a cada 3 acertos seguidos sem erros (até 4 energias)
+        let recoveredEnergy = false;
+        if (state.consecutiveCorrectCount >= 3) {
+          if (state.lives < 4) {
+            state.lives += 1;
+            recoveredEnergy = true;
+            sound.playPowerup();
+          }
+          state.consecutiveCorrectCount = 0; // Reinicia o contador da sequência após conceder a energia
+        }
+
+        // Sistema de Checkpoint nas fases 10, 20, 30, 40, 50
+        const completedStageNum = state.currentStageIndex + 1;
+        let isCheckpointHit = false;
+        if (completedStageNum % 10 === 0 && completedStageNum <= 50) {
+          if (completedStageNum > state.highestCheckpoint) {
+            state.highestCheckpoint = completedStageNum;
+            isCheckpointHit = true;
+            sound.playCheckpoint();
+            if (state.studentLogin) {
+              localStorage.setItem('cyber_runner_checkpoint_' + state.studentLogin, String(completedStageNum));
+            }
+          }
+        }
+
         updateHud();
 
         feedback.className = 'feedback-banner success';
         feedback.style.display = 'block';
-        document.getElementById('feedback-title').innerHTML = '<span>✅</span> RESPOSTA EXATA! (+150 PTS)';
+
+        let titleHtml = '<span>✅</span> RESPOSTA EXATA! (+150 PTS)';
+        if (recoveredEnergy) {
+          titleHtml += ' <span style="color: var(--neon-yellow); margin-left: 6px;">🔋 +1 ENERGIA RECUPERADA!</span>';
+        }
+        if (isCheckpointHit) {
+          titleHtml += ' <span style="color: var(--neon-green); margin-left: 6px;">🚩 CHECKPOINT ' + completedStageNum + ' SALVO!</span>';
+        }
+        document.getElementById('feedback-title').innerHTML = titleHtml;
         document.getElementById('feedback-explanation').innerHTML = '<strong>' + selected.feedback + '</strong><br><span style="opacity: 0.9; font-size: 12.5px;">' + explanation + '</span>';
 
         state.stageResults.push({
@@ -1845,13 +2889,14 @@
         selectedBtn.classList.add('wrong');
         sound.playError();
         state.wrongCount += 1;
+        state.consecutiveCorrectCount = 0; // Zera a sequência de acertos
         state.lives -= 1;
         updateHud();
 
         feedback.className = 'feedback-banner error';
         feedback.style.display = 'block';
         document.getElementById('feedback-title').innerHTML = '<span>⚠️</span> SINTAXE INCORRETA! (-1 ENERGIA)';
-        document.getElementById('feedback-explanation').innerHTML = '<strong>' + selected.feedback + '</strong><br><span style="opacity: 0.9; font-size: 12px;">Analise o código com atenção e tente outra alternativa.</span>';
+        document.getElementById('feedback-explanation').innerHTML = '<strong>' + selected.feedback + '</strong><br><span style="opacity: 0.9; font-size: 12px;">Analise o código com atenção e tente outra alternativa. Sequência de bônus reiniciada.</span>';
 
         if (state.lives <= 0) {
           state.isAnswerLocked = true;
@@ -1880,6 +2925,7 @@
         if (!isHandlerActive || !state.hasStartedClass || state.isFinished || state.isLockedByScreenSwitch) return;
 
         sound.playError();
+        state.consecutiveCorrectCount = 0; // Zera o streak em caso de violação
         state.lives -= 1;
         updateHud();
 
@@ -1907,7 +2953,7 @@
     }
 
     /* =========================================================================
-       VICTORY & GAME OVER
+       VICTORY & GAME OVER COM CHECKPOINTS
        ========================================================================= */
     function handleVictory() {
       state.isFinished = true;
@@ -1925,6 +2971,22 @@
 
       document.getElementById('gameover-score-val').textContent = state.score + ' PTS';
       document.getElementById('gameover-stages-val').textContent = 'Desafios Superados: ' + state.correctCount + ' / 60';
+
+      const cpBox = document.getElementById('gameover-checkpoint-box');
+      const cpBtn = document.getElementById('btn-resume-checkpoint');
+      const cpText = document.getElementById('gameover-checkpoint-text');
+      const cpStageSpan = document.getElementById('resume-checkpoint-stage');
+
+      if (state.highestCheckpoint > 0) {
+        if (cpBox) cpBox.style.display = 'block';
+        if (cpBtn) cpBtn.style.display = 'flex';
+        if (cpText) cpText.textContent = 'Você atingiu o Checkpoint da Fase ' + state.highestCheckpoint + '. Pode retomar a partir da Fase ' + (state.highestCheckpoint + 1) + ' com 4 energias restauradas!';
+        if (cpStageSpan) cpStageSpan.textContent = 'FASE ' + (state.highestCheckpoint + 1);
+      } else {
+        if (cpBox) cpBox.style.display = 'none';
+        if (cpBtn) cpBtn.style.display = 'none';
+      }
+
       showScreen('screen-gameover');
     }
 
@@ -1933,7 +2995,177 @@
       initSessionData();
       showScreen('screen-gameplay');
       loadStage(0);
+      updateHud();
     }
+
+    function restartFromCheckpoint() {
+      sound.playBlip();
+      state.lives = 4;
+      state.consecutiveCorrectCount = 0;
+      state.isFinished = false;
+      state.isAnswerLocked = false;
+      state.isLockedByScreenSwitch = false;
+      state.currentStageIndex = state.highestCheckpoint; // Começa na fase seguinte ao checkpoint (ex: 10 -> index 10 / Fase 11)
+      showScreen('screen-gameplay');
+      loadStage(state.currentStageIndex);
+      updateHud();
+      saveLocalAttempt('RETOMADO DO CHECKPOINT (Fase ' + (state.currentStageIndex + 1) + ')');
+    }
+
+    /* =========================================================================
+       COMPUTAÇÃO DESPLUGADA (QUIZ SHOW DO MILHÃO / CARTÕES IMPRIMÍVEIS)
+       ========================================================================= */
+    function openUnpluggedQuizModal() {
+      const modal = document.getElementById('unplugged-quiz-modal');
+      if (modal) {
+        modal.classList.add('active');
+        updateQuizPreview();
+      }
+    }
+
+    function closeUnpluggedQuizModal() {
+      const modal = document.getElementById('unplugged-quiz-modal');
+      if (modal) modal.classList.remove('active');
+    }
+
+    function getSelectedQuizStages() {
+      const stagesList = window.STAGES || [];
+      const select = document.getElementById('quiz-block-select');
+      const block = select ? select.value : 'all';
+      if (block === 'all') return stagesList;
+      const parts = block.split('-').map(Number);
+      return stagesList.slice(parts[0] - 1, parts[1]);
+    }
+
+    function updateQuizPreview() {
+      const previewBox = document.getElementById('quiz-preview-box');
+      if (!previewBox) return;
+
+      const stages = getSelectedQuizStages();
+      const lang = document.getElementById('quiz-lang-select').value;
+      const layout = document.getElementById('quiz-layout-select').value;
+
+      let html = `<div style="font-size: 12px; color: var(--neon-yellow); margin-bottom: 6px; font-weight: 700;">${stages.length} questões prontas para impressão (${lang.toUpperCase()}):</div>`;
+      stages.slice(0, 3).forEach(s => {
+        const title = s.title;
+        const code = (lang === 'python' && s.pythonCodeTemplate) ? s.pythonCodeTemplate : s.codeTemplate;
+        html += `<div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 6px 8px; margin-bottom: 6px; font-size: 11px;">
+          <strong style="color: var(--neon-cyan);">${title}</strong> // ${s.concept}<br>
+          <code style="font-size: 10px; color: #cbd5e1; font-family: monospace;">${escapeHtml(code.substring(0, 60))}...</code>
+        </div>`;
+      });
+      if (stages.length > 3) {
+        html += `<div style="font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 4px;">... e mais ${stages.length - 3} cartões formatados para impressão.</div>`;
+      }
+      previewBox.innerHTML = html;
+    }
+
+    function triggerQuizPrint() {
+      const stages = getSelectedQuizStages();
+      const lang = document.getElementById('quiz-lang-select').value;
+      const layout = document.getElementById('quiz-layout-select').value;
+      const printContainer = document.getElementById('print-quiz-container');
+      if (!printContainer) return;
+
+      let printHtml = `<div style="text-align: center; margin-bottom: 16px; border-bottom: 2px solid #000; padding-bottom: 8px;">
+        <h1 style="font-size: 22px; text-transform: uppercase; margin-bottom: 4px; font-family: Arial, sans-serif;">Cyber Runner // Computação Desplugada</h1>
+        <p style="font-size: 13px; color: #333; margin: 0;">Cartões de Dinâmica para Sala de Aula (Quiz Show do Milhão) | Linguagem: <strong>${lang.toUpperCase()}</strong></p>
+      </div>`;
+
+      for (let i = 0; i < stages.length; i += 2) {
+        printHtml += `<div class="quiz-page">`;
+        const stageA = stages[i];
+        const stageB = stages[i + 1];
+
+        if (stageA) printHtml += renderSinglePrintableCard(stageA, lang, layout);
+        if (stageB) printHtml += renderSinglePrintableCard(stageB, lang, layout);
+
+        printHtml += `</div>`;
+      }
+
+      printContainer.innerHTML = printHtml;
+      window.print();
+    }
+
+    function renderSinglePrintableCard(stage, lang, layout) {
+      const isPy = (lang === 'python');
+      const title = stage.title;
+      const concept = stage.concept;
+      const code = (isPy && stage.pythonCodeTemplate) ? stage.pythonCodeTemplate : stage.codeTemplate;
+      const cleanCode = code.replace(/<[^>]*>?/gm, '[ ? ]');
+      const options = (isPy && stage.pythonOptions) ? stage.pythonOptions : stage.options;
+      const explanation = (isPy && stage.pythonExplanation) ? stage.pythonExplanation : stage.explanation;
+      const correctOpt = options.find(o => o.correct) || options[0];
+
+      let cardHtml = `<div class="quiz-card">`;
+      
+      // Cabeçalho
+      cardHtml += `<div class="quiz-card-header">
+        <span>⚡ QUESTÃO ${stage.id} // ${concept}</span>
+        <span style="font-size: 11px;">[150 PTS]</span>
+      </div>`;
+
+      // Enunciado
+      cardHtml += `<div style="font-size: 11.5px; margin-bottom: 6px; font-style: italic;">"${stage.scenario}"</div>`;
+
+      // Código
+      cardHtml += `<div class="quiz-card-code">${escapeHtml(cleanCode)}</div>`;
+
+      // Alternativas (Cartão de Pergunta / Aluno A)
+      if (layout === 'both' || layout === 'questions_only') {
+        cardHtml += `<div style="font-weight: bold; font-size: 11px; margin-top: 6px; text-transform: uppercase;">Alternativas de Resposta:</div>`;
+        const letters = ['A', 'B', 'C', 'D'];
+        options.forEach((opt, idx) => {
+          cardHtml += `<div class="quiz-card-option"><strong>(${letters[idx]})</strong> ${escapeHtml(opt.text)}</div>`;
+        });
+      }
+
+      // Gabarito Pedagógico (Cartão de Resposta / Aluno B / Juiz)
+      if (layout === 'both' || layout === 'answers_only') {
+        cardHtml += `<div class="quiz-card-answer">
+          <div style="font-weight: bold; color: #065f46;">🎯 GABARITO (RESPOSTA CORRETA): <u>${escapeHtml(correctOpt.text)}</u></div>
+          <div style="font-size: 11px; margin-top: 4px; color: #1f2937;"><strong>Explicação:</strong> ${explanation}</div>
+        </div>`;
+      }
+
+      cardHtml += `</div>`;
+      return cardHtml;
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    /* =========================================================================
+       ATALHOS DE TECLADO (ACESSIBILIDADE: 1-4 PARA OPÇÕES, ENTER/ESPAÇO PARA AVANÇAR)
+       ========================================================================= */
+    window.addEventListener('keydown', (e) => {
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+      const gameplayScreen = document.getElementById('screen-gameplay');
+      if (gameplayScreen && gameplayScreen.classList.contains('active')) {
+        if (['1', '2', '3', '4'].includes(e.key)) {
+          const idx = parseInt(e.key, 10) - 1;
+          const optBtn = document.getElementById('option-' + idx);
+          if (optBtn && !state.isAnswerLocked) {
+            onSelectOption(idx);
+          }
+        }
+        if (e.key === 'Enter' || e.key === ' ') {
+          const nextBtn = document.getElementById('btn-next-action');
+          if (nextBtn && nextBtn.style.display !== 'none') {
+            e.preventDefault();
+            onNextStageClicked();
+          }
+        }
+      }
+    });
 
     /* =========================================================================
        TEACHER DASHBOARD & AUTHENTICATION

@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="questions.js"></script>
   <script src="professor_auth.js"></script>
   <style>
     :root {
@@ -30,6 +31,81 @@
       --font-display: 'Orbitron', -apple-system, sans-serif;
       --font-body: 'Rajdhani', -apple-system, sans-serif;
       --font-code: 'Fira Code', monospace;
+    }
+
+    /* Print Styles para Computação Desplugada (Show do Milhão) */
+    #print-quiz-container {
+      display: none;
+    }
+    @media print {
+      body * {
+        visibility: hidden !important;
+      }
+      #print-quiz-container, #print-quiz-container * {
+        visibility: visible !important;
+      }
+      #print-quiz-container {
+        display: block !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 8mm;
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      .quiz-page {
+        page-break-after: always;
+        break-after: page;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8mm;
+        margin-bottom: 8mm;
+      }
+      .quiz-card {
+        border: 2px dashed #333333;
+        border-radius: 8px;
+        padding: 12px;
+        background: #ffffff;
+        color: #111111;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        box-sizing: border-box;
+      }
+      .quiz-card-header {
+        border-bottom: 2px solid #222;
+        padding-bottom: 4px;
+        margin-bottom: 6px;
+        display: flex;
+        justify-content: space-between;
+        font-weight: bold;
+        font-size: 13px;
+      }
+      .quiz-card-code {
+        background: #f4f4f4;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 8px;
+        font-family: 'Courier New', monospace;
+        font-size: 11px;
+        margin: 6px 0;
+        white-space: pre-wrap;
+      }
+      .quiz-card-option {
+        margin: 4px 0;
+        padding: 4px 6px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 11.5px;
+      }
+      .quiz-card-answer {
+        background: #e6f7ed;
+        border: 2px solid #059669;
+        border-radius: 6px;
+        padding: 8px;
+        margin-top: 6px;
+        font-size: 12px;
+      }
     }
 
     * {
@@ -515,9 +591,9 @@
         <a href="index.html" class="cyber-btn-sm" style="text-decoration: none;">
           <span>🎮</span> Abrir Jogo do Aluno
         </a>
+        <button class="cyber-btn-sm" style="color: var(--neon-magenta); border-color: rgba(244, 63, 94, 0.3);" onclick="lockProfessorPanel()" title="Bloquear o painel ao sair da mesa">🔒 Bloquear</button>
       </div>
-      <button class="cyber-btn-sm" style="color: var(--neon-magenta); border-color: rgba(244, 63, 94, 0.3);" onclick="lockProfessorPanel()" title="Bloquear o painel ao sair da mesa">🔒 Bloquear</button>
-      </header>
+    </header>
 
     <!-- Main Dashboard Card -->
     <main class="cyber-card">
@@ -553,6 +629,9 @@
           </button>
           <button class="cyber-btn-sm" onclick="exportJsonBackup()">
             <span>💾</span> Backup JSON
+          </button>
+          <button class="cyber-btn-sm" style="color: var(--neon-yellow); border-color: rgba(251, 191, 36, 0.35);" onclick="openUnpluggedQuizModal()">
+            <span>🖨️</span> Quiz Desplugado (Cartões)
           </button>
           <button class="cyber-btn-sm" onclick="openSupabaseModal()">
             <span>⚡</span> Configurar Nuvem (Supabase)
@@ -678,7 +757,7 @@ CREATE TABLE IF NOT EXISTS student_attempts (
     stages_completed INTEGER DEFAULT 0,
     correct_answers INTEGER DEFAULT 0,
     wrong_attempts INTEGER DEFAULT 0,
-    lives_remaining INTEGER DEFAULT 3,
+    lives_remaining INTEGER DEFAULT 4,
     status TEXT,
     stage_results JSONB,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -704,6 +783,69 @@ ALTER TABLE student_users DISABLE ROW LEVEL SECURITY;</pre>
       </button>
     </div>
   </div>
+
+  <!-- UNPLUGGED QUIZ MODAL (COMPUTAÇÃO DESPLUGADA / SHOW DO MILHÃO) -->
+  <div class="custom-modal" id="unplugged-quiz-modal" onclick="if(event.target === this) closeUnpluggedQuizModal()">
+    <div class="custom-modal-content" style="max-width: 650px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div style="display: align-items: center; gap: 10px;">
+          <span style="font-size: 28px;">🖨️</span>
+          <div>
+            <h3 style="font-family: var(--font-display); font-size: 16px; color: var(--neon-yellow);">Computação Desplugada: Quiz Show</h3>
+            <p style="font-size: 12px; color: var(--text-muted);">Gerador de cartões para sala de aula (Pergunta vs Gabarito / Juiz)</p>
+          </div>
+        </div>
+        <button style="background: none; border: none; color: var(--text-muted); font-size: 22px; cursor: pointer;" onclick="closeUnpluggedQuizModal()">✕</button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+        <div>
+          <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Bloco de Fases</label>
+          <select id="quiz-block-select" class="cyber-input" style="padding: 8px 10px;" onchange="updateQuizPreview()">
+            <option value="1-10">Fases 1 a 10 (Condicionais & Sintaxe)</option>
+            <option value="11-20">Fases 11 a 20 (Laços & Repetição)</option>
+            <option value="21-30">Fases 21 a 30 (Vetores & Matrizes)</option>
+            <option value="31-40">Fases 31 a 40 (Funções & Modularização)</option>
+            <option value="41-50">Fases 41 a 50 (Busca & Ordenação)</option>
+            <option value="51-60">Fases 51 a 60 (Algoritmos Avançados)</option>
+            <option value="all" selected>Todas as 60 Fases (Completo)</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Linguagem do Cartão</label>
+          <select id="quiz-lang-select" class="cyber-input" style="padding: 8px 10px;" onchange="updateQuizPreview()">
+            <option value="portugol" selected>🇧🇷 Portugol (Pseudocódigo)</option>
+            <option value="python">🐍 Python</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 10px; margin-bottom: 12px;">
+        <div>
+          <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Formato dos Cartões</label>
+          <select id="quiz-layout-select" class="cyber-input" style="padding: 8px 10px;" onchange="updateQuizPreview()">
+            <option value="both" selected>🗂️ Par Duplo: Pergunta (Aluno A) + Gabarito (Aluno B)</option>
+            <option value="questions_only">❓ Apenas Perguntas (Sem Gabarito)</option>
+            <option value="answers_only">💡 Apenas Gabaritos & Explicações (Juiz)</option>
+          </select>
+        </div>
+        <div style="display: flex; align-items: flex-end;">
+          <button type="button" class="cyber-btn-sm" style="width: 100%; background: linear-gradient(135deg, #d97706 0%, #fbbf24 100%); color: #000; font-weight: 800; padding: 9px 12px; font-family: var(--font-display);" onclick="triggerQuizPrint()">
+            🖨️ IMPRIMIR / PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- Preview Box -->
+      <div style="background: rgba(0,0,0,0.5); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px; max-height: 220px; overflow-y: auto;" id="quiz-preview-box">
+        <!-- Preview gerado via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTAINER DE IMPRESSÃO (OCULTO NA TELA, VISÍVEL NO PRINT) -->
+  <div id="print-quiz-container"></div>
 
   <script>
     /* =========================================================================
@@ -1281,6 +1423,201 @@ ALTER TABLE student_users DISABLE ROW LEVEL SECURITY;</pre>
         }
       } catch(e) {
         resultBox.style.background = 'rgba(244, 63, 94, 0.2)';
+      renderDashboard();
+    }
+
+    function onSearchChanged(val) {
+      currentSearchTerm = val;
+      renderDashboard();
+    }
+
+    function manualRefreshData() {
+      const btnText = document.getElementById('live-polling-text');
+      btnText.textContent = 'Sincronizando...';
+      loadData().then(() => {
+        setTimeout(() => {
+          btnText.textContent = 'AO VIVO (Sincronizado)';
+        }, 400);
+      });
+    }
+
+    // Auto-polling every 4 seconds for live monitor in classroom
+    setInterval(loadData, 4000);
+    loadData();
+
+    /* =========================================================================
+       MODAL RAIO-X DO ALUNO
+       ========================================================================= */
+    function openStudentDetail(id) {
+      const student = cachedAttempts.find(a => String(a.id) === String(id));
+      if (!student) return;
+      currentModalId = id;
+
+      document.getElementById('modal-avatar').textContent = student.characterAvatar || '⚡';
+      document.getElementById('modal-name').textContent = student.studentName;
+      document.getElementById('modal-class').textContent = `Turma: ${student.studentClass} // Login: ${student.studentLogin || '-'}`;
+
+      let resultsHtml = '';
+      if (student.stageResults && student.stageResults.length > 0) {
+        resultsHtml = `
+          <div style="font-weight: 700; color: var(--neon-cyan); margin-top: 12px; margin-bottom: 6px; font-size: 12px; text-transform: uppercase;">
+            Histórico das Questões Respondidas (${student.stageResults.length}):
+          </div>
+          <div style="max-height: 180px; overflow-y: auto; background: rgba(0,0,0,0.4); border-radius: 10px; padding: 8px; border: 1px solid var(--border-subtle); font-size: 12px;">
+            ${student.stageResults.map(r => `
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 4px 0;">
+                <span><strong>Fase ${r.stageNum}:</strong> ${r.concept}</span>
+                <span style="color: var(--neon-green);">+${r.points} pts</span>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      document.getElementById('modal-body').innerHTML = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: rgba(0,0,0,0.5); padding: 12px; border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border-subtle);">
+          <div><span style="color: var(--text-muted); font-size: 11px;">PONTUAÇÃO:</span><br><strong style="color: var(--neon-yellow); font-size: 18px;">${student.score} pts</strong></div>
+          <div><span style="color: var(--text-muted); font-size: 11px;">STATUS ATUAL:</span><br><strong style="font-size: 13px;">${student.status}</strong></div>
+          <div><span style="color: var(--text-muted); font-size: 11px;">ACERTOS:</span><br><strong style="color: var(--neon-green);">${student.correctAnswers || 0}</strong></div>
+          <div><span style="color: var(--text-muted); font-size: 11px;">ERROS / TENTATIVAS:</span><br><strong style="color: var(--neon-magenta);">${student.wrongAttempts || 0}</strong></div>
+          <div><span style="color: var(--text-muted); font-size: 11px;">ENERGIAS RESTANTES:</span><br><strong>${student.livesRemaining || 0} / 3</strong></div>
+          <div><span style="color: var(--text-muted); font-size: 11px;">DATA / HORA:</span><br><span style="font-size: 12px;">${student.timestamp || 'Hoje'}</span></div>
+        </div>
+        ${resultsHtml}
+      `;
+
+      document.getElementById('detail-modal').classList.add('active');
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detail-modal').classList.remove('active');
+      currentModalId = null;
+    }
+
+    async function deleteCurrentModalRecord() {
+      if (!currentModalId) return;
+      if (!confirm('Deseja realmente remover este registro de aluno?')) return;
+
+      // 1. Delete locally
+      try {
+        let history = JSON.parse(localStorage.getItem('cyber_runner_history') || '[]');
+        history = history.filter(h => String(h.id) !== String(currentModalId));
+        localStorage.setItem('cyber_runner_history', JSON.stringify(history));
+      } catch(e) {}
+
+      // 2. Delete from Supabase
+      if (SupabaseCloud.isConfigured()) {
+        await SupabaseCloud.deleteAttempt(currentModalId);
+      }
+
+      // 3. Delete from XAMPP SQLite
+      await XamppSqlite.deleteAttempt(currentModalId);
+
+      cachedAttempts = cachedAttempts.filter(a => String(a.id) !== String(currentModalId));
+      closeDetailModal();
+      renderDashboard();
+    }
+
+    /* =========================================================================
+       EXPORT CSV & BACKUP JSON
+       ========================================================================= */
+    function exportCsvReport() {
+      const all = cachedAttempts;
+      if (all.length === 0) {
+        alert('Não há registros para exportar no momento.');
+        return;
+      }
+
+      const headers = ['Turma', 'Nome do Aluno', 'Login', 'Pontuacao', 'Progresso (%)', 'Fases Concluidas', 'Acertos', 'Erros', 'Energias', 'Status', 'Data_Hora'];
+      const rows = all.map(a => [
+        `"${a.studentClass || ''}"`,
+        `"${a.studentName || ''}"`,
+        `"${a.studentLogin || ''}"`,
+        a.score || 0,
+        a.progressPercentage || 0,
+        a.stagesCompleted || 0,
+        a.correctAnswers || 0,
+        a.wrongAttempts || 0,
+        a.livesRemaining || 0,
+        `"${a.status || ''}"`,
+        `"${a.timestamp || ''}"`
+      ]);
+
+      const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `relatorio_cyber_runner_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function exportJsonBackup() {
+      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(cachedAttempts, null, 2));
+      const dlAnchor = document.createElement('a');
+      dlAnchor.setAttribute('href', dataStr);
+      dlAnchor.setAttribute('download', `backup_cyber_runner_${new Date().toISOString().slice(0,10)}.json`);
+      dlAnchor.click();
+    }
+
+    async function confirmClearAll() {
+      if (confirm('ATENÇÃO: Deseja apagar todos os registros da memória local e do banco SQLite local?')) {
+        localStorage.removeItem('cyber_runner_history');
+        await XamppSqlite.clearAll();
+        cachedAttempts = [];
+        renderDashboard();
+      }
+    }
+
+    /* =========================================================================
+       SUPABASE CONFIG MODAL
+       ========================================================================= */
+    function openSupabaseModal() {
+      const conf = SupabaseCloud.getConfig();
+      document.getElementById('cfg-supabase-url').value = conf.url;
+      document.getElementById('cfg-supabase-key').value = conf.key;
+      document.getElementById('cfg-test-result').style.display = 'none';
+      document.getElementById('supabase-modal').classList.add('active');
+    }
+
+    function closeSupabaseModal() {
+      document.getElementById('supabase-modal').classList.remove('active');
+    }
+
+    async function saveAndTestSupabaseConfig() {
+      const url = document.getElementById('cfg-supabase-url').value.trim();
+      const key = document.getElementById('cfg-supabase-key').value.trim();
+      const resultBox = document.getElementById('cfg-test-result');
+
+      localStorage.setItem('cyber_runner_supabase_url', url);
+      localStorage.setItem('cyber_runner_supabase_key', key);
+
+      resultBox.style.display = 'block';
+      resultBox.style.background = 'rgba(34, 211, 238, 0.15)';
+      resultBox.style.color = 'var(--neon-cyan)';
+      resultBox.textContent = 'Testando conexão com o Supabase...';
+
+      try {
+        const endpoint = `${url.replace(/\/+$/, '')}/rest/v1/student_attempts?select=id&limit=1`;
+        const res = await fetch(endpoint, {
+          headers: { 'apikey': key, 'Authorization': `Bearer ${key}` }
+        });
+        if (res.ok) {
+          resultBox.style.background = 'rgba(16, 185, 129, 0.2)';
+          resultBox.style.color = 'var(--neon-green)';
+          resultBox.textContent = '✅ Conexão estabelecida com sucesso! Os dados dos alunos serão sincronizados em nuvem.';
+          setTimeout(() => {
+            closeSupabaseModal();
+            loadData();
+          }, 1200);
+        } else {
+          resultBox.style.background = 'rgba(244, 63, 94, 0.2)';
+          resultBox.style.color = 'var(--neon-magenta)';
+          resultBox.textContent = `⚠️ Supabase retornou status ${res.status}: ${res.statusText}. Execute o Script SQL abaixo no SQL Editor do seu projeto Supabase.`;
+        }
+      } catch(e) {
+        resultBox.style.background = 'rgba(244, 63, 94, 0.2)';
         resultBox.style.color = 'var(--neon-magenta)';
         resultBox.textContent = `❌ Falha ao conectar: ${e.message}`;
       }
@@ -1291,6 +1628,130 @@ ALTER TABLE student_users DISABLE ROW LEVEL SECURITY;</pre>
       navigator.clipboard.writeText(sql).then(() => {
         alert('Script SQL copiado para a área de transferência! Cole no SQL Editor do Supabase.');
       });
+    }
+
+    /* =========================================================================
+       COMPUTAÇÃO DESPLUGADA (QUIZ SHOW DO MILHÃO / CARTÕES IMPRIMÍVEIS)
+       ========================================================================= */
+    function openUnpluggedQuizModal() {
+      const modal = document.getElementById('unplugged-quiz-modal');
+      if (modal) {
+        modal.classList.add('active');
+        updateQuizPreview();
+      }
+    }
+
+    function closeUnpluggedQuizModal() {
+      const modal = document.getElementById('unplugged-quiz-modal');
+      if (modal) modal.classList.remove('active');
+    }
+
+    function getSelectedQuizStages() {
+      const stagesList = window.STAGES || [];
+      const select = document.getElementById('quiz-block-select');
+      const block = select ? select.value : 'all';
+      if (block === 'all') return stagesList;
+      const parts = block.split('-').map(Number);
+      return stagesList.slice(parts[0] - 1, parts[1]);
+    }
+
+    function updateQuizPreview() {
+      const previewBox = document.getElementById('quiz-preview-box');
+      if (!previewBox) return;
+
+      const stages = getSelectedQuizStages();
+      const lang = document.getElementById('quiz-lang-select').value;
+      const layout = document.getElementById('quiz-layout-select').value;
+
+      let html = `<div style="font-size: 12px; color: var(--neon-yellow); margin-bottom: 6px; font-weight: 700;">${stages.length} questões prontas para impressão (${lang.toUpperCase()}):</div>`;
+      stages.slice(0, 3).forEach(s => {
+        const title = s.title;
+        const code = (lang === 'python' && s.pythonCodeTemplate) ? s.pythonCodeTemplate : s.codeTemplate;
+        html += `<div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 6px 8px; margin-bottom: 6px; font-size: 11px;">
+          <strong style="color: var(--neon-cyan);">${title}</strong> // ${s.concept}<br>
+          <code style="font-size: 10px; color: #cbd5e1; font-family: monospace;">${escapeHtml(code.substring(0, 60))}...</code>
+        </div>`;
+      });
+      if (stages.length > 3) {
+        html += `<div style="font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 4px;">... e mais ${stages.length - 3} cartões formatados para impressão.</div>`;
+      }
+      previewBox.innerHTML = html;
+    }
+
+    function triggerQuizPrint() {
+      const stages = getSelectedQuizStages();
+      const lang = document.getElementById('quiz-lang-select').value;
+      const layout = document.getElementById('quiz-layout-select').value;
+      const printContainer = document.getElementById('print-quiz-container');
+      if (!printContainer) return;
+
+      let printHtml = `<div style="text-align: center; margin-bottom: 16px; border-bottom: 2px solid #000; padding-bottom: 8px;">
+        <h1 style="font-size: 22px; text-transform: uppercase; margin-bottom: 4px; font-family: Arial, sans-serif;">Cyber Runner // Computação Desplugada</h1>
+        <p style="font-size: 13px; color: #333; margin: 0;">Cartões de Dinâmica para Sala de Aula (Quiz Show do Milhão) | Linguagem: <strong>${lang.toUpperCase()}</strong></p>
+      </div>`;
+
+      for (let i = 0; i < stages.length; i += 2) {
+        printHtml += `<div class="quiz-page">`;
+        const stageA = stages[i];
+        const stageB = stages[i + 1];
+
+        if (stageA) printHtml += renderSinglePrintableCard(stageA, lang, layout);
+        if (stageB) printHtml += renderSinglePrintableCard(stageB, lang, layout);
+
+        printHtml += `</div>`;
+      }
+
+      printContainer.innerHTML = printHtml;
+      window.print();
+    }
+
+    function renderSinglePrintableCard(stage, lang, layout) {
+      const isPy = (lang === 'python');
+      const title = stage.title;
+      const concept = stage.concept;
+      const code = (isPy && stage.pythonCodeTemplate) ? stage.pythonCodeTemplate : stage.codeTemplate;
+      const cleanCode = code.replace(/<[^>]*>?/gm, '[ ? ]');
+      const options = (isPy && stage.pythonOptions) ? stage.pythonOptions : stage.options;
+      const explanation = (isPy && stage.pythonExplanation) ? stage.pythonExplanation : stage.explanation;
+      const correctOpt = options.find(o => o.correct) || options[0];
+
+      let cardHtml = `<div class="quiz-card">`;
+      
+      cardHtml += `<div class="quiz-card-header">
+        <span>⚡ QUESTÃO ${stage.id} // ${concept}</span>
+        <span style="font-size: 11px;">[150 PTS]</span>
+      </div>`;
+
+      cardHtml += `<div style="font-size: 11.5px; margin-bottom: 6px; font-style: italic;">"${stage.scenario}"</div>`;
+      cardHtml += `<div class="quiz-card-code">${escapeHtml(cleanCode)}</div>`;
+
+      if (layout === 'both' || layout === 'questions_only') {
+        cardHtml += `<div style="font-weight: bold; font-size: 11px; margin-top: 6px; text-transform: uppercase;">Alternativas de Resposta:</div>`;
+        const letters = ['A', 'B', 'C', 'D'];
+        options.forEach((opt, idx) => {
+          cardHtml += `<div class="quiz-card-option"><strong>(${letters[idx]})</strong> ${escapeHtml(opt.text)}</div>`;
+        });
+      }
+
+      if (layout === 'both' || layout === 'answers_only') {
+        cardHtml += `<div class="quiz-card-answer">
+          <div style="font-weight: bold; color: #065f46;">🎯 GABARITO (RESPOSTA CORRETA): <u>${escapeHtml(correctOpt.text)}</u></div>
+          <div style="font-size: 11px; margin-top: 4px; color: #1f2937;"><strong>Explicação:</strong> ${explanation}</div>
+        </div>`;
+      }
+
+      cardHtml += `</div>`;
+      return cardHtml;
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
     }
 
     // Inicialização ao carregar a página
