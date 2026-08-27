@@ -11,6 +11,63 @@ if ($requestMethod === 'OPTIONS') {
 }
 
 /**
+ * Carrega variáveis de ambiente do arquivo .env (se existir)
+ */
+function loadEnv($path = __DIR__ . '/.env') {
+    if (!file_exists($path)) {
+        $parentPath = dirname(__DIR__) . '/.env';
+        if (file_exists($parentPath)) {
+            $path = $parentPath;
+        } else {
+            return;
+        }
+    }
+
+    $lines = @file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if ($lines === false) return;
+
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if ($line === '' || strpos($line, '#') === 0) {
+            continue;
+        }
+
+        $parts = explode('=', $line, 2);
+        if (count($parts) === 2) {
+            $key = trim($parts[0]);
+            $val = trim($parts[1]);
+
+            // Remove aspas simples ou duplas envolventes
+            $len = strlen($val);
+            if ($len >= 2) {
+                $first = $val[0];
+                $last = $val[$len - 1];
+                if (($first === '"' && $last === '"') || ($first === "'" && $last === "'")) {
+                    $val = substr($val, 1, -1);
+                }
+            }
+
+            if (!empty($key)) {
+                $_ENV[$key] = $val;
+                $_SERVER[$key] = $val;
+                putenv("$key=$val");
+            }
+        }
+    }
+}
+
+// Inicializa variáveis do .env
+loadEnv();
+
+/**
+ * Obtém valor de variável de ambiente com fallback
+ */
+function getEnvVar($key, $default = '') {
+    $val = $_ENV[$key] ?? $_SERVER[$key] ?? getenv($key);
+    return ($val !== false && $val !== null && $val !== '') ? $val : $default;
+}
+
+/**
  * Obtém a conexão PDO com o SQLite.
  * Se o diretório atual for somente leitura (como no ambiente Serverless da Vercel),
  * o banco é copiado e aberto em /tmp/database.sqlite.
@@ -85,6 +142,61 @@ function createTablesIfNotExists($db) {
     )");
 }
 
+/**
+ * Obtém configuração do Supabase com suporte a múltiplos padrões (.env padrão e Vite)
+ */
+function getSupabaseConfig() {
+    $url = getEnvVar('VITE_SUPABASE_URL', getEnvVar('SUPABASE_URL', ''));
+    $key = getEnvVar('VITE_SUPABASE_PUBLISHABLE_KEY', getEnvVar('SUPABASE_ANON_KEY', getEnvVar('VITE_SUPABASE_ANON_KEY', getEnvVar('SUPABASE_KEY', getEnvVar('SUPABASE_PUBLISHABLE_KEY', '')))));
+    return [$url, $key];
+}
+
+/**
+ * Envio opcional e resiliente para o Supabase via REST
+ */
+function syncRecordToSupabase($record) {
+    list($supabaseUrl, $supabaseKey) = getSupabaseConfig();
+
+    if (empty($supabaseUrl) || empty($supabaseKey) || strlen($supabaseUrl) < 8 || strlen($supabaseKey) < 10) {
+        return false;
+    }
+
+    $endpoint = rtrim($supabaseUrl, '/') . '/rest/v1/student_attempts';
+    $payload = json_encode([
+        'id' => (string)($record['id'] ?? uniqid('att_')),
+        'student_name' => $record['studentName'] ?? ($record['student_name'] ?? ''),
+        'student_class' => $record['studentClass'] ?? ($record['student_class'] ?? ''),
+        'student_login' => $record['studentLogin'] ?? ($record['student_login'] ?? ''),
+        'character_name' => $record['characterName'] ?? ($record['character_name'] ?? ''),
+        'character_avatar' => $record['characterAvatar'] ?? ($record['character_avatar'] ?? '⚡'),
+        'score' => (int)($record['score'] ?? 0),
+        'progress_percentage' => (int)($record['progressPercentage'] ?? ($record['progress_percentage'] ?? 0)),
+        'stages_completed' => (int)($record['stagesCompleted'] ?? ($record['stages_completed'] ?? 0)),
+        'correct_answers' => (int)($record['correctAnswers'] ?? ($record['correct_answers'] ?? 0)),
+        'wrong_attempts' => (int)($record['wrongAttempts'] ?? ($record['wrong_attempts'] ?? 0)),
+        'lives_remaining' => (int)($record['livesRemaining'] ?? ($record['lives_remaining'] ?? 3)),
+        'status' => $record['status'] ?? 'EM ANDAMENTO',
+        'stage_results' => $record['stageResults'] ?? ($record['stage_results'] ?? []),
+        'raw_json' => json_encode($record, JSON_UNESCAPED_UNICODE)
+    ]);
+
+    $opts = [
+        'http' => [
+            'method' => 'POST',
+            'header' => "Content-Type: application/json\r\n" .
+                        "apikey: $supabaseKey\r\n" .
+                        "Authorization: Bearer $supabaseKey\r\n" .
+                        "Prefer: resolution=merge-duplicates\r\n",
+            'content' => $payload,
+            'timeout' => 2 // Timeout curto para não bloquear se estiver sem internet
+        ]
+    ];
+
+    $ctx = stream_context_create($opts);
+    @file_get_contents($endpoint, false, $ctx);
+    return true;
+}
+
 try {
     list($db, $dbPath, $isTmp) = getDatabaseConnection();
 
@@ -97,14 +209,38 @@ try {
         $action = $input['action'];
     }
 
-    // Healthcheck / Status
-    if ($action === 'status') {
+    // Configuração pública do sistema (Supabase URL / Anon Key via .env)
+    if ($action === 'get_config') {
+        list($supabaseUrl, $supabaseAnonKey) = getSupabaseConfig();
+        $storageMode = getEnvVar('STORAGE_MODE', 'hybrid');
+        $isSupabaseConfigured = (!empty($supabaseUrl) && !empty($supabaseAnonKey) && strlen($supabaseUrl) > 8 && strlen($supabaseAnonKey) > 10);
+
         echo json_encode([
             'success' => true,
-            'storage' => 'SQLite (' . ($isTmp ? 'Vercel /tmp' : 'Servidor Local') . ')',
+            'supabase_url' => $supabaseUrl,
+            'supabase_anon_key' => $supabaseAnonKey,
+            'storage_mode' => $storageMode,
+            'is_supabase_configured' => $isSupabaseConfigured,
+            'is_sqlite_available' => true,
+            'database' => basename($dbPath),
+            'storage' => 'SQLite + Supabase (.env Hybrid)',
+            'timestamp' => date('c')
+        ]);
+        exit;
+    }
+
+    // Healthcheck / Status
+    if ($action === 'status') {
+        list($supabaseUrl, $supabaseAnonKey) = getSupabaseConfig();
+        $isSupabaseConfigured = (!empty($supabaseUrl) && !empty($supabaseAnonKey));
+
+        echo json_encode([
+            'success' => true,
+            'storage' => 'SQLite (' . ($isTmp ? 'Vercel /tmp' : 'Servidor Local') . ')' . ($isSupabaseConfigured ? ' + Supabase (.env Ativo)' : ''),
             'database' => basename($dbPath),
             'path' => $dbPath,
             'is_tmp' => $isTmp,
+            'supabase_configured' => $isSupabaseConfigured,
             'timestamp' => date('c')
         ]);
         exit;
@@ -118,6 +254,7 @@ try {
             exit;
         }
 
+        // 1. Grava no SQLite local (Garantia offline total)
         $stmt = $db->prepare("INSERT OR REPLACE INTO student_attempts 
             (id, student_name, student_class, student_login, character_name, character_avatar, score, progress_percentage, stages_completed, correct_answers, wrong_attempts, lives_remaining, status, timestamp, stage_results, raw_json) 
             VALUES (:id, :student_name, :student_class, :student_login, :character_name, :character_avatar, :score, :progress_percentage, :stages_completed, :correct_answers, :wrong_attempts, :lives_remaining, :status, :timestamp, :stage_results, :raw_json)");
@@ -141,7 +278,18 @@ try {
             ':raw_json' => json_encode($record, JSON_UNESCAPED_UNICODE)
         ]);
 
-        echo json_encode(['success' => true, 'id' => $record['id']]);
+        // 2. Sincronização em nuvem não-bloqueante se o Supabase estiver configurado
+        $syncedCloud = false;
+        if (getEnvVar('STORAGE_MODE', 'hybrid') !== 'sqlite') {
+            $syncedCloud = syncRecordToSupabase($record);
+        }
+
+        echo json_encode([
+            'success' => true, 
+            'id' => $record['id'],
+            'storage' => 'sqlite',
+            'cloud_sync' => $syncedCloud
+        ]);
         exit;
     }
 
@@ -211,7 +359,7 @@ try {
         exit;
     }
 
-    echo json_encode(['success' => true, 'msg' => 'API SQLite do Cyber Runner operacional']);
+    echo json_encode(['success' => true, 'msg' => 'API SQLite do Cyber Runner operacional com suporte a Supabase via .env']);
 
 } catch (Throwable $e) {
     http_response_code(500);

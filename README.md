@@ -24,6 +24,36 @@ Plataforma educacional gamificada para treinamento prático de **Lógica de Prog
 
 ---
 
+## 🌐 Arquitetura Híbrida: Supabase (.env) + SQLite (Offline)
+
+O sistema foi arquitetado para ser **100% tolerante a falhas e resiliente a quedas de conexão** (*Offline-First*):
+
+| Camada | Função | Onde os dados ficam |
+|---|---|---|
+| **SQLite (`database.sqlite`)** | **Offline / Rede Local** | Gravação imediata no servidor local (XAMPP/PHP). Funciona sem internet. |
+| **LocalStorage** | **Offline de Emergência** | Cache interno do navegador em cada máquina cliente. |
+| **Supabase Cloud** | **Online / Centralização** | Sincronização automática em tempo real quando houver internet. |
+
+---
+
+## ⚙️ Configuração do `.env` (Supabase)
+
+Para conectar à nuvem Supabase sem precisar configurar máquina por máquina, utilize o arquivo `.env`:
+
+1. Copie o arquivo de exemplo:
+   ```bash
+   copy .env.example .env
+   ```
+2. Abra o `.env` e insira suas credenciais:
+   ```env
+   SUPABASE_URL=https://seu-projeto.supabase.co
+   SUPABASE_ANON_KEY=sua-chave-anon-publica
+   STORAGE_MODE=hybrid
+   ```
+3. Pronto! Ao carregar o jogo ou o Painel do Professor, o sistema detecta as credenciais automaticamente via `api.php?action=get_config`.
+
+---
+
 ## 🔐 Acesso e Senha do Professor
 
 O acesso ao Painel do Professor (`professor.html` ou aba "Painel do Professor") é protegido por código de autorização.
@@ -45,10 +75,12 @@ Abra o arquivo `professor_auth.json` na raiz do projeto e edite o campo `codigoA
 ## 📂 Estrutura de Arquivos
 
 - `index.html`: Interface principal do aluno e gameplay.
-- `professor.html`: Painel avançado de gestão e acompanhamento do professor.
+- `professor.html`: Painel avançado de gestão e acompanhamento do professor em tempo real.
+- `.env`: Arquivo de variáveis de ambiente com as credenciais do Supabase.
+- `.env.example`: Modelo documentado para fácil configuração.
+- `api.php` / `api/index.php`: API REST PHP com leitor nativo de `.env` e persistência em SQLite (`database.sqlite`) / Vercel Serverless.
 - `questions.json` / `questions.js`: Banco estruturado com as 60 fases completas em Portugol e Python.
 - `professor_auth.json` / `professor_auth.js`: Configuração de segurança e código de acesso do professor.
-- `api.php` / `api/index.php`: API REST PHP com banco SQLite para persistência em servidor local (XAMPP) e Vercel Serverless.
 
 ---
 
@@ -60,4 +92,4 @@ Abra o arquivo `professor_auth.json` na raiz do projeto e edite o campo `codigoA
 
 2. **Nuvem (Vercel / Supabase)**:
    - Faça o deploy no Vercel (já configurado com `vercel.json`).
-   - Configure o Supabase para sincronização em nuvem pelo botão ⚙️ no Painel do Professor.
+   - Defina as variáveis de ambiente `SUPABASE_URL` e `SUPABASE_ANON_KEY` nas configurações da Vercel ou via `.env`.

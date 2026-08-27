@@ -3,3 +3,11 @@ ARTIGO_COMPLETO_FULLPAPER_SBC.md
 ARTIGO_RELATO_DE_EXPERIENCIA_SBC.md
 GUIA_COLETA_METRICAS_AULA.md
 PLANO.md
+
+# Variáveis de ambiente e credenciais
+.env
+.env.local
+.env.*.local
+
+# Banco de dados local SQLite
+database.sqlite

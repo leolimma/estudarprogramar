@@ -751,13 +751,48 @@ ALTER TABLE student_users DISABLE ROW LEVEL SECURITY;</pre>
     animateParticles();
 
     /* =========================================================================
-       SUPABASE REST API CLIENT
+       SUPABASE REST API CLIENT (OFFLINE-FIRST + .ENV AUTO-LOAD)
        ========================================================================= */
     const SupabaseCloud = {
+      _envUrl: '',
+      _envKey: '',
+      _envLoaded: false,
+
+      async initFromEnv() {
+        if (this._envLoaded) return;
+        try {
+          const res = await fetch('api.php?action=get_config');
+          if (res.ok) {
+            const data = await res.json();
+            if (data.success && data.is_supabase_configured) {
+              this._envUrl = data.supabase_url || '';
+              this._envKey = data.supabase_anon_key || '';
+              if (!localStorage.getItem('cyber_runner_supabase_url')) {
+                localStorage.setItem('cyber_runner_supabase_url', this._envUrl);
+              }
+              if (!localStorage.getItem('cyber_runner_supabase_key')) {
+                localStorage.setItem('cyber_runner_supabase_key', this._envKey);
+              }
+              this.updateStatusBadge(true, 'AO VIVO (Nuvem .env + SQLite)');
+            } else {
+              this.updateStatusBadge(false, 'AO VIVO (SQLite Local Offline)');
+            }
+          }
+        } catch(e) {
+          this.updateStatusBadge(false, 'AO VIVO (Modo Offline)');
+        }
+        this._envLoaded = true;
+      },
+
+      updateStatusBadge(isCloud, text) {
+        const badge = document.getElementById('live-polling-text');
+        if (badge) badge.textContent = text;
+      },
+
       getConfig() {
         return {
-          url: localStorage.getItem('cyber_runner_supabase_url') || '',
-          key: localStorage.getItem('cyber_runner_supabase_key') || ''
+          url: localStorage.getItem('cyber_runner_supabase_url') || this._envUrl || '',
+          key: localStorage.getItem('cyber_runner_supabase_key') || this._envKey || ''
         };
       },
       isConfigured() {
@@ -1257,6 +1292,14 @@ ALTER TABLE student_users DISABLE ROW LEVEL SECURITY;</pre>
         alert('Script SQL copiado para a área de transferência! Cole no SQL Editor do Supabase.');
       });
     }
+
+    // Inicialização ao carregar a página
+    document.addEventListener('DOMContentLoaded', async () => {
+      await SupabaseCloud.initFromEnv();
+      await loadData();
+      // Polling a cada 5 segundos para monitoramento ao vivo
+      setInterval(loadData, 5000);
+    });
   </script>
 </body>
 </html>

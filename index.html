@@ -2021,6 +2021,48 @@
     /* =========================================================================
        DATA PERSISTENCE & TEACHER METRICS
        ========================================================================= */
+    /* =========================================================================
+       DATA PERSISTENCE & TEACHER METRICS (OFFLINE-FIRST: SQLITE + SUPABASE .ENV)
+       ========================================================================= */
+    const StorageService = {
+      supabaseUrl: localStorage.getItem('cyber_runner_supabase_url') || '',
+      supabaseKey: localStorage.getItem('cyber_runner_supabase_key') || '',
+      isEnvLoaded: false,
+
+      async init() {
+        if (this.isEnvLoaded) return;
+        try {
+          const res = await fetch('api.php?action=get_config');
+          if (res.ok) {
+            const data = await res.json();
+            if (data.success && data.is_supabase_configured) {
+              this.supabaseUrl = data.supabase_url;
+              this.supabaseKey = data.supabase_anon_key;
+              if (!localStorage.getItem('cyber_runner_supabase_url')) {
+                localStorage.setItem('cyber_runner_supabase_url', this.supabaseUrl);
+              }
+              if (!localStorage.getItem('cyber_runner_supabase_key')) {
+                localStorage.setItem('cyber_runner_supabase_key', this.supabaseKey);
+              }
+              this.updateIndicator(true, 'Nuvem Ativa (.env + SQLite)');
+            } else {
+              this.updateIndicator(false, 'SQLite Local (Offline)');
+            }
+          }
+        } catch(e) {
+          this.updateIndicator(false, 'Modo Local (Offline)');
+        }
+        this.isEnvLoaded = true;
+      },
+
+      updateIndicator(isCloud, text) {
+        const dot = document.getElementById('supabase-dot');
+        const txt = document.getElementById('supabase-status-text');
+        if (dot) dot.textContent = isCloud ? '🟢' : '🟡';
+        if (txt) txt.textContent = text;
+      }
+    };
+
     function getLocalAttempts() {
       return JSON.parse(localStorage.getItem('cyber_runner_attempts') || '[]');
     }
@@ -2048,13 +2090,57 @@
         createdAt: new Date().toISOString()
       };
 
+      // 1. Armazenamento local imediato (Garantia offline no navegador)
       if (existingIdx >= 0) {
         attempts[existingIdx] = record;
       } else {
         attempts.unshift(record);
       }
-
       localStorage.setItem('cyber_runner_attempts', JSON.stringify(attempts));
+
+      // 2. Persistência no SQLite local (Servidor XAMPP / PHP)
+      try {
+        fetch('api.php?action=save_attempt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(record)
+        }).catch(() => {});
+      } catch(e) {}
+
+      // 3. Sincronização em nuvem não-bloqueante (Supabase via .env ou manual)
+      const url = StorageService.supabaseUrl || localStorage.getItem('cyber_runner_supabase_url');
+      const key = StorageService.supabaseKey || localStorage.getItem('cyber_runner_supabase_key');
+      if (url && key && url.length > 8 && key.length > 10) {
+        try {
+          const endpoint = url.replace(/\/+$/, '') + '/rest/v1/student_attempts';
+          fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': key,
+              'Authorization': 'Bearer ' + key,
+              'Prefer': 'resolution=merge-duplicates'
+            },
+            body: JSON.stringify({
+              id: String(record.id),
+              student_name: record.studentName,
+              student_class: record.studentClass,
+              student_login: record.studentLogin || '',
+              character_name: record.characterName,
+              character_avatar: record.characterAvatar,
+              score: Number(record.score) || 0,
+              progress_percentage: Number(record.progressPercentage) || 0,
+              stages_completed: Number(record.stagesCompleted) || 0,
+              correct_answers: Number(record.correctAnswers) || 0,
+              wrong_attempts: Number(record.wrongAttempts) || 0,
+              lives_remaining: Number(record.livesRemaining) || 0,
+              status: record.status,
+              stage_results: record.stageResults || [],
+              raw_json: JSON.stringify(record)
+            })
+          }).catch(() => {});
+        } catch(e) {}
+      }
     }
 
     function notifyStageProgress(passed) {
@@ -2071,8 +2157,22 @@
       }
     }
 
-    function refreshTeacherData() {
-      const attempts = getLocalAttempts();
+    async function refreshTeacherData() {
+      let attempts = getLocalAttempts();
+      try {
+        const res = await fetch('api.php?action=get_attempts');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.attempts)) {
+            const map = new Map();
+            data.attempts.forEach(a => map.set(String(a.id), a));
+            attempts.forEach(a => {
+              if (!map.has(String(a.id))) map.set(String(a.id), a);
+            });
+            attempts = Array.from(map.values());
+          }
+        }
+      } catch(e) {}
       renderTeacherTable(attempts);
     }
 
@@ -2129,15 +2229,39 @@
       document.getElementById('student-detail-modal').classList.remove('active');
     }
 
-    function deleteCurrentModalRecord() {
+    async function deleteCurrentModalRecord() {
       if (!confirm('Deseja realmente excluir este registro do aluno?')) return;
       const attempts = getLocalAttempts().filter(a => a.id != selectedStudentIdForModal);
       localStorage.setItem('cyber_runner_attempts', JSON.stringify(attempts));
+
+      // Remove do SQLite via api.php
+      try {
+        fetch('api.php?action=delete_attempt&id=' + encodeURIComponent(selectedStudentIdForModal), { method: 'DELETE' }).catch(() => {});
+      } catch(e) {}
+
+      // Remove do Supabase
+      const url = StorageService.supabaseUrl || localStorage.getItem('cyber_runner_supabase_url');
+      const key = StorageService.supabaseKey || localStorage.getItem('cyber_runner_supabase_key');
+      if (url && key) {
+        try {
+          fetch(url.replace(/\/+$/, '') + '/rest/v1/student_attempts?id=eq.' + encodeURIComponent(selectedStudentIdForModal), {
+            method: 'DELETE',
+            headers: { 'apikey': key, 'Authorization': 'Bearer ' + key }
+          }).catch(() => {});
+        } catch(e) {}
+      }
+
       closeStudentDetailModal();
       refreshTeacherData();
     }
 
     function openSupabaseConfigModal() {
+      const url = localStorage.getItem('cyber_runner_supabase_url') || StorageService.supabaseUrl || '';
+      const key = localStorage.getItem('cyber_runner_supabase_key') || StorageService.supabaseKey || '';
+      const urlInput = document.getElementById('supabase-url-input');
+      const keyInput = document.getElementById('supabase-key-input');
+      if (urlInput) urlInput.value = url;
+      if (keyInput) keyInput.value = key;
       document.getElementById('supabase-config-modal').classList.add('active');
     }
 
@@ -2150,6 +2274,9 @@
       const key = document.getElementById('supabase-key-input').value.trim();
       localStorage.setItem('cyber_runner_supabase_url', url);
       localStorage.setItem('cyber_runner_supabase_key', key);
+      StorageService.supabaseUrl = url;
+      StorageService.supabaseKey = key;
+      StorageService.updateIndicator(url.length > 8 && key.length > 10, url.length > 8 ? 'Nuvem Conectada' : 'SQLite Local (Offline)');
       alert('Configurações salvas!');
       closeSupabaseConfigModal();
     }
@@ -2265,8 +2392,9 @@
     }
     animateParticles();
 
-    // Iniciar na tela de login por padrão
+    // Iniciar na tela de login por padrão e carregar ambiente
     document.addEventListener('DOMContentLoaded', () => {
+      StorageService.init();
       showScreen('screen-login');
     });
   </script>
