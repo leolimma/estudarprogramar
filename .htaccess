@@ -1,0 +1,4 @@
+# Configuração de Políticas de Permissão e Segurança para o VLibras Widget e Aplicação
+<IfModule mod_headers.c>
+    Header always set Permissions-Policy "accelerometer=(self \"https://vlibras.gov.br\" \"https://*.vlibras.gov.br\" \"https://cdn.jsdelivr.net\"), gyroscope=(self \"https://vlibras.gov.br\" \"https://*.vlibras.gov.br\" \"https://cdn.jsdelivr.net\"), magnetometer=(self \"https://vlibras.gov.br\" \"https://*.vlibras.gov.br\" \"https://cdn.jsdelivr.net\")"
+</IfModule>

@@ -4,6 +4,17 @@
       "runtime": "vercel-php@0.9.0"
     }
   },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Permissions-Policy",
+          "value": "accelerometer=(self \"https://vlibras.gov.br\" \"https://*.vlibras.gov.br\" \"https://cdn.jsdelivr.net\"), gyroscope=(self \"https://vlibras.gov.br\" \"https://*.vlibras.gov.br\" \"https://cdn.jsdelivr.net\"), magnetometer=(self \"https://vlibras.gov.br\" \"https://*.vlibras.gov.br\" \"https://cdn.jsdelivr.net\")"
+        }
+      ]
+    }
+  ],
   "routes": [
     {
       "src": "/api.php(.*)",

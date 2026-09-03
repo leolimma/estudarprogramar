@@ -1164,7 +1164,9 @@
     html[data-font-size="large"] .sidebar-metric-val { font-size: 24px !important; }
     html[data-font-size="large"] .sidebar-action-btn { font-size: 12.5px !important; }
 
-    /* 2. LAYOUT RESPONSIVO COM VLIBRAS ABERTO */
+    /* 2. LAYOUT RESPONSIVO COM VLIBRAS ABERTO (SUPORTE VLIBRAS MODERNO E LEGADO) */
+    #vlibras-access-wrapper,
+    #vlibras-app-root,
     div[vw] {
       z-index: 99999 !important;
     }
@@ -2192,15 +2194,67 @@
       <div class="vw-plugin-top-wrapper"></div>
     </div>
   </div>
+
+  <!-- PATCH DE PERMISSÕES PARA O VLIBRAS (ELIMINA [VIOLATION] ACCELEROMETER/GYROSCOPE NO UNITY WEBGL) -->
+  <script>
+    (function() {
+      // 1. Intercepta a criação de iframes para injetar permissões necessárias ao Unity WebGL do VLibras
+      const origCreateElement = document.createElement;
+      document.createElement = function(tagName, options) {
+        const el = origCreateElement.call(document, tagName, options);
+        if (tagName && typeof tagName === 'string' && tagName.toLowerCase() === 'iframe') {
+          try {
+            el.setAttribute('allow', 'accelerometer *; gyroscope *; magnetometer *; fullscreen *');
+            const origSetAttribute = el.setAttribute;
+            el.setAttribute = function(name, value) {
+              if (name === 'title' && (value === 'vlibras-player' || String(value).includes('vlibras'))) {
+                try { origSetAttribute.call(el, 'allow', 'accelerometer *; gyroscope *; magnetometer *; fullscreen *'); } catch(e) {}
+              }
+              return origSetAttribute.call(el, name, value);
+            };
+          } catch(e) {}
+        }
+        return el;
+      };
+
+      // 2. Observador para iframes injetados diretamente no DOM
+      try {
+        const ifrObserver = new MutationObserver((mutations) => {
+          for (const m of mutations) {
+            for (const node of m.addedNodes) {
+              if (node.nodeType === 1) {
+                if (node.tagName === 'IFRAME') {
+                  if (!node.getAttribute('allow')) {
+                    node.setAttribute('allow', 'accelerometer *; gyroscope *; magnetometer *; fullscreen *');
+                  }
+                } else if (node.querySelectorAll) {
+                  const iframes = node.querySelectorAll('iframe:not([allow])');
+                  iframes.forEach(f => f.setAttribute('allow', 'accelerometer *; gyroscope *; magnetometer *; fullscreen *'));
+                }
+              }
+            }
+          }
+        });
+        ifrObserver.observe(document.documentElement, { childList: true, subtree: true });
+      } catch(e) {}
+    })();
+  </script>
   <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
   <script>
-    window.addEventListener('load', () => {
+    // Inicialização oficial do VLibras Widget
+    (function initWidget() {
       try {
         if (typeof window.VLibras !== 'undefined') {
           new window.VLibras.Widget('https://vlibras.gov.br/app');
+        } else {
+          document.addEventListener('DOMContentLoaded', () => {
+            if (typeof window.VLibras !== 'undefined') {
+              new window.VLibras.Widget('https://vlibras.gov.br/app');
+            }
+          });
         }
       } catch(e) {}
-    });
+    })();
   </script>
 
   <script>
@@ -2358,24 +2412,73 @@
     }
 
     function initVLibrasObserver() {
-      const checkVLibrasState = () => {
-        const wrapper = document.querySelector('[vw-plugin-wrapper]');
-        if (wrapper) {
-          const isOpened = wrapper.classList.contains('active') ||
-                           wrapper.getAttribute('active') === 'true' ||
-                           (wrapper.offsetWidth > 60 && window.getComputedStyle(wrapper).display !== 'none');
-          if (isOpened) {
-            document.body.classList.add('vlibras-active');
-          } else {
-            document.body.classList.remove('vlibras-active');
+      let isCurrentlyActive = false;
+
+      const updateState = () => {
+        let isOpen = false;
+
+        // 1. VLibras Moderno (v7+): root container e atributo data-active
+        const appRoot = document.getElementById('vlibras-app-root');
+        if (appRoot) {
+          if (appRoot.dataset.active === 'true' || appRoot.getAttribute('data-active') === 'true') {
+            isOpen = true;
           }
+        }
+
+        // 2. VLibras Moderno: estado persistido no localStorage (sem custo de layout/reflow)
+        if (!isOpen) {
+          try {
+            const stored = localStorage.getItem('@vlibras-widget');
+            if (stored && stored.includes('"isOpen":true')) {
+              isOpen = true;
+            }
+          } catch(e) {}
+        }
+
+        // 3. Suporte ao VLibras Legado caso div vw-plugin-wrapper receba a classe active
+        if (!isOpen) {
+          const wrapper = document.querySelector('[vw-plugin-wrapper]');
+          if (wrapper && (wrapper.classList.contains('active') || wrapper.getAttribute('active') === 'true')) {
+            isOpen = true;
+          }
+        }
+
+        // Só altera o DOM se houver mudança real de estado (evita layout thrashing e loops de mutação)
+        if (isOpen !== isCurrentlyActive) {
+          isCurrentlyActive = isOpen;
+          document.body.classList.toggle('vlibras-active', isOpen);
         }
       };
 
+      // Checagem periódica leve a cada 300ms (não bloqueante, zero forced reflow)
+      setInterval(updateState, 300);
+
+      // Atualiza imediatamente se o storage mudar (ex: abriu/fechou player)
+      window.addEventListener('storage', (e) => {
+        if (e.key === '@vlibras-widget') updateState();
+      });
+
+      // Observa especificamente a inserção de #vlibras-app-root para ligar observer de atributos dedicado
       try {
-        const observer = new MutationObserver(checkVLibrasState);
-        observer.observe(document.body, { childList: true, subtree: true, attributes: true });
-        setInterval(checkVLibrasState, 600);
+        const attachRootObserver = () => {
+          const appRoot = document.getElementById('vlibras-app-root');
+          if (appRoot) {
+            updateState();
+            const attrObserver = new MutationObserver(updateState);
+            attrObserver.observe(appRoot, { attributes: true, attributeFilter: ['data-active', 'class'] });
+            return true;
+          }
+          return false;
+        };
+
+        if (!attachRootObserver()) {
+          const rootFinder = new MutationObserver(() => {
+            if (attachRootObserver()) {
+              rootFinder.disconnect();
+            }
+          });
+          rootFinder.observe(document.body, { childList: true });
+        }
       } catch(e) {}
     }
 
@@ -2916,10 +3019,39 @@
     }
 
     /* =========================================================================
-       ANTI-CHEAT & LOSS OF FOCUS (GESTÃO DE ENERGIAS)
+       ANTI-CHEAT & LOSS OF FOCUS (GESTÃO DE ENERGIAS COM SUPORTE A ACESSIBILIDADE)
        ========================================================================= */
     function setupExitAndAbandonmentDetection() {
       let isHandlerActive = true;
+      let isVLibrasInteracting = false;
+      let vlibrasCooldownTimer = null;
+
+      const setVLibrasActiveTemporarily = () => {
+        isVLibrasInteracting = true;
+        if (vlibrasCooldownTimer) clearTimeout(vlibrasCooldownTimer);
+        vlibrasCooldownTimer = setTimeout(() => {
+          isVLibrasInteracting = false;
+        }, 3500);
+      };
+
+      // Detecta interações diretas (mouse/toque/teclado) com qualquer componente do VLibras
+      window.addEventListener('pointerdown', (e) => {
+        try {
+          const path = e.composedPath ? e.composedPath() : [];
+          const isVLibrasTarget = path.some(el => {
+            if (!el) return false;
+            const id = el.id || '';
+            const tag = el.tagName || '';
+            const isVlibrasId = id === 'vlibras-access-wrapper' || id === 'vlibras-app-root' || String(id).includes('vlibras');
+            const hasVwAttr = el.hasAttribute && (el.hasAttribute('vw') || el.hasAttribute('vw-access-button') || el.hasAttribute('vw-plugin-wrapper'));
+            const isVlibrasFrame = tag === 'IFRAME' && (String(el.title).includes('vlibras') || String(el.src).includes('vlibras'));
+            return isVlibrasId || hasVwAttr || isVlibrasFrame;
+          });
+          if (isVLibrasTarget) {
+            setVLibrasActiveTemporarily();
+          }
+        } catch(err) {}
+      }, true);
 
       const handleViolation = () => {
         if (!isHandlerActive || !state.hasStartedClass || state.isFinished || state.isLockedByScreenSwitch) return;
@@ -2945,11 +3077,40 @@
         }
       };
 
+      // Violação legítima por troca de aba ou minimização
       document.addEventListener('visibilitychange', () => {
-        if (document.hidden) handleViolation();
+        if (document.hidden) {
+          handleViolation();
+        }
       });
 
-      window.addEventListener('blur', handleViolation);
+      // Perda de foco com proteção para acessibilidade (VLibras)
+      window.addEventListener('blur', () => {
+        // Atraso de 80ms para permitir que o navegador atualize document.activeElement
+        setTimeout(() => {
+          // Se a aba estiver oculta, a violação já será tratada pelo visibilitychange
+          if (document.hidden) {
+            handleViolation();
+            return;
+          }
+
+          const active = document.activeElement;
+          const isVLibrasElement = active && (
+            (active.tagName === 'IFRAME' && (String(active.title).includes('vlibras') || String(active.src).includes('vlibras.gov.br'))) ||
+            active.id === 'vlibras-app-root' ||
+            active.id === 'vlibras-access-wrapper' ||
+            (active.closest && active.closest('#vlibras-app-root, #vlibras-access-wrapper, [vw], [vw-plugin-wrapper]'))
+          );
+
+          // Se o foco migrou para o widget do VLibras ou o aluno estava interagindo com ele:
+          if (isVLibrasInteracting || isVLibrasElement) {
+            // Não penaliza o aluno por usar recurso de acessibilidade!
+            return;
+          }
+
+          handleViolation();
+        }, 80);
+      });
     }
 
     /* =========================================================================
