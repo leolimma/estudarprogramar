@@ -2195,7 +2195,7 @@
     </div>
   </div>
 
-  <!-- PATCH DE PERMISSÕES PARA O VLIBRAS (ELIMINA [VIOLATION] ACCELEROMETER/GYROSCOPE NO UNITY WEBGL) -->
+  <!-- PATCH DE SEGURANÇA E ACESSIBILIDADE DO VLIBRAS (PERMISSÕES E INTERATIVIDADE DE BOTÕES) -->
   <script>
     (function() {
       // 1. Intercepta a criação de iframes para injetar permissões necessárias ao Unity WebGL do VLibras
@@ -2237,6 +2237,40 @@
         });
         ifrObserver.observe(document.documentElement, { childList: true, subtree: true });
       } catch(e) {}
+
+      // 3. Libera a interação normal com botões e opções da página
+      // Impede que o VLibras bloqueie o clique com preventDefault/stopPropagation nos botões e inputs
+      const origMatches = Element.prototype.matches || Element.prototype.webkitMatchesSelector || Element.prototype.msMatchesSelector;
+      if (origMatches) {
+        const customMatches = function(selector) {
+          if (selector === '.vlibras-links' || selector === '.vlibras-ignore') {
+            try {
+              if (this.classList && (this.classList.contains('vlibras-links') || this.classList.contains('vlibras-ignore'))) {
+                return true;
+              }
+              // Qualquer botão, card de alternativa ou controle interativo informa ao VLibras para não interceptar o clique
+              if (this.closest && this.closest('button, .cyber-btn, .choice-card, .sidebar-btn, a, input, select, textarea, [role="button"], .access-btn, .access-btn-mini, .modal-close, .character-card, .btn-action, .theme-btn, .stage-dot, [onclick]')) {
+                return true;
+              }
+            } catch(e) {}
+          }
+          return origMatches.call(this, selector);
+        };
+        Element.prototype.matches = customMatches;
+        if (Element.prototype.webkitMatchesSelector) {
+          Element.prototype.webkitMatchesSelector = customMatches;
+        }
+      }
+
+      // 4. Captura antecipada de clique na janela para garantir que classes necessárias estejam presentes
+      window.addEventListener('click', (e) => {
+        try {
+          const interactive = e.target && e.target.closest ? e.target.closest('button, .cyber-btn, .choice-card, .sidebar-btn, a, input, select, textarea, [role="button"], .access-btn, .access-btn-mini, .modal-close, .character-card, .btn-action, .theme-btn') : null;
+          if (interactive && !interactive.classList.contains('vlibras-links')) {
+            interactive.classList.add('vlibras-links');
+          }
+        } catch(err) {}
+      }, true);
     })();
   </script>
   <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
@@ -2768,6 +2802,7 @@
       });
       localStorage.setItem('cyber_runner_users', JSON.stringify(users));
 
+      window.lastPasswordActionTime = Date.now();
       initSessionData();
       showScreen('screen-gameplay');
       loadStage(0);
@@ -2796,6 +2831,7 @@
       state.studentClass = user.studentClass;
       state.selectedCharacter = CHARACTERS.find(c => c.id === user.character) || CHARACTERS[0];
 
+      window.lastPasswordActionTime = Date.now();
       initSessionData();
       showScreen('screen-gameplay');
       loadStage(0);
@@ -2803,6 +2839,8 @@
 
     function initSessionData() {
       state.hasStartedClass = true;
+      state.sessionStartTime = Date.now();
+      window.lastPasswordActionTime = Date.now();
       state.score = 0;
       state.lives = 4; // Capacidade padrão de 4 energias
       state.consecutiveCorrectCount = 0;
@@ -3025,6 +3063,25 @@
       let isHandlerActive = true;
       let isVLibrasInteracting = false;
       let vlibrasCooldownTimer = null;
+      let blurGraceTimeout = null;
+
+      window.lastPasswordActionTime = window.lastPasswordActionTime || 0;
+      const recordPasswordAction = () => {
+        window.lastPasswordActionTime = Date.now();
+      };
+
+      // Detecta foco e alterações em campos de senha para proteger o diálogo nativo do navegador
+      document.addEventListener('focusin', (e) => {
+        if (e.target && (e.target.type === 'password' || e.target.autocomplete?.includes('password') || e.target.id?.includes('pass'))) {
+          recordPasswordAction();
+        }
+      }, true);
+
+      document.addEventListener('focusout', (e) => {
+        if (e.target && (e.target.type === 'password' || e.target.autocomplete?.includes('password') || e.target.id?.includes('pass'))) {
+          recordPasswordAction();
+        }
+      }, true);
 
       const setVLibrasActiveTemporarily = () => {
         isVLibrasInteracting = true;
@@ -3077,23 +3134,37 @@
         }
       };
 
-      // Violação legítima por troca de aba ou minimização
+      // Violação legítima e imediata por troca de aba ou minimização da janela
       document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
           handleViolation();
         }
       });
 
-      // Perda de foco com proteção para acessibilidade (VLibras)
+      // Perda de foco com proteção contra falsos positivos:
+      // 1. Não penaliza quando o navegador abre o popup "Salvar senha?"
+      // 2. Não penaliza nos primeiros 30 segundos após login/início da partida
+      // 3. Não penaliza ao interagir com o VLibras (acessibilidade)
+      // 4. Dá tempo de tolerância caso a janela recupere o foco rapidamente
       window.addEventListener('blur', () => {
-        // Atraso de 80ms para permitir que o navegador atualize document.activeElement
-        setTimeout(() => {
-          // Se a aba estiver oculta, a violação já será tratada pelo visibilitychange
+        if (blurGraceTimeout) clearTimeout(blurGraceTimeout);
+
+        blurGraceTimeout = setTimeout(() => {
+          // Se a aba estiver oculta (trocou de aba ou minimizou), a violação já é tratada pelo visibilitychange
           if (document.hidden) {
             handleViolation();
             return;
           }
 
+          // Proteção 1: Interação recente com salvamento de senha ou login (janela de 30 segundos)
+          const now = Date.now();
+          const isRecentPasswordAction = (now - (window.lastPasswordActionTime || 0)) < 30000;
+          const isSessionStarting = (now - (state.sessionStartTime || 0)) < 25000;
+          if (isRecentPasswordAction || isSessionStarting) {
+            return;
+          }
+
+          // Proteção 2: Interação com VLibras ou foco em iframe/widget de acessibilidade
           const active = document.activeElement;
           const isVLibrasElement = active && (
             (active.tagName === 'IFRAME' && (String(active.title).includes('vlibras') || String(active.src).includes('vlibras.gov.br'))) ||
@@ -3101,15 +3172,25 @@
             active.id === 'vlibras-access-wrapper' ||
             (active.closest && active.closest('#vlibras-app-root, #vlibras-access-wrapper, [vw], [vw-plugin-wrapper]'))
           );
-
-          // Se o foco migrou para o widget do VLibras ou o aluno estava interagindo com ele:
           if (isVLibrasInteracting || isVLibrasElement) {
-            // Não penaliza o aluno por usar recurso de acessibilidade!
+            return;
+          }
+
+          // Proteção 3: Se o foco já retornou para o documento (ex: fechou o popup do browser)
+          if (document.hasFocus()) {
             return;
           }
 
           handleViolation();
-        }, 80);
+        }, 2000); // 2 segundos de tolerância para o aluno interagir com o popup nativo de senha do navegador
+      });
+
+      window.addEventListener('focus', () => {
+        // Se o foco retornou à página, cancela qualquer penalidade pendente
+        if (blurGraceTimeout) {
+          clearTimeout(blurGraceTimeout);
+          blurGraceTimeout = null;
+        }
       });
     }
 
