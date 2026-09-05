@@ -1,0 +1,28 @@
+# =========================================================================
+# CONFIGURAÇÃO APACHE / XAMPP - CYBER RUNNER & VLIBRAS
+# =========================================================================
+
+# 1. POLÍTICA DE PERMISSÕES PARA O VLIBRAS WIDGET (UNITY WEBGL)
+<IfModule mod_headers.c>
+    Header always set Permissions-Policy "accelerometer=(self \"https://vlibras.gov.br\" \"https://*.vlibras.gov.br\" \"https://cdn.jsdelivr.net\"), gyroscope=(self \"https://vlibras.gov.br\" \"https://*.vlibras.gov.br\" \"https://cdn.jsdelivr.net\"), magnetometer=(self \"https://vlibras.gov.br\" \"https://*.vlibras.gov.br\" \"https://cdn.jsdelivr.net\")"
+</IfModule>
+
+# 2. SEGURANÇA: BLOQUEIA ACESSO DIRETO A ARQUIVOS SENSÍVEIS (BANCO E CREDENCIAIS)
+<FilesMatch "^(\.env|\.env\..*|database\.sqlite|\.git.*)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# 3. CHARSET E TIPOS MIME PADRÃO
+AddDefaultCharset UTF-8
+<IfModule mod_mime.c>
+    AddType application/json .json
+    AddType application/wasm .wasm
+    AddType image/webp .webp
+    AddType image/svg+xml .svg
+</IfModule>
